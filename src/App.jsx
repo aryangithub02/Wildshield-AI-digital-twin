@@ -1,0 +1,334 @@
+import React, { useState, useEffect, useRef } from 'react';
+import Sidebar from './components/Sidebar';
+import TopNavbar from './components/TopNavbar';
+import RightPanel from './components/RightPanel';
+import KPICards from './components/KPICards';
+import DigitalTwin from './components/DigitalTwin';
+import Timeline from './components/Timeline';
+import Analytics from './components/Analytics';
+import DeviceStatus from './components/DeviceStatus';
+import AIDetectionTab from './components/AIDetectionTab';
+import DevicesTab from './components/DevicesTab';
+import FarmMapTab from './components/FarmMapTab';
+import NodeModal from './components/NodeModal';
+
+const STATE_IDLE = 0;
+const STATE_APPROACHING = 1;
+const STATE_DETECTED = 2;
+const STATE_ESCALATED = 3;
+const STATE_DETERRENT_ACTIVE = 4;
+const STATE_RESOLVED = 5;
+
+const STATE_LABELS = {
+  [STATE_IDLE]: "System Idle • Monitoring",
+  [STATE_APPROACHING]: "PIR Motion Warning",
+  [STATE_DETECTED]: "Edge AI Analysis • LoRa TX",
+  [STATE_ESCALATED]: "Threat Confirmed • Actuators Active",
+  [STATE_DETERRENT_ACTIVE]: "Deterrents Active • Repelling",
+  [STATE_RESOLVED]: "Intrusion Resolved • Safe",
+};
+
+const ANIMAL_SCENARIOS = [
+  {
+    species: "Elephant",
+    emoji: "🐘",
+    threat: "HIGH",
+    nodeId: 1,
+    nodeName: "FN-1",
+    confidenceBase: 96.2,
+    confidenceMax: 98.4,
+    actuators: { siren: true, floodlight: true, speaker: true, sprinkler: true },
+    logThreat: "HIGH",
+    path: [
+      { x: 54, y: -10, rotate: 0 },
+      { x: 54, y: 2, rotate: 0 },
+      { x: 54, y: 11, rotate: 0 },
+      { x: 54, y: 20, rotate: 0 },
+      { x: 54, y: 20, rotate: 180 },
+      { x: 54, y: -5, rotate: 180 }
+    ]
+  },
+  {
+    species: "Wild Boar",
+    emoji: "🐗",
+    threat: "MEDIUM",
+    nodeId: 5,
+    nodeName: "FN-5",
+    confidenceBase: 91.5,
+    confidenceMax: 95.8,
+    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: true },
+    logThreat: "MEDIUM",
+    path: [
+      { x: -5, y: 12, rotate: 0 },
+      { x: 10, y: 17, rotate: 0 },
+      { x: 20, y: 22, rotate: 0 },
+      { x: 32, y: 28, rotate: 0 },
+      { x: 32, y: 28, rotate: 180 },
+      { x: 10, y: 17, rotate: 180 }
+    ]
+  },
+  {
+    species: "Monkey",
+    emoji: "🐒",
+    threat: "LOW",
+    nodeId: 2,
+    nodeName: "FN-2",
+    confidenceBase: 88.4,
+    confidenceMax: 93.6,
+    actuators: { siren: false, floodlight: false, speaker: false, sprinkler: true },
+    logThreat: "LOW",
+    path: [
+      { x: 105, y: 12, rotate: 0 },
+      { x: 90, y: 17, rotate: 0 },
+      { x: 80, y: 22, rotate: 0 },
+      { x: 68, y: 28, rotate: 0 },
+      { x: 68, y: 28, rotate: 180 },
+      { x: 92, y: 17, rotate: 180 }
+    ]
+  },
+  {
+    species: "Deer",
+    emoji: "🦌",
+    threat: "LOW",
+    nodeId: 4,
+    nodeName: "FN-4",
+    confidenceBase: 92.1,
+    confidenceMax: 96.8,
+    actuators: { siren: false, floodlight: true, speaker: false, sprinkler: false },
+    logThreat: "LOW",
+    path: [
+      { x: 18, y: 105, rotate: 0 },
+      { x: 26, y: 92, rotate: 0 },
+      { x: 32, y: 80, rotate: 0 },
+      { x: 42, y: 68, rotate: 0 },
+      { x: 42, y: 68, rotate: 180 },
+      { x: 22, y: 92, rotate: 180 }
+    ]
+  }
+];
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('overview');
+  const [simulationState, setSimulationState] = useState(STATE_IDLE);
+  const [scenarioIndex, setScenarioIndex] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [speed, setSpeed] = useState(1);
+  const [selectedNode, setSelectedNode] = useState(null);
+  
+  const [logs, setLogs] = useState([
+    { id: 1, time: getFormattedTime(new Date(Date.now() - 3600000)), text: "WildShield Core Network Online", type: "info" },
+    { id: 2, time: getFormattedTime(new Date(Date.now() - 3000000)), text: "Central AI Hub (Jetson Orin Nano) connected", type: "info" },
+    { id: 3, time: getFormattedTime(new Date(Date.now() - 2400000)), text: "ESP32 Mesh geofence calibration complete", type: "success" },
+  ]);
+
+  const [kpi, setKpi] = useState({
+    intrusions: 8,
+    wildAnimals: 4,
+    activeCameras: 4,
+    health: 98,
+  });
+
+  const timerRef = useRef(null);
+  const currentScenario = ANIMAL_SCENARIOS[scenarioIndex];
+
+  // Helper to format time as HH:MM:SS
+  function getFormattedTime(date = new Date()) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+  }
+
+  // Add log helper
+  const addLog = (text, type = 'info') => {
+    setLogs(prev => [
+      {
+        id: Date.now() + Math.random(),
+        time: getFormattedTime(),
+        text,
+        type
+      },
+      ...prev
+    ]);
+  };
+
+  // State Transition Actions
+  const handleStateTransition = (nextState, activeScenario = currentScenario) => {
+    setSimulationState(nextState);
+
+    switch (nextState) {
+      case STATE_IDLE:
+        addLog("System returned to standard monitoring state. All devices on standby.", "info");
+        setScenarioIndex(prev => (prev + 1) % ANIMAL_SCENARIOS.length);
+        break;
+      
+      case STATE_APPROACHING:
+        addLog(`PIR Sensor on ${activeScenario.nodeName} detects motion. Sending wake-up trigger to ESP32.`, "warning");
+        break;
+      
+      case STATE_DETECTED:
+        addLog(`${activeScenario.nodeName} wakes IP Camera. Transmitting 1080p stream over LoRa SX1278 to Central AI Hub.`, "detection");
+        break;
+      
+      case STATE_ESCALATED:
+        addLog(`Central AI Hub confirmed: ${activeScenario.species} (Confidence rising). Threat level: ${activeScenario.threat}.`, "danger");
+        
+        const activeActuators = [];
+        if (activeScenario.actuators.speaker) activeActuators.push("Predator Sound");
+        if (activeScenario.actuators.sprinkler) activeActuators.push("Sprinkler Pump");
+        
+        if (activeActuators.length > 0) {
+          addLog(`${activeScenario.nodeName} deploying Stage 1 Deterrence: ${activeActuators.join(" & ")} activated.`, "deterrent");
+        } else {
+          addLog(`${activeScenario.nodeName} analyzing persistence. Actuator deploy pending stage 2 triggers.`, "info");
+        }
+        break;
+      
+      case STATE_DETERRENT_ACTIVE:
+        const stage2Actuators = [];
+        if (activeScenario.actuators.siren) stage2Actuators.push("Ultrasonic Siren");
+        if (activeScenario.actuators.floodlight) stage2Actuators.push("Floodlight 01");
+
+        if (stage2Actuators.length > 0) {
+          addLog(`Threat persists. ${activeScenario.nodeName} deploying Stage 2 Deterrence: ${stage2Actuators.join(" & ")} active.`, "danger");
+        } else {
+          addLog("Deterrence protocol finalized. Target retreating under existing countermeasures.", "success");
+        }
+        break;
+      
+      case STATE_RESOLVED:
+        addLog(`Target repelled: ${activeScenario.species} retreated past PIR range at ${activeScenario.nodeName}.`, "success");
+        setKpi(prev => ({
+          ...prev,
+          intrusions: prev.intrusions + 1,
+          wildAnimals: prev.wildAnimals + 1
+        }));
+        break;
+
+      default:
+        break;
+    }
+  };
+
+  // Simulation Logic Timer Loop
+  useEffect(() => {
+    if (isPlaying) {
+      const intervalDuration = 2500 / speed;
+      timerRef.current = setInterval(() => {
+        setSimulationState(current => {
+          const next = (current + 1) % 6;
+          handleStateTransition(next, ANIMAL_SCENARIOS[scenarioIndex]);
+          return next;
+        });
+      }, intervalDuration);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isPlaying, speed, scenarioIndex]);
+
+  // Reset Simulation
+  const handleReset = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+    }
+    setSimulationState(STATE_IDLE);
+    setScenarioIndex(0);
+    setIsPlaying(false);
+    setLogs([
+      { id: 1, time: getFormattedTime(), text: "Simulation manual reset. Monitoring standard perimeter.", type: "info" }
+    ]);
+    addLog("System initialized to IDLE.", "success");
+  };
+
+  // Manual Step Forward
+  const handleStepForward = () => {
+    if (!isPlaying) {
+      const next = (simulationState + 1) % 6;
+      handleStateTransition(next);
+    }
+  };
+
+  return (
+    <div className="w-full min-h-screen bg-[#020617] text-slate-100 font-sans">
+      
+      {/* 1. Left Sidebar */}
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* 2. Top Navigation Bar */}
+      <TopNavbar />
+
+      {/* 3. Right Sidebar Panel */}
+      <RightPanel 
+        simulationState={simulationState} 
+        currentScenario={currentScenario} 
+      />
+
+      {/* 4. Center Main Panel Viewport */}
+      <div className="ml-64 pr-80 pt-16 min-h-screen flex flex-col p-6 space-y-6">
+        
+        {activeTab === 'overview' ? (
+          <>
+            {/* KPI Cards Grid */}
+            <KPICards kpi={kpi} />
+
+            {/* Map Panel (Digital Twin) */}
+            <div className="w-full">
+              <DigitalTwin 
+                simulationState={simulationState} 
+                onSelectNode={setSelectedNode}
+                currentScenario={currentScenario}
+              />
+            </div>
+
+            {/* Bottom Split Grid: Analytics Overview (Left) & Event Timeline (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Analytics />
+              <Timeline logs={logs} />
+            </div>
+
+            {/* IoT Nodes Hardware list */}
+            <div className="w-full">
+              <DeviceStatus simulationState={simulationState} currentScenario={currentScenario} />
+            </div>
+          </>
+        ) : activeTab === 'map' ? (
+          <FarmMapTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+          />
+        ) : activeTab === 'detection' ? (
+          <AIDetectionTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+          />
+        ) : activeTab === 'devices' ? (
+          <DevicesTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+          />
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center text-slate-500 font-mono text-xs py-20 bg-[#0b0f19]/30 rounded-xl border border-slate-900/60">
+            <span className="text-2xl mb-2">⚙️</span>
+            <span>Workspace section "{activeTab.toUpperCase()}" is under active configuration.</span>
+          </div>
+        )}
+
+      </div>
+
+      {/* Interactive Enclosure & Circuit Schematic Modal */}
+      {selectedNode && (
+        <NodeModal
+          node={selectedNode}
+          onClose={() => setSelectedNode(null)}
+          simulationState={simulationState}
+          currentScenario={currentScenario}
+        />
+      )}
+    </div>
+  );
+}
