@@ -42,9 +42,9 @@ const ANIMAL_SCENARIOS = [
     path: [
       { x: 54, y: -10, rotate: 0 },
       { x: 54, y: 2, rotate: 0 },
-      { x: 54, y: 11, rotate: 0 },
-      { x: 54, y: 20, rotate: 0 },
-      { x: 54, y: 20, rotate: 180 },
+      { x: 54, y: 9, rotate: 0 },
+      { x: 54, y: 12, rotate: 0 },
+      { x: 54, y: 12, rotate: 180 },
       { x: 54, y: -5, rotate: 180 }
     ]
   },
@@ -59,12 +59,12 @@ const ANIMAL_SCENARIOS = [
     actuators: { siren: false, floodlight: false, speaker: true, sprinkler: true },
     logThreat: "MEDIUM",
     path: [
-      { x: -5, y: 12, rotate: 0 },
-      { x: 10, y: 17, rotate: 0 },
-      { x: 20, y: 22, rotate: 0 },
-      { x: 32, y: 28, rotate: 0 },
-      { x: 32, y: 28, rotate: 180 },
-      { x: 10, y: 17, rotate: 180 }
+      { x: -10, y: -10, rotate: 0 },
+      { x: 10, y: 10, rotate: 0 },
+      { x: 22, y: 22, rotate: 0 },
+      { x: 25, y: 25, rotate: 0 },
+      { x: 25, y: 25, rotate: 180 },
+      { x: -5, y: -5, rotate: 180 }
     ]
   },
   {
@@ -78,12 +78,12 @@ const ANIMAL_SCENARIOS = [
     actuators: { siren: false, floodlight: false, speaker: false, sprinkler: true },
     logThreat: "LOW",
     path: [
-      { x: 105, y: 12, rotate: 0 },
-      { x: 90, y: 17, rotate: 0 },
-      { x: 80, y: 22, rotate: 0 },
-      { x: 68, y: 28, rotate: 0 },
-      { x: 68, y: 28, rotate: 180 },
-      { x: 92, y: 17, rotate: 180 }
+      { x: 95, y: -10, rotate: 0 },
+      { x: 85, y: 10, rotate: 0 },
+      { x: 78, y: 22, rotate: 0 },
+      { x: 75, y: 26, rotate: 0 },
+      { x: 75, y: 26, rotate: 180 },
+      { x: 92, y: -5, rotate: 180 }
     ]
   },
   {
@@ -97,12 +97,31 @@ const ANIMAL_SCENARIOS = [
     actuators: { siren: false, floodlight: true, speaker: false, sprinkler: false },
     logThreat: "LOW",
     path: [
-      { x: 18, y: 105, rotate: 0 },
+      { x: 15, y: 110, rotate: 0 },
       { x: 26, y: 92, rotate: 0 },
-      { x: 32, y: 80, rotate: 0 },
-      { x: 42, y: 68, rotate: 0 },
-      { x: 42, y: 68, rotate: 180 },
-      { x: 22, y: 92, rotate: 180 }
+      { x: 34, y: 78, rotate: 0 },
+      { x: 38, y: 74, rotate: 0 },
+      { x: 38, y: 74, rotate: 180 },
+      { x: 18, y: 100, rotate: 180 }
+    ]
+  },
+  {
+    species: "Nilgai",
+    emoji: "🐂",
+    threat: "LOW",
+    nodeId: 3,
+    nodeName: "FN-3",
+    confidenceBase: 90.4,
+    confidenceMax: 94.6,
+    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: false },
+    logThreat: "LOW",
+    path: [
+      { x: 90, y: 110, rotate: 0 },
+      { x: 82, y: 92, rotate: 0 },
+      { x: 74, y: 78, rotate: 0 },
+      { x: 70, y: 74, rotate: 0 },
+      { x: 70, y: 74, rotate: 180 },
+      { x: 88, y: 100, rotate: 180 }
     ]
   }
 ];

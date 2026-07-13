@@ -19,6 +19,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
     if (speciesName === "Wild Boar") return t('wildBoar');
     if (speciesName === "Monkey") return t('monkey');
     if (speciesName === "Deer") return t('deer');
+    if (speciesName === "Nilgai") return t('nilgai');
     return speciesName;
   };
 
@@ -34,6 +35,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
     if (activeScenario.species === "Wild Boar") return t('boarDetected');
     if (activeScenario.species === "Monkey") return t('monkeyDetected');
     if (activeScenario.species === "Deer") return t('deerDetected');
+    if (activeScenario.species === "Nilgai") return t('nilgaiDetected');
     return `${getSpeciesTranslated(activeScenario.species)} ${t('live')}`;
   };
 
@@ -81,7 +83,8 @@ export default function RightPanel({ simulationState, currentScenario, language 
     "Elephant": "https://images.unsplash.com/photo-1557050543-4b5f4e07ea49?q=80&w=200&auto=format&fit=crop",
     "Wild Boar": "https://images.unsplash.com/photo-1590422941838-89c565d6c291?q=80&w=200&auto=format&fit=crop",
     "Monkey": "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=200&auto=format&fit=crop",
-    "Deer": "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=200&auto=format&fit=crop"
+    "Deer": "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=200&auto=format&fit=crop",
+    "Nilgai": "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=200&auto=format&fit=crop"
   };
 
   return (

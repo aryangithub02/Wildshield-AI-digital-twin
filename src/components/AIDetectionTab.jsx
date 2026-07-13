@@ -44,6 +44,7 @@ export default function AIDetectionTab({ simulationState, currentScenario, langu
     if (speciesName === "Wild Boar") return t('wildBoar');
     if (speciesName === "Monkey") return t('monkey');
     if (speciesName === "Deer") return t('deer');
+    if (speciesName === "Nilgai") return t('nilgai');
     return speciesName;
   };
 
@@ -58,7 +59,8 @@ export default function AIDetectionTab({ simulationState, currentScenario, langu
     "Elephant": "Elephas maximus",
     "Wild Boar": "Sus scrofa",
     "Monkey": "Macaca mulatta",
-    "Deer": "Cervus elaphus"
+    "Deer": "Cervus elaphus",
+    "Nilgai": "Boselaphus tragocamelus"
   };
 
   // Thermal/Silhouette animal shapes
@@ -66,7 +68,8 @@ export default function AIDetectionTab({ simulationState, currentScenario, langu
     "Elephant": "https://images.unsplash.com/photo-1557050543-4b5f4e07ea49?q=80&w=350&auto=format&fit=crop",
     "Wild Boar": "https://images.unsplash.com/photo-1590422941838-89c565d6c291?q=80&w=350&auto=format&fit=crop",
     "Monkey": "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=350&auto=format&fit=crop",
-    "Deer": "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=350&auto=format&fit=crop"
+    "Deer": "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=350&auto=format&fit=crop",
+    "Nilgai": "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=350&auto=format&fit=crop"
   };
 
   const getThreatBlocksCount = () => {
