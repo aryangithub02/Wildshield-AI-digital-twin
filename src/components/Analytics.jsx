@@ -1,9 +1,12 @@
 import React from 'react';
+import { getTranslation } from '../utils/translations';
 
-export default function Analytics() {
+export default function Analytics({ language }) {
+  const t = (key) => getTranslation(language, key);
+
   const sparklines = [
     {
-      title: "Detections (7D)",
+      title: `${t('aiDetection')} (7D)`,
       value: "126",
       change: "↑ 15%",
       changeType: "up",
@@ -11,7 +14,7 @@ export default function Analytics() {
       color: "#22c55e"
     },
     {
-      title: "Alerts (7D)",
+      title: `${t('alerts')} (7D)`,
       value: "32",
       change: "↓ 8%",
       changeType: "down",
@@ -19,7 +22,7 @@ export default function Analytics() {
       color: "#ef4444"
     },
     {
-      title: "Responses (7D)",
+      title: `${t('responseActions')} (7D)`,
       value: "28",
       change: "↑ 20%",
       changeType: "up",
@@ -33,8 +36,8 @@ export default function Analytics() {
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2">
-        <span className="text-xs font-bold text-slate-100 font-sans uppercase tracking-wider">Analytics Overview</span>
-        <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">View All</span>
+        <span className="text-xs font-bold text-slate-100 font-sans uppercase tracking-wider">{t('analytics')}</span>
+        <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">{t('viewAll')}</span>
       </div>
 
       {/* Grid of sparkline cards */}
@@ -61,7 +64,6 @@ export default function Analytics() {
             {/* Sparkline wave path */}
             <div className="h-16 w-full flex items-end pt-4">
               <svg className="w-full h-full" viewBox="0 0 180 35">
-                {/* Gradient area under line */}
                 <defs>
                   <linearGradient id={`grad-${index}`} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={chart.color} stopOpacity="0.25" />
@@ -72,7 +74,6 @@ export default function Analytics() {
                   d={`M ${chart.points.split(' ')[0]} L ${chart.points.split(' ').join(' L ')} L 180,35 L 0,35 Z`}
                   fill={`url(#grad-${index})`}
                 />
-                {/* Sparkline stroke path */}
                 <path
                   d={`M ${chart.points.split(' ')[0]} L ${chart.points.split(' ').join(' L ')}`}
                   fill="none"

@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Volume2, Lightbulb, ShieldAlert, Sparkles, Cpu, 
-  CheckCircle, Play, Film, Scan, HelpCircle, 
-  Smartphone, FileText, ArrowRight
+  Play, Film, Scan, Smartphone, FileText, ArrowRight
 } from 'lucide-react';
+import { getTranslation } from '../utils/translations';
 
-export default function AIDetectionTab({ simulationState, currentScenario }) {
+export default function AIDetectionTab({ simulationState, currentScenario, language }) {
+  const t = (key) => getTranslation(language, key);
+
   const activeScenario = currentScenario || {
     species: "Elephant",
     emoji: "🐘",
@@ -37,6 +39,20 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
     }
   }, [simulationState, activeScenario]);
 
+  const getSpeciesTranslated = (speciesName) => {
+    if (speciesName === "Elephant") return t('elephant');
+    if (speciesName === "Wild Boar") return t('wildBoar');
+    if (speciesName === "Monkey") return t('monkey');
+    if (speciesName === "Deer") return t('deer');
+    return speciesName;
+  };
+
+  const getThreatTranslated = (threatLevel) => {
+    if (threatLevel === "HIGH") return t('high').toUpperCase();
+    if (threatLevel === "MEDIUM") return t('medium').toUpperCase();
+    return t('low').toUpperCase();
+  };
+
   // Scientific names mapping
   const scientificNames = {
     "Elephant": "Elephas maximus",
@@ -53,14 +69,12 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
     "Deer": "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=350&auto=format&fit=crop"
   };
 
-  // Threat level red block counter (5 blocks total)
   const getThreatBlocksCount = () => {
     if (activeScenario.threat === 'HIGH') return 5;
     if (activeScenario.threat === 'MEDIUM') return 3;
     return 1;
   };
 
-  // Determine active steps in the 7-stage pipeline
   const isStepActive = (stepNum) => {
     if (simulationState === 0) return false;
     if (simulationState === 1) return stepNum <= 2;
@@ -71,7 +85,6 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
     return false;
   };
 
-  // Check details for deterrent states
   const isSirenTriggered = simulationState === 4 && activeScenario.actuators.siren;
   const isLightTriggered = simulationState === 4 && activeScenario.actuators.floodlight;
   const isAlertTriggered = simulationState >= 3 && simulationState <= 4;
@@ -89,7 +102,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
           </div>
           <div>
             <h2 className="text-sm font-extrabold text-slate-100 font-sans tracking-wide uppercase leading-none">
-              AI Detection Workspace
+              {t('aiDetection')}
             </h2>
             <p className="text-[10px] text-slate-500 font-mono mt-1">Real-time Wildlife Detection, Edge Inference & Analysis</p>
           </div>
@@ -98,16 +111,16 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
         {/* Live status chips */}
         <div className="flex items-center gap-6 text-[10px] font-mono">
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-500">AI MODEL:</span>
+            <span className="text-slate-500">{t('model').toUpperCase()}:</span>
             <span className="text-green-500 font-bold">YOLOv11m</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="text-slate-500">INFERENCE FPS:</span>
+            <span className="text-slate-500">{t('inferenceFps').toUpperCase()}:</span>
             <span className="text-slate-100 font-bold">24.7</span>
           </div>
           <div className="flex items-center gap-2 px-2.5 py-1 bg-green-500/10 text-green-500 rounded border border-green-500/20 font-bold">
             <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span>STATUS: ACTIVE</span>
+            <span>{t('status').toUpperCase()}: {t('active').toUpperCase()}</span>
           </div>
         </div>
       </div>
@@ -115,12 +128,12 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
       {/* 2. THREE COLUMN LAYOUT */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
-        {/* Column 1: Live Camera Feed (50% equivalent: Span 2 columns) */}
+        {/* Column 1: Live Camera Feed */}
         <div className="lg:col-span-2 bg-[#0b0f19] border border-slate-900 rounded-xl p-5 flex flex-col justify-between shadow-lg">
           <div className="flex items-center justify-between text-xs border-b border-slate-900 pb-2 mb-3">
             <span className="font-bold text-slate-100 font-sans uppercase tracking-wider flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              Live Camera Feed
+              {t('liveCameraFeed')}
             </span>
             <span className="text-[10px] text-slate-500 font-mono">
               🎥 {activeScenario.nodeName} (North Field)
@@ -130,13 +143,11 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
           {/* CRT Camera feed viewport */}
           <div className="relative aspect-video w-full bg-black rounded-lg border border-slate-900 overflow-hidden crt-overlay flex items-center justify-center">
             
-            {/* Blinking stream icon */}
             <div className="absolute top-3 left-3 z-10 flex items-center gap-2 font-mono text-[9px] text-white bg-black/50 px-2 py-1 rounded">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-              <span>LIVE FEED</span>
+              <span>{t('live').toUpperCase()}</span>
             </div>
 
-            {/* Scanning line animation */}
             <div className="absolute top-0 left-0 w-full h-[2.5px] bg-green-500/10 shadow-[0_0_10px_rgba(34,197,94,0.5)] animate-scanline pointer-events-none z-10" />
 
             {simulationState > 0 ? (
@@ -155,17 +166,15 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                     className="absolute border-2 border-green-500 bg-green-500/5 rounded-md p-4 flex flex-col items-center justify-center"
                     style={{ width: '45%', height: '65%' }}
                   >
-                    {/* Bounding box corners */}
                     <div className="absolute top-0 left-0 w-2 h-2 border-t-2 border-l-2 border-green-500 -mt-0.5 -ml-0.5" />
                     <div className="absolute top-0 right-0 w-2 h-2 border-t-2 border-r-2 border-green-500 -mt-0.5 -mr-0.5" />
                     <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-green-500 -mb-0.5 -ml-0.5" />
                     <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-green-500 -mb-0.5 -mr-0.5" />
                     
                     <span className="absolute -top-5 left-0 bg-green-500 text-slate-950 font-mono text-[8px] font-bold px-1 rounded">
-                      {activeScenario.species} {confidence}%
+                      {getSpeciesTranslated(activeScenario.species)} {confidence}%
                     </span>
                     
-                    {/* Visual scan graphic inside box */}
                     <div className="text-5xl opacity-85 filter drop-shadow-[0_0_10px_rgba(34,197,94,0.2)]">
                       {activeScenario.emoji}
                     </div>
@@ -179,12 +188,10 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
               </div>
             )}
 
-            {/* Bottom time metrics inside viewport */}
             <div className="absolute bottom-3 left-3 font-mono text-[9px] text-white/60 bg-black/50 px-2 py-0.5 rounded">
               10:23:15 PM • 20 May 2025
             </div>
 
-            {/* Viewport Control icons */}
             <div className="absolute bottom-3 right-3 flex items-center gap-1.5 bg-black/50 p-1 rounded">
               <button className="p-0.5 hover:text-white text-slate-400"><Volume2 className="h-3 w-3" /></button>
               <button className="p-0.5 hover:text-white text-slate-400"><Film className="h-3 w-3" /></button>
@@ -193,12 +200,12 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
           </div>
         </div>
 
-        {/* Column 2: Detection Result & Behavior Analysis (25% equivalent) */}
+        {/* Column 2: Detection Result & Behavior Analysis */}
         <div className="space-y-6">
           {/* Detection Result Card */}
           <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-4">
             <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-2">
-              Detection Result
+              {t('detectionResult')}
             </div>
 
             {simulationState >= 2 && simulationState <= 4 ? (
@@ -206,10 +213,9 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                 <div className="flex items-start justify-between">
                   <div className="text-left space-y-1">
                     <span className="text-[8px] font-mono text-slate-500 block uppercase">SPECIES</span>
-                    <span className="text-lg font-bold text-slate-100 font-sans block">{activeScenario.species}</span>
+                    <span className="text-lg font-bold text-slate-100 font-sans block">{getSpeciesTranslated(activeScenario.species)}</span>
                     <span className="text-[9px] text-slate-400 italic block">*{scientificNames[activeScenario.species]}*</span>
                   </div>
-                  {/* Animal visual thumbnail */}
                   <div className="h-10 w-10 rounded-lg bg-green-500/10 border border-green-500/20 flex items-center justify-center text-green-500 text-2xl">
                     {activeScenario.emoji}
                   </div>
@@ -217,7 +223,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
 
                 {/* Confidence Bar */}
                 <div className="space-y-1 text-left">
-                  <span className="text-[8px] font-mono text-slate-500 block uppercase">CONFIDENCE</span>
+                  <span className="text-[8px] font-mono text-slate-500 block uppercase">{t('confidence')}</span>
                   <span className="text-lg font-bold text-green-500 font-mono block">{confidence}%</span>
                   <div className="h-1.5 w-full bg-slate-950 rounded-full overflow-hidden">
                     <div className="h-full bg-green-500 rounded-full" style={{ width: `${confidence}%` }} />
@@ -226,12 +232,12 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
 
                 {/* Threat level block counts */}
                 <div className="space-y-1 text-left">
-                  <span className="text-[8px] font-mono text-slate-500 block uppercase">THREAT LEVEL</span>
+                  <span className="text-[8px] font-mono text-slate-500 block uppercase">{t('threatLevel')}</span>
                   <div className="flex items-center gap-1.5">
                     <span className={`text-xs font-bold font-mono uppercase ${
                       activeScenario.threat === 'HIGH' ? 'text-red-500' : 'text-amber-500'
                     }`}>
-                      {activeScenario.threat}
+                      {getThreatTranslated(activeScenario.threat)}
                     </span>
                     <div className="flex gap-0.5">
                       {[1, 2, 3, 4, 5].map((i) => (
@@ -261,12 +267,11 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
           {/* Behavior Analysis Card */}
           <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-3">
             <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-2">
-              Behavior Analysis
+              {t('behaviorAnalysis')}
             </div>
             {simulationState >= 2 && simulationState <= 4 ? (
               <div className="space-y-3 text-[10px] font-mono text-slate-400">
                 <div className="h-8 flex items-end">
-                  {/* Wave sparkline */}
                   <svg className="w-full h-full" viewBox="0 0 150 30">
                     <path
                       d="M0,20 Q15,5 30,22 T60,8 T90,25 T120,5 T150,15"
@@ -307,29 +312,28 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
           </div>
         </div>
 
-        {/* Column 3: Classification Score & Info (25% equivalent) */}
+        {/* Column 3: Classification Score & Info */}
         <div className="space-y-6">
           {/* Classification Score Card */}
           <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-3.5">
             <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-2">
-              Classification Score
+              {t('classificationScore')}
             </div>
             <div className="space-y-2 text-[10px] font-mono">
               {[
-                { name: "Elephant", key: "Elephant", pct: "98.4%", active: activeScenario.species === "Elephant" && isCameraActive },
-                { name: "Wild Boar", key: "Wild Boar", pct: "95.8%", active: activeScenario.species === "Wild Boar" && isCameraActive },
-                { name: "Monkey", key: "Monkey", pct: "93.6%", active: activeScenario.species === "Monkey" && isCameraActive },
-                { name: "Deer", key: "Deer", pct: "96.8%", active: activeScenario.species === "Deer" && isCameraActive },
-                { name: "Nilgai", key: "Nilgai", pct: "82.1%", active: false }
+                { name: t('elephant'), key: "Elephant", pct: "98.4%", active: activeScenario.species === "Elephant" && isCameraActive },
+                { name: t('wildBoar'), key: "Wild Boar", pct: "95.8%", active: activeScenario.species === "Wild Boar" && isCameraActive },
+                { name: t('monkey'), key: "Monkey", pct: "93.6%", active: activeScenario.species === "Monkey" && isCameraActive },
+                { name: t('deer'), key: "Deer", pct: "96.8%", active: activeScenario.species === "Deer" && isCameraActive },
+                { name: t('nilgai'), key: "Nilgai", pct: "82.1%", active: false }
               ].map((cls) => (
                 <div key={cls.name} className="space-y-1">
                   <div className="flex justify-between font-sans">
                     <span className={cls.active ? 'text-green-400 font-bold' : 'text-slate-400'}>{cls.name}</span>
                     <span className={cls.active ? 'text-green-500 font-bold' : 'text-slate-500'}>
-                      {cls.active ? cls.pct : cls.name === "Nilgai" ? "0.2%" : "0.1%"}
+                      {cls.active ? cls.pct : cls.name === t('nilgai') ? "0.2%" : "0.1%"}
                     </span>
                   </div>
-                  {/* Progress bar */}
                   <div className="h-1 w-full bg-slate-950 rounded-full overflow-hidden">
                     <div 
                       className={`h-full rounded-full transition-all duration-300 ${cls.active ? 'bg-green-500' : 'bg-slate-800'}`} 
@@ -344,7 +348,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
           {/* Detection Info Card */}
           <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-3">
             <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-2">
-              Detection Info
+              {t('detectionInfo')}
             </div>
             {simulationState >= 2 && simulationState <= 4 ? (
               <div className="space-y-1.5 text-[9px] font-mono text-slate-400">
@@ -365,11 +369,11 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                   <span className="text-slate-100 font-semibold">(320, 126) - (768, 845)</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Detected At</span>
+                  <span>{t('detectedAt')}</span>
                   <span className="text-slate-100 font-semibold">10:23:15 PM</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Model</span>
+                  <span>{t('model')}</span>
                   <span className="text-green-500 font-semibold">YOLOv11m</span>
                 </div>
                 <div className="flex justify-between">
@@ -390,24 +394,22 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
       {/* 3. DETECTION PIPELINE STEPPER */}
       <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-4">
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-2">
-          Detection Pipeline
+          {t('pipeline')}
         </div>
         
-        {/* Stepper workflow list */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 py-2 px-2 overflow-x-auto">
           {[
-            { id: 1, label: "Frame Capture", time: "10:23:13 PM" },
-            { id: 2, label: "Motion Detection", time: "10:23:13 PM" },
-            { id: 3, label: "Object Detection", time: "10:23:14 PM" },
-            { id: 4, label: "Species Class", time: "10:23:15 PM" },
-            { id: 5, label: "Threat Assess", time: "10:23:15 PM" },
-            { id: 6, label: "Decision Engine", time: "10:23:15 PM" },
-            { id: 7, label: "Alert & Response", time: "10:23:15 PM" }
+            { id: 1, label: t('step1'), time: "10:23:13 PM" },
+            { id: 2, label: t('step2'), time: "10:23:13 PM" },
+            { id: 3, label: t('step3'), time: "10:23:14 PM" },
+            { id: 4, label: t('step4'), time: "10:23:15 PM" },
+            { id: 5, label: t('step5'), time: "10:23:15 PM" },
+            { id: 6, label: t('step6'), time: "10:23:15 PM" },
+            { id: 7, label: t('step7'), time: "10:23:15 PM" }
           ].map((step, index, arr) => {
             const active = isStepActive(step.id);
             return (
               <React.Fragment key={step.id}>
-                {/* Step Circle Card */}
                 <div className="flex items-center gap-2.5">
                   <div className={`h-8 w-8 rounded-full border flex items-center justify-center font-mono text-xs font-bold transition-all duration-300 ${
                     active
@@ -424,7 +426,6 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                   </div>
                 </div>
 
-                {/* Arrow Connector */}
                 {index < arr.length - 1 && (
                   <ArrowRight className={`hidden md:block h-4 w-4 ${active ? 'text-green-500 animate-pulse' : 'text-slate-800'}`} />
                 )}
@@ -440,7 +441,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
         {/* Response Actions Card */}
         <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-4">
           <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-2">
-            Response Actions
+            {t('responseActions')}
           </div>
           
           <div className="grid grid-cols-2 gap-4">
@@ -451,7 +452,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                 : 'bg-slate-950/40 border-slate-900 text-slate-500'
             }`}>
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-bold font-sans uppercase">Siren Activated</span>
+                <span className="text-[9px] font-bold font-sans uppercase">{t('sirenActivated')}</span>
                 <Volume2 className={`h-4.5 w-4.5 ${isSirenTriggered ? 'text-red-500 animate-bounce' : 'text-slate-600'}`} />
               </div>
               <div className="text-left">
@@ -467,7 +468,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                 : 'bg-slate-950/40 border-slate-900 text-slate-500'
             }`}>
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-bold font-sans uppercase">Flood Light</span>
+                <span className="text-[9px] font-bold font-sans uppercase">{t('floodLight')}</span>
                 <Lightbulb className={`h-4.5 w-4.5 ${isLightTriggered ? 'text-amber-400 animate-pulse' : 'text-slate-600'}`} />
               </div>
               <div className="text-left">
@@ -483,7 +484,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                 : 'bg-slate-950/40 border-slate-900 text-slate-500'
             }`}>
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-bold font-sans uppercase">Alert Sent</span>
+                <span className="text-[9px] font-bold font-sans uppercase">{t('alertSent')}</span>
                 <Smartphone className={`h-4.5 w-4.5 ${isAlertTriggered ? 'text-blue-500 animate-pulse' : 'text-slate-600'}`} />
               </div>
               <div className="text-left">
@@ -499,7 +500,7 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
                 : 'bg-slate-950/40 border-slate-900 text-slate-500'
             }`}>
               <div className="flex items-center justify-between">
-                <span className="text-[9px] font-bold font-sans uppercase">Event Logged</span>
+                <span className="text-[9px] font-bold font-sans uppercase">{t('eventLogged')}</span>
                 <FileText className={`h-4.5 w-4.5 ${isLogTriggered ? 'text-purple-500 animate-pulse' : 'text-slate-600'}`} />
               </div>
               <div className="text-left">
@@ -514,8 +515,8 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
         {/* Recent Detections List */}
         <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-4">
           <div className="flex items-center justify-between text-xs border-b border-slate-900 pb-2">
-            <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">Recent Detections</span>
-            <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">View All</span>
+            <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">{t('recentDetections')}</span>
+            <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">{t('viewAll')}</span>
           </div>
 
           <div className="overflow-x-auto text-[10px] font-mono">
@@ -531,10 +532,10 @@ export default function AIDetectionTab({ simulationState, currentScenario }) {
               </thead>
               <tbody>
                 {[
-                  { sp: "Elephant", loc: "North Field", time: "10:23:15 PM", conf: "98.4%", threat: "HIGH", threatColor: "text-red-400 border-red-500/20 bg-red-500/10 font-bold" },
-                  { sp: "Wild Boar", loc: "West Field", time: "09:58:42 PM", conf: "87.6%", threat: "MEDIUM", threatColor: "text-amber-400 border-amber-500/20 bg-amber-500/10" },
-                  { sp: "Deer", loc: "South Field", time: "09:42:11 PM", conf: "76.3%", threat: "LOW", threatColor: "text-green-400 border-green-500/20 bg-green-500/10" },
-                  { sp: "Nilgai", loc: "East Field", time: "09:18:33 PM", conf: "82.1%", threat: "LOW", threatColor: "text-green-400 border-green-500/20 bg-green-500/10" }
+                  { sp: t('elephant'), loc: "North Field", time: "10:23:15 PM", conf: "98.4%", threat: t('high').toUpperCase(), threatColor: "text-red-400 border-red-500/20 bg-red-500/10 font-bold" },
+                  { sp: t('wildBoar'), loc: "West Field", time: "09:58:42 PM", conf: "87.6%", threat: t('medium').toUpperCase(), threatColor: "text-amber-400 border-amber-500/20 bg-amber-500/10" },
+                  { sp: t('deer'), loc: "South Field", time: "09:42:11 PM", conf: "76.3%", threat: t('low').toUpperCase(), threatColor: "text-green-400 border-green-500/20 bg-green-500/10" },
+                  { sp: t('nilgai'), loc: "East Field", time: "09:18:33 PM", conf: "82.1%", threat: t('low').toUpperCase(), threatColor: "text-green-400 border-green-500/20 bg-green-500/10" }
                 ].map((row, idx) => (
                   <tr key={idx} className="border-b border-slate-900 h-9 text-slate-300">
                     <td className="font-sans font-semibold text-slate-100">{row.sp}</td>

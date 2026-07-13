@@ -1,11 +1,11 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Camera, Volume2, Lightbulb, ShieldCheck, Compass, 
-  HelpCircle, Info, MapPin, AlertCircle, Droplet, Wifi
-} from 'lucide-react';
+import { Camera, Volume2, Lightbulb, Compass, Wifi } from 'lucide-react';
+import { getTranslation } from '../utils/translations';
 
-export default function FarmMapTab({ simulationState, currentScenario }) {
+export default function FarmMapTab({ simulationState, currentScenario, language }) {
+  const t = (key) => getTranslation(language, key);
+
   const activeScenario = currentScenario || {
     species: "Elephant",
     emoji: "🐘",
@@ -16,21 +16,26 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
     actuators: { siren: true, floodlight: true, speaker: true, sprinkler: true }
   };
 
-  const isBreachState = simulationState >= 2 && simulationState <= 4;
-
-  // Link scenario nodeId to active CAM & Actuators on the map
-  const activeCamId = () => {
-    if (activeScenario.nodeId === 1 || activeScenario.nodeId === 5) return 1; // CAM-01
-    if (activeScenario.nodeId === 2) return 2; // CAM-02
-    if (activeScenario.nodeId === 4) return 3; // CAM-03
-    return 4; // CAM-04
+  const getSpeciesTranslated = (speciesName) => {
+    if (speciesName === "Elephant") return t('elephant');
+    if (speciesName === "Wild Boar") return t('wildBoar');
+    if (speciesName === "Monkey") return t('monkey');
+    if (speciesName === "Deer") return t('deer');
+    return speciesName;
   };
 
-  // Actuator checks
+  const isBreachState = simulationState >= 2 && simulationState <= 4;
+
+  const activeCamId = () => {
+    if (activeScenario.nodeId === 1 || activeScenario.nodeId === 5) return 1;
+    if (activeScenario.nodeId === 2) return 2;
+    if (activeScenario.nodeId === 4) return 3;
+    return 4;
+  };
+
   const isSirenActive = isBreachState && activeScenario.actuators.siren;
   const isFloodlightsActive = isBreachState && activeScenario.actuators.floodlight;
 
-  // Sensor node coordinates (green wifi dots along fence matching realistic landmarks)
   const sensorNodes = [
     { id: 1, x: '22%', y: '50%' },
     { id: 2, x: '76%', y: '40%' },
@@ -39,10 +44,9 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
     { id: 5, x: '22%', y: '35%' }
   ];
 
-  // Map animal coordinate translations from pentagon coordinates to top-down grid coordinates
   const getAnimalGridPosition = () => {
     switch (activeScenario.species) {
-      case "Elephant": // FN-1 top
+      case "Elephant":
         return [
           { x: '54%', y: '-10%' },
           { x: '54%', y: '2%' },
@@ -52,7 +56,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           { x: '54%', y: '-5%' }
         ][simulationState];
 
-      case "Wild Boar": // FN-5 top-left
+      case "Wild Boar":
         return [
           { x: '-5%', y: '12%' },
           { x: '10%', y: '17%' },
@@ -62,7 +66,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           { x: '10%', y: '17%' }
         ][simulationState];
 
-      case "Monkey": // FN-2 top-right
+      case "Monkey":
         return [
           { x: '105%', y: '12%' },
           { x: '90%', y: '17%' },
@@ -72,7 +76,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           { x: '92%', y: '17%' }
         ][simulationState];
 
-      case "Deer": // FN-4 bottom-left
+      case "Deer":
         return [
           { x: '18%', y: '105%' },
           { x: '26%', y: '92%' },
@@ -100,7 +104,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           </div>
           <div>
             <h2 className="text-sm font-extrabold text-slate-100 font-sans tracking-wide uppercase leading-none">
-              Digital Farm Map
+              {t('demoFarmMap')}
             </h2>
             <p className="text-[10px] text-slate-500 font-mono mt-1">Topographical spatial grid representing sensor coverages</p>
           </div>
@@ -110,24 +114,24 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
         <div className="flex items-center gap-6 text-[10px] font-mono">
           <div className="flex items-center gap-1.5">
             <Camera className="h-3.5 w-3.5 text-slate-500" />
-            <span className="text-slate-400">Cameras:</span>
+            <span className="text-slate-400">{t('totalCameras').replace("Total ", "")}:</span>
             <span className="text-green-500 font-bold">4 Online</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Wifi className="h-3.5 w-3.5 text-slate-500" />
-            <span className="text-slate-400">Sensors:</span>
+            <span className="text-slate-400">{t('sensors')}:</span>
             <span className="text-green-500 font-bold">12 Active</span>
           </div>
           <div className="flex items-center gap-1.5">
             <Volume2 className="h-3.5 w-3.5 text-slate-500" />
-            <span className="text-slate-400">Siren:</span>
+            <span className="text-slate-400">{t('sirenActivated').replace(" Activated", "")}:</span>
             <span className={isSirenActive ? "text-red-500 font-bold animate-pulse" : "text-slate-500"}>
               {isSirenActive ? "1 Active" : "Standby"}
             </span>
           </div>
           <div className="flex items-center gap-1.5">
             <Lightbulb className="h-3.5 w-3.5 text-slate-500" />
-            <span className="text-slate-400">Flood Lights:</span>
+            <span className="text-slate-400">{t('floodLight')}:</span>
             <span className={isFloodlightsActive ? "text-amber-500 font-bold animate-pulse" : "text-slate-500"}>
               {isFloodlightsActive ? "2 Active" : "Standby"}
             </span>
@@ -149,16 +153,14 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
         }}
       >
         
-        {/* Soft overlay */}
         <div className="absolute inset-0 bg-slate-950/20 pointer-events-none" />
 
-        {/* Fences and pathways structure */}
+        {/* Pentagon Fence line */}
         <svg 
           className="absolute inset-0 w-full h-full pointer-events-none"
           viewBox="0 0 100 100"
           preserveAspectRatio="none"
         >
-          {/* Pentagon Fence line */}
           <polygon
             points="54,9 78,22 74,78 34,78 22,22"
             fill="none"
@@ -168,8 +170,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           />
         </svg>
 
-        {/* CAMERA OVERLAYS & SCAN CONES */}
-        {/* CAM-01 (Top-Left, coordinates 22, 22) */}
+        {/* CAM-01 */}
         <div className="absolute top-[22%] left-[22%] transform -translate-x-1/2 -translate-y-1/2 z-20">
           <div className={`h-7 w-7 rounded-lg border flex items-center justify-center transition-all ${
             isBreachState && activeCamId() === 1
@@ -180,14 +181,13 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           </div>
           <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-[6px] font-mono text-slate-200">CAM-01</span>
           
-          {/* Scan Cone */}
           {activeCamId() === 1 && isBreachState && (
             <div className="absolute w-36 h-36 top-[10px] left-[10px] bg-gradient-to-br from-red-500/15 to-transparent pointer-events-none rounded-br-full"
                  style={{ clipPath: 'polygon(0 0, 100% 40%, 40% 100%)' }} />
           )}
         </div>
 
-        {/* CAM-02 (Top-Right, coordinates 78, 22) */}
+        {/* CAM-02 */}
         <div className="absolute top-[22%] left-[78%] transform -translate-x-1/2 -translate-y-1/2 z-20">
           <div className={`h-7 w-7 rounded-lg border flex items-center justify-center transition-all ${
             isBreachState && activeCamId() === 2
@@ -198,14 +198,13 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           </div>
           <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-[6px] font-mono text-slate-200">CAM-02</span>
           
-          {/* Scan Cone */}
           {activeCamId() === 2 && isBreachState && (
             <div className="absolute w-36 h-36 top-[10px] right-[10px] bg-gradient-to-bl from-red-500/15 to-transparent pointer-events-none rounded-bl-full"
                  style={{ clipPath: 'polygon(100% 0, 0 40%, 60% 100%)' }} />
           )}
         </div>
 
-        {/* CAM-03 (Bottom-Left, coordinates 34, 78) */}
+        {/* CAM-03 */}
         <div className="absolute bottom-[22%] left-[34%] transform -translate-x-1/2 translate-y-1/2 z-20">
           <div className={`h-7 w-7 rounded-lg border flex items-center justify-center transition-all ${
             isBreachState && activeCamId() === 3
@@ -216,14 +215,13 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           </div>
           <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-[6px] font-mono text-slate-200">CAM-03</span>
           
-          {/* Scan Cone */}
           {activeCamId() === 3 && isBreachState && (
             <div className="absolute w-36 h-36 bottom-[10px] left-[10px] bg-gradient-to-tr from-red-500/15 to-transparent pointer-events-none rounded-tr-full"
                  style={{ clipPath: 'polygon(0 100%, 100% 60%, 40% 0)' }} />
           )}
         </div>
 
-        {/* CAM-04 (Bottom-Right, coordinates 74, 78) */}
+        {/* CAM-04 */}
         <div className="absolute bottom-[22%] left-[74%] transform -translate-x-1/2 translate-y-1/2 z-20">
           <div className={`h-7 w-7 rounded-lg border flex items-center justify-center transition-all ${
             isBreachState && activeCamId() === 4
@@ -234,7 +232,6 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           </div>
           <span className="absolute -bottom-4 left-1/2 transform -translate-x-1/2 text-[6px] font-mono text-slate-200">CAM-04</span>
           
-          {/* Scan Cone */}
           {activeCamId() === 4 && isBreachState && (
             <div className="absolute w-36 h-36 bottom-[10px] right-[10px] bg-gradient-to-tl from-red-500/15 to-transparent pointer-events-none rounded-tl-full"
                  style={{ clipPath: 'polygon(100% 100%, 0 60%, 60% 0)' }} />
@@ -242,7 +239,6 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
         </div>
 
         {/* FLOOD LIGHTS & SIRENS OVERLAYS */}
-        {/* FL-01 (Top-Center, coordinates 54, 9) */}
         <div className="absolute top-[9%] left-[54%] transform -translate-x-1/2 -translate-y-1/2 z-20">
           <div className={`h-5 w-5 rounded-full border flex items-center justify-center ${
             isFloodlightsActive ? 'bg-amber-500/25 border-amber-500 text-amber-400' : 'bg-slate-950 border-slate-900 text-slate-600'
@@ -255,7 +251,6 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           )}
         </div>
 
-        {/* SIREN-01 (Center-Right, next to Orin Nano 52, 44) */}
         <div className="absolute top-[44%] left-[60%] transform -translate-y-1/2 z-20">
           <div className={`h-6 w-6 rounded-lg border flex items-center justify-center ${
             isSirenActive ? 'bg-red-500/20 border-red-500 text-red-400 animate-bounce' : 'bg-slate-950 border-slate-900 text-slate-600'
@@ -271,7 +266,6 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           )}
         </div>
 
-        {/* Sensor Node dots */}
         {sensorNodes.map((node) => (
           <div
             key={node.id}
@@ -302,7 +296,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
               {isBreachState && (
                 <div className="absolute -inset-3.5 border border-red-500 rounded-md">
                   <div className="absolute -top-4 left-0 bg-red-500 text-slate-950 font-mono text-[6px] font-bold px-0.5 rounded whitespace-nowrap">
-                    {activeScenario.species.toUpperCase()}
+                    {getSpeciesTranslated(activeScenario.species).toUpperCase()}
                   </div>
                 </div>
               )}
@@ -313,7 +307,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           )}
         </AnimatePresence>
 
-        {/* 3. LEGEND OVERLAY PANEL (Bottom-Left) */}
+        {/* 3. LEGEND OVERLAY PANEL */}
         <div className="absolute bottom-3 left-3 bg-[#090d16]/90 border border-slate-900 rounded-xl p-3 w-40 space-y-1.5 text-[8px] font-mono text-slate-400 shadow-lg">
           <span className="text-[9px] font-bold text-slate-100 uppercase tracking-wider block border-b border-slate-900 pb-1 mb-1">LEGEND</span>
           <div className="flex items-center gap-1.5">
@@ -334,7 +328,7 @@ export default function FarmMapTab({ simulationState, currentScenario }) {
           </div>
         </div>
 
-        {/* 4. FARM INFORMATION OVERLAY PANEL (Bottom-Right) */}
+        {/* 4. FARM INFORMATION OVERLAY PANEL */}
         <div className="absolute bottom-3 right-3 bg-[#090d16]/90 border border-slate-900 rounded-xl p-3.5 w-48 space-y-2 text-[8px] font-mono text-slate-400 shadow-lg">
           <span className="text-[9px] font-bold text-slate-100 uppercase tracking-wider block border-b border-slate-900 pb-1 mb-1">FARM INFORMATION</span>
           <div className="space-y-1">

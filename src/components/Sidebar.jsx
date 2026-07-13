@@ -1,20 +1,23 @@
 import React from 'react';
 import { 
   LayoutDashboard, Map, Cpu, Bell, BarChart3, 
-  Clock, FileText, Settings, ShieldCheck 
+  Clock, FileText, Settings 
 } from 'lucide-react';
+import { getTranslation } from '../utils/translations';
 
-export default function Sidebar({ activeTab = 'overview', setActiveTab }) {
+export default function Sidebar({ activeTab = 'overview', setActiveTab, language }) {
+  const t = (key) => getTranslation(language, key);
+
   const menuItems = [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'map', label: 'Farm Map', icon: Map },
-    { id: 'detection', label: 'AI Detection', icon: Cpu },
-    { id: 'devices', label: 'Devices', icon: Settings }, // Matches settings/cog or server list icon
-    { id: 'alerts', label: 'Alerts', icon: Bell },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-    { id: 'timeline', label: 'Timeline', icon: Clock },
-    { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'settings', label: 'Settings', icon: Settings }
+    { id: 'overview', label: t('overview'), icon: LayoutDashboard },
+    { id: 'map', label: t('farmMap'), icon: Map },
+    { id: 'detection', label: t('aiDetection'), icon: Cpu },
+    { id: 'devices', label: t('devices'), icon: Settings },
+    { id: 'alerts', label: t('alerts'), icon: Bell },
+    { id: 'analytics', label: t('analytics'), icon: BarChart3 },
+    { id: 'timeline', label: t('timeline'), icon: Clock },
+    { id: 'reports', label: t('reports'), icon: FileText },
+    { id: 'settings', label: t('settings'), icon: Settings }
   ];
 
   return (
@@ -61,13 +64,13 @@ export default function Sidebar({ activeTab = 'overview', setActiveTab }) {
         {/* System Status Widget */}
         <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3.5 space-y-2">
           <div className="flex items-center justify-between text-[10px] font-mono">
-            <span className="text-slate-400">System Status</span>
+            <span className="text-slate-400">{t('systemStatus')}</span>
             <span className="flex items-center gap-1 text-green-500 font-bold">
               <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-              Operational
+              {t('operational')}
             </span>
           </div>
-          <p className="text-[10px] font-sans font-semibold text-slate-300">All Systems Operational</p>
+          <p className="text-[10px] font-sans font-semibold text-slate-300">{t('allSystemsOK')}</p>
           
           {/* Mini line-wave monitor graph */}
           <div className="h-6 flex items-end">
@@ -86,7 +89,7 @@ export default function Sidebar({ activeTab = 'overview', setActiveTab }) {
         {/* Connected Devices progress bar */}
         <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3.5 space-y-2">
           <div className="flex items-center justify-between text-[10px] font-mono">
-            <span className="text-slate-400">Connected Devices</span>
+            <span className="text-slate-400">{t('connectedDevices')}</span>
             <span className="text-slate-200 font-bold">24 / 24</span>
           </div>
           {/* Progress bar */}
@@ -108,11 +111,10 @@ export default function Sidebar({ activeTab = 'overview', setActiveTab }) {
             </div>
             <div className="text-left leading-tight">
               <p className="text-[9px] font-bold text-slate-100 font-sans">Rohan Verma</p>
-              <p className="text-[7px] font-mono text-slate-500">Farm Manager</p>
+              <p className="text-[7px] font-mono text-slate-500">{t('farmManager')}</p>
             </div>
           </div>
           
-          {/* Dropdown arrow symbol */}
           <span className="text-slate-500 text-[10px] pr-2 cursor-pointer hover:text-slate-300">▼</span>
         </div>
 

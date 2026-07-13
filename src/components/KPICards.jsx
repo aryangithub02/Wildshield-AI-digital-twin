@@ -1,20 +1,23 @@
 import React from 'react';
 import { Camera, Target, AlertCircle, Wifi, Compass } from 'lucide-react';
+import { getTranslation } from '../utils/translations';
 
-export default function KPICards({ kpi }) {
+export default function KPICards({ kpi, language }) {
+  const t = (key) => getTranslation(language, key);
+
   const cards = [
     {
-      title: "Total Cameras",
+      title: t('totalCameras'),
       value: "12",
-      change: "Online",
+      change: t('online'),
       icon: Camera,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
       borderColor: "border-green-500/20",
     },
     {
-      title: "AI Detections (Today)",
-      value: kpi.wildAnimals + 14, // Dynamic value based on KPI state
+      title: t('aiDetectionsToday'),
+      value: kpi.wildAnimals + 14,
       change: "↑ 12%",
       icon: Target,
       color: "text-green-500",
@@ -22,27 +25,27 @@ export default function KPICards({ kpi }) {
       borderColor: "border-green-500/20",
     },
     {
-      title: "Active Alerts",
-      value: kpi.intrusions - 5, // Dynamic value based on KPI state
-      change: "High Priority",
+      title: t('activeAlerts'),
+      value: kpi.intrusions - 5,
+      change: t('highPriority'),
       icon: AlertCircle,
       color: "text-red-500",
       bgColor: "bg-red-500/10",
       borderColor: "border-red-500/20",
     },
     {
-      title: "Sensors",
+      title: t('sensors'),
       value: "8",
-      change: "Online",
+      change: t('online'),
       icon: Wifi,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
       borderColor: "border-green-500/20",
     },
     {
-      title: "Coverage Area",
+      title: t('coverageArea'),
       value: "128",
-      change: "Hectares",
+      change: t('hectares'),
       icon: Compass,
       color: "text-green-500",
       bgColor: "bg-green-500/10",
@@ -68,17 +71,17 @@ export default function KPICards({ kpi }) {
               </span>
               
               <div className="flex items-center gap-1">
-                {card.title === "Active Alerts" && (
+                {card.title === t('activeAlerts') && (
                   <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
                 )}
-                {card.title === "Total Cameras" && (
+                {card.title === t('totalCameras') && (
                   <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                 )}
-                {card.title === "Sensors" && (
+                {card.title === t('sensors') && (
                   <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                 )}
                 <span className={`text-[9px] font-mono font-semibold ${
-                  card.title === "Active Alerts" ? 'text-red-400' : 'text-slate-400'
+                  card.title === t('activeAlerts') ? 'text-red-400' : 'text-slate-400'
                 }`}>
                   {card.change}
                 </span>

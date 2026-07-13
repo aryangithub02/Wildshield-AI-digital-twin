@@ -1,9 +1,19 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, Volume2, Lightbulb, ShieldAlert, Sparkles, Radio, HelpCircle, Navigation, Plus, Minus, Layers, Settings } from 'lucide-react';
+import { getTranslation } from '../utils/translations';
 
-export default function DigitalTwin({ simulationState, onSelectNode, currentScenario }) {
-  // 5 Farmer Nodes matching the new AutoCAD layout coordinates
+export default function DigitalTwin({ simulationState, onSelectNode, currentScenario, language }) {
+  const t = (key) => getTranslation(language, key);
+
+  const getSpeciesTranslated = (speciesName) => {
+    if (speciesName === "Elephant") return t('elephant');
+    if (speciesName === "Wild Boar") return t('wildBoar');
+    if (speciesName === "Monkey") return t('monkey');
+    if (speciesName === "Deer") return t('deer');
+    return speciesName;
+  };
+
   const nodes = [
     { id: 1, name: 'Farmer Node 01 (FN-1)', x: 54, y: 9, type: 'node' },
     { id: 2, name: 'Farmer Node 02 (FN-2)', x: 78, y: 22, type: 'node' },
@@ -44,11 +54,11 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
 
   // Mapped camera rotations
   const coneRotations = {
-    1: 180, // FN-1 pointing down
-    2: 225, // FN-2 pointing down-left
-    3: 315, // FN-3 pointing up-left
-    4: 45,  // FN-4 pointing up-right
-    5: 135  // FN-5 pointing down-right
+    1: 180,
+    2: 225,
+    3: 315,
+    4: 45,
+    5: 135
   };
 
   // Mapped floodlight rotations
@@ -68,13 +78,13 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
       {/* Header Info */}
       <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2">
         <div className="text-left">
-          <span className="text-xs font-bold text-slate-100 font-sans uppercase tracking-wider block">Demo Farm Map</span>
-          <p className="text-[10px] text-slate-500 font-mono mt-0.5">Pentagonal Geofence perimeter (500m × 400m)</p>
+          <span className="text-xs font-bold text-slate-100 font-sans uppercase tracking-wider block">{t('demoFarmMap')}</span>
+          <p className="text-[10px] text-slate-500 font-mono mt-0.5">{t('pentagonPerimeter')}</p>
         </div>
         
         <div className="flex items-center gap-1.5 text-[9px] font-semibold text-green-500 bg-green-500/10 px-2 py-1 rounded border border-green-500/20">
           <HelpCircle className="h-3 w-3" />
-          <span>Click Nodes to inspect circuits & enclosures</span>
+          <span>{t('clickNodesTip')}</span>
         </div>
       </div>
 
@@ -88,10 +98,10 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
         }}
       >
         
-        {/* Soft dark vignette over the image to keep text overlays legible */}
+        {/* Soft dark vignette */}
         <div className="absolute inset-0 bg-slate-950/20 pointer-events-none" />
 
-        {/* Responsive Vector Overlay SVG using viewBox="0 0 100 100" matching percentage positions */}
+        {/* Responsive Vector Overlay SVG */}
         <svg 
           className="absolute inset-0 w-full h-full pointer-events-none"
           viewBox="0 0 100 100"
@@ -108,7 +118,7 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
             transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
           />
 
-          {/* Alarm alert highlighted geofence path between active node and left/right neighbours */}
+          {/* Alarm alert highlighted geofence path */}
           {simulationState >= 2 && simulationState <= 4 && (
             <motion.line
               x1={activeScenarioNode.x}
@@ -141,7 +151,7 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
 
         {/* Top-Left Dropdown Map Selector */}
         <div className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-2.5 py-1.5 bg-[#090d16]/90 border border-slate-900 rounded-lg text-[10px] font-bold font-sans text-slate-100 cursor-pointer select-none">
-          <span>Demo Farm Map</span>
+          <span>{t('demoFarmMap')}</span>
           <span className="text-slate-500 text-[6px]">▼</span>
         </div>
 
@@ -175,7 +185,7 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
         {isAnyDeterrentActive && (
           <div className="absolute top-3 left-1/2 transform -translate-x-1/2 bg-red-600 text-slate-950 font-sans text-[8px] font-extrabold px-2.5 py-1 rounded shadow flex items-center gap-1">
             <ShieldAlert className="h-3 w-3 animate-ping" fill="currentColor" />
-            <span>⚠️ ALERT: ACTIVE BOUNDARY BREACH</span>
+            <span>{t('geofenceBreach')}</span>
           </div>
         )}
 
@@ -274,13 +284,9 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
 
                     {/* Predator Sound warning */}
                     {isSpeakerActive && (
-                      <>
-                        <motion.div
-                          animate={{ scale: [1, 2], opacity: [0.7, 0] }}
-                          transition={{ repeat: Infinity, duration: 1.2 }}
-                          className="absolute -inset-6 border border-blue-500/60 rounded-full pointer-events-none"
-                        />
-                      </>
+                      <div className="absolute -top-7 -right-7 text-xs select-none pointer-events-none animate-bounce bg-slate-900/90 px-1 py-0.5 border border-slate-800 rounded">
+                        {t('speakerOn')}
+                      </div>
                     )}
 
                     {/* Siren flash */}
@@ -337,7 +343,7 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
           );
         })}
 
-        {/* 6. Animal pathing (Framer Motion) */}
+        {/* 6. Animal pathing */}
         <AnimatePresence>
           {simulationState > 0 && (
             <motion.div
@@ -372,12 +378,12 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
                   <div className="absolute bottom-0 left-0 w-2 h-2 border-b-2 border-l-2 border-red-500 -mb-1 -ml-1" />
                   <div className="absolute bottom-0 right-0 w-2 h-2 border-b-2 border-r-2 border-red-500 -mb-1 -mr-1" />
                   <div className="absolute -top-6 left-0 bg-red-500 text-slate-950 font-mono text-[8px] font-extrabold px-1 rounded shadow whitespace-nowrap">
-                    {activeScenario.species.toUpperCase()}: {simulationState === 2 ? `${activeScenario.confidenceBase}%` : `${activeScenario.confidenceMax}%`}
+                    {getSpeciesTranslated(activeScenario.species).toUpperCase()}: {simulationState === 2 ? `${activeScenario.confidenceBase}%` : `${activeScenario.confidenceMax}%`}
                   </div>
                 </motion.div>
               )}
 
-              {/* Startle tag when floodlight/deterrent is active */}
+              {/* Startle tag */}
               {simulationState === 4 && (
                 <motion.div
                   animate={{ scale: [1, 1.4, 1], opacity: [1, 0.4, 1] }}
@@ -402,9 +408,9 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
       <div className="mt-3 flex flex-wrap items-center justify-between text-xs text-slate-400 font-mono bg-slate-950/40 p-2.5 rounded-lg border border-slate-900">
         <span className="flex items-center gap-1.5">
           <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-          <span>RF Network: LoRa SX1278 Mesh (Active)</span>
+          <span>{t('rfNetworkActive')}</span>
         </span>
-        <span className="hidden sm:inline">Protected Area Geofence: Pentagon Grid</span>
+        <span className="hidden sm:inline">{t('protectedGeofence')}</span>
       </div>
     </div>
   );

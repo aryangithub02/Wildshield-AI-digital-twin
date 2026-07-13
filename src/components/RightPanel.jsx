@@ -1,7 +1,10 @@
 import React from 'react';
 import { ShieldAlert, AlertTriangle, Radio, Wifi, CheckCircle2 } from 'lucide-react';
+import { getTranslation } from '../utils/translations';
 
-export default function RightPanel({ simulationState, currentScenario }) {
+export default function RightPanel({ simulationState, currentScenario, language }) {
+  const t = (key) => getTranslation(language, key);
+
   const activeScenario = currentScenario || {
     species: "Elephant",
     emoji: "🐘",
@@ -11,11 +14,34 @@ export default function RightPanel({ simulationState, currentScenario }) {
     confidenceMax: 98.4,
   };
 
-  // 1. Mock Active Alerts List (Dynamic)
+  const getSpeciesTranslated = (speciesName) => {
+    if (speciesName === "Elephant") return t('elephant');
+    if (speciesName === "Wild Boar") return t('wildBoar');
+    if (speciesName === "Monkey") return t('monkey');
+    if (speciesName === "Deer") return t('deer');
+    return speciesName;
+  };
+
+  const getThreatTranslated = (threatLevel) => {
+    if (threatLevel === "HIGH") return t('high').toUpperCase();
+    if (threatLevel === "MEDIUM") return t('medium').toUpperCase();
+    return t('low').toUpperCase();
+  };
+
+  // Helper to resolve dynamic localized alert titles
+  const getDynamicAlertTitle = () => {
+    if (activeScenario.species === "Elephant") return t('elephantDetected');
+    if (activeScenario.species === "Wild Boar") return t('boarDetected');
+    if (activeScenario.species === "Monkey") return t('monkeyDetected');
+    if (activeScenario.species === "Deer") return t('deerDetected');
+    return `${getSpeciesTranslated(activeScenario.species)} ${t('live')}`;
+  };
+
+  // Mock Active Alerts List
   const alertsList = [
     {
       id: 1,
-      title: `${activeScenario.species} Detected`,
+      title: getDynamicAlertTitle(),
       location: `Zone FN-0${activeScenario.nodeId}`,
       time: "10:23 AM",
       threat: activeScenario.threat,
@@ -23,7 +49,7 @@ export default function RightPanel({ simulationState, currentScenario }) {
     },
     {
       id: 2,
-      title: "Movement Detected",
+      title: t('movementDetected'),
       location: "FN-5 Forest Edge",
       time: "10:18 AM",
       threat: "MEDIUM",
@@ -31,7 +57,7 @@ export default function RightPanel({ simulationState, currentScenario }) {
     },
     {
       id: 3,
-      title: "Fence Vibration",
+      title: t('fenceVibration'),
       location: "FN-3 South Boundary",
       time: "09:52 AM",
       threat: "LOW",
@@ -39,21 +65,18 @@ export default function RightPanel({ simulationState, currentScenario }) {
     }
   ];
 
-  // 2. Mock Device Status List
   const devices = [
-    { name: "CAM-01 (North)", status: "Online" },
-    { name: "CAM-02 (East)", status: "Online" },
-    { name: "CAM-03 (South)", status: "Online" },
-    { name: "CAM-04 (West)", status: "Online" },
-    { name: "Sensor-01 (Temp)", status: "Online" },
-    { name: "Sensor-02 (Motion)", status: "Online" },
-    { name: "Speaker-01", status: "Online" }
+    { name: "CAM-01 (North)", status: t('online') },
+    { name: "CAM-02 (East)", status: t('online') },
+    { name: "CAM-03 (South)", status: t('online') },
+    { name: "CAM-04 (West)", status: t('online') },
+    { name: "Sensor-01 (Temp)", status: t('online') },
+    { name: "Sensor-02 (Motion)", status: t('online') },
+    { name: "Speaker-01", status: t('online') }
   ];
 
-  // Determine Current Detection Visual / Metadata
   const isTargetDetected = simulationState >= 2 && simulationState <= 4;
 
-  // Visual representation of animals (thermal styled boxes)
   const thermalAvatars = {
     "Elephant": "https://images.unsplash.com/photo-1557050543-4b5f4e07ea49?q=80&w=200&auto=format&fit=crop",
     "Wild Boar": "https://images.unsplash.com/photo-1590422941838-89c565d6c291?q=80&w=200&auto=format&fit=crop",
@@ -67,8 +90,8 @@ export default function RightPanel({ simulationState, currentScenario }) {
       {/* 1. ACTIVE ALERTS PANEL */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs border-b border-slate-900 pb-2">
-          <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">Active Alerts</span>
-          <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">View All</span>
+          <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">{t('activeAlerts')}</span>
+          <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">{t('viewAll')}</span>
         </div>
         
         <div className="space-y-2">
@@ -110,7 +133,7 @@ export default function RightPanel({ simulationState, currentScenario }) {
                       ? 'bg-slate-950 border-slate-900 text-slate-500'
                       : 'bg-slate-950 border-slate-900 text-slate-500'
                 }`}>
-                  {alert.threat}
+                  {getThreatTranslated(alert.threat)}
                 </span>
               </div>
             </div>
@@ -121,7 +144,7 @@ export default function RightPanel({ simulationState, currentScenario }) {
       {/* 2. CURRENT DETECTION PANEL */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs border-b border-slate-900 pb-2">
-          <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">Current Detection</span>
+          <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">{t('currentDetection')}</span>
         </div>
 
         <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3.5 space-y-3">
@@ -132,13 +155,12 @@ export default function RightPanel({ simulationState, currentScenario }) {
                 <img
                   src={thermalAvatars[activeScenario.species]}
                   alt={activeScenario.species}
-                  className="w-full h-full object-cover filter brightness-[0.75] contrast-[1.1] hue-rotate-[15deg]"
+                  className="w-full h-full object-cover filter brightness-[0.75] contrast-[1.15] hue-rotate-[15deg]"
                 />
-                {/* Thermal filter mask */}
                 <div className="absolute inset-0 bg-gradient-to-t from-red-500/10 via-transparent to-blue-500/5 mix-blend-color-burn" />
                 <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-600 text-white font-mono text-[7px] px-1 py-0.5 rounded shadow animate-pulse">
                   <Radio className="h-2 w-2 animate-ping" />
-                  <span>LIVE</span>
+                  <span>{t('live').toUpperCase()}</span>
                 </div>
               </>
             ) : (
@@ -148,7 +170,6 @@ export default function RightPanel({ simulationState, currentScenario }) {
               </div>
             )}
             
-            {/* Visual corner indicators */}
             <div className="absolute top-1.5 left-1.5 w-2 h-2 border-t border-l border-white/20" />
             <div className="absolute top-1.5 right-1.5 w-2 h-2 border-t border-r border-white/20" />
             <div className="absolute bottom-1.5 left-1.5 w-2 h-2 border-b border-l border-white/20" />
@@ -159,25 +180,25 @@ export default function RightPanel({ simulationState, currentScenario }) {
           {isTargetDetected ? (
             <div className="space-y-1.5 text-[10px] font-mono border-t border-slate-900 pt-2">
               <div className="flex justify-between">
-                <span className="text-slate-400">Target:</span>
-                <span className="text-slate-100 font-bold font-sans">{activeScenario.species}</span>
+                <span className="text-slate-400">{t('target')}:</span>
+                <span className="text-slate-100 font-bold font-sans">{getSpeciesTranslated(activeScenario.species)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Confidence:</span>
+                <span className="text-slate-400">{t('confidence')}:</span>
                 <span className="text-green-500 font-bold">{activeScenario.confidenceMax}%</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Threat Level:</span>
+                <span className="text-slate-400">{t('threatLevel')}:</span>
                 <span className={`font-bold ${
                   activeScenario.threat === 'HIGH' ? 'text-red-500' : 'text-amber-500'
-                }`}>{activeScenario.threat}</span>
+                }`}>{getThreatTranslated(activeScenario.threat)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-400">Location:</span>
+                <span className="text-slate-400">{t('location')}:</span>
                 <span className="text-slate-200">Zone FN-0{activeScenario.nodeId}</span>
               </div>
               <div className="flex justify-between border-t border-slate-900/60 pt-1 text-[8px] text-slate-500">
-                <span>Detected:</span>
+                <span>{t('detectedAt')}:</span>
                 <span>10:23:15 AM</span>
               </div>
             </div>
@@ -192,8 +213,8 @@ export default function RightPanel({ simulationState, currentScenario }) {
       {/* 3. DEVICE STATUS PANEL */}
       <div className="space-y-3">
         <div className="flex items-center justify-between text-xs border-b border-slate-900 pb-2">
-          <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">Device Status</span>
-          <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">View All</span>
+          <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">{t('deviceStatus')}</span>
+          <span className="text-[10px] text-slate-400 cursor-pointer hover:text-slate-200">{t('viewAll')}</span>
         </div>
         
         <div className="space-y-1.5">

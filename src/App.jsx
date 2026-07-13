@@ -109,6 +109,7 @@ const ANIMAL_SCENARIOS = [
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [language, setLanguage] = useState('en'); // Translation language state
   const [simulationState, setSimulationState] = useState(STATE_IDLE);
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -116,9 +117,9 @@ export default function App() {
   const [selectedNode, setSelectedNode] = useState(null);
   
   const [logs, setLogs] = useState([
-    { id: 1, time: getFormattedTime(new Date(Date.now() - 3600000)), text: "WildShield Core Network Online", type: "info" },
-    { id: 2, time: getFormattedTime(new Date(Date.now() - 3000000)), text: "Central AI Hub (Jetson Orin Nano) connected", type: "info" },
-    { id: 3, time: getFormattedTime(new Date(Date.now() - 2400000)), text: "ESP32 Mesh geofence calibration complete", type: "success" },
+    { id: 1, time: getFormattedTime(new Date(Date.now() - 3600000)), key: "coreOnline", type: "info" },
+    { id: 2, time: getFormattedTime(new Date(Date.now() - 3000000)), key: "hubConnected", type: "info" },
+    { id: 3, time: getFormattedTime(new Date(Date.now() - 2400000)), key: "meshCalibrated", type: "success" },
   ]);
 
   const [kpi, setKpi] = useState({
@@ -136,13 +137,16 @@ export default function App() {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   }
 
-  // Add log helper
-  const addLog = (text, type = 'info') => {
+  // Add log helper with support for translation keys and parameters
+  const addLog = (keyOrText, type = 'info', params = {}) => {
+    const isKey = typeof keyOrText === 'string' && keyOrText.indexOf(' ') === -1;
     setLogs(prev => [
       {
         id: Date.now() + Math.random(),
         time: getFormattedTime(),
-        text,
+        key: isKey ? keyOrText : undefined,
+        text: isKey ? undefined : keyOrText,
+        params,
         type
       },
       ...prev
@@ -155,29 +159,29 @@ export default function App() {
 
     switch (nextState) {
       case STATE_IDLE:
-        addLog("System returned to standard monitoring state. All devices on standby.", "info");
+        addLog("systemIdle", "info");
         setScenarioIndex(prev => (prev + 1) % ANIMAL_SCENARIOS.length);
         break;
       
       case STATE_APPROACHING:
-        addLog(`PIR Sensor on ${activeScenario.nodeName} detects motion. Sending wake-up trigger to ESP32.`, "warning");
+        addLog("motionDetectedLog", "warning", { nodeName: activeScenario.nodeName });
         break;
       
       case STATE_DETECTED:
-        addLog(`${activeScenario.nodeName} wakes IP Camera. Transmitting 1080p stream over LoRa SX1278 to Central AI Hub.`, "detection");
+        addLog("cameraActivatedLog", "detection", { nodeName: activeScenario.nodeName });
         break;
       
       case STATE_ESCALATED:
-        addLog(`Central AI Hub confirmed: ${activeScenario.species} (Confidence rising). Threat level: ${activeScenario.threat}.`, "danger");
+        addLog("targetConfirmedLog", "danger", { species: activeScenario.species, threat: activeScenario.threat });
         
         const activeActuators = [];
         if (activeScenario.actuators.speaker) activeActuators.push("Predator Sound");
         if (activeScenario.actuators.sprinkler) activeActuators.push("Sprinkler Pump");
         
         if (activeActuators.length > 0) {
-          addLog(`${activeScenario.nodeName} deploying Stage 1 Deterrence: ${activeActuators.join(" & ")} activated.`, "deterrent");
+          addLog("stage1DeployLog", "deterrent", { nodeName: activeScenario.nodeName, actuators: activeActuators });
         } else {
-          addLog(`${activeScenario.nodeName} analyzing persistence. Actuator deploy pending stage 2 triggers.`, "info");
+          addLog("stage1DeployLog", "info", { nodeName: activeScenario.nodeName, actuators: [] });
         }
         break;
       
@@ -187,14 +191,14 @@ export default function App() {
         if (activeScenario.actuators.floodlight) stage2Actuators.push("Floodlight 01");
 
         if (stage2Actuators.length > 0) {
-          addLog(`Threat persists. ${activeScenario.nodeName} deploying Stage 2 Deterrence: ${stage2Actuators.join(" & ")} active.`, "danger");
+          addLog("stage2DeployLog", "danger", { nodeName: activeScenario.nodeName, actuators: stage2Actuators });
         } else {
-          addLog("Deterrence protocol finalized. Target retreating under existing countermeasures.", "success");
+          addLog("stage2DeployLog", "success", { nodeName: activeScenario.nodeName, actuators: [] });
         }
         break;
       
       case STATE_RESOLVED:
-        addLog(`Target repelled: ${activeScenario.species} retreated past PIR range at ${activeScenario.nodeName}.`, "success");
+        addLog("targetRepelledLog", "success", { species: activeScenario.species, nodeName: activeScenario.nodeName });
         setKpi(prev => ({
           ...prev,
           intrusions: prev.intrusions + 1,
@@ -240,9 +244,9 @@ export default function App() {
     setScenarioIndex(0);
     setIsPlaying(false);
     setLogs([
-      { id: 1, time: getFormattedTime(), text: "Simulation manual reset. Monitoring standard perimeter.", type: "info" }
+      { id: 1, time: getFormattedTime(), key: "manualReset", type: "info" }
     ]);
-    addLog("System initialized to IDLE.", "success");
+    addLog("systemInitialized", "success");
   };
 
   // Manual Step Forward
@@ -257,15 +261,16 @@ export default function App() {
     <div className="w-full min-h-screen bg-[#020617] text-slate-100 font-sans">
       
       {/* 1. Left Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} language={language} />
 
       {/* 2. Top Navigation Bar */}
-      <TopNavbar />
+      <TopNavbar language={language} setLanguage={setLanguage} />
 
       {/* 3. Right Sidebar Panel */}
       <RightPanel 
         simulationState={simulationState} 
         currentScenario={currentScenario} 
+        language={language}
       />
 
       {/* 4. Center Main Panel Viewport */}
@@ -274,7 +279,7 @@ export default function App() {
         {activeTab === 'overview' ? (
           <>
             {/* KPI Cards Grid */}
-            <KPICards kpi={kpi} />
+            <KPICards kpi={kpi} language={language} />
 
             {/* Map Panel (Digital Twin) */}
             <div className="w-full">
@@ -282,34 +287,38 @@ export default function App() {
                 simulationState={simulationState} 
                 onSelectNode={setSelectedNode}
                 currentScenario={currentScenario}
+                language={language}
               />
             </div>
 
-            {/* Bottom Split Grid: Analytics Overview (Left) & Event Timeline (Right) */}
+            {/* Bottom Split Grid: Analytics Overview & Event Timeline */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Analytics />
-              <Timeline logs={logs} />
+              <Analytics language={language} />
+              <Timeline logs={logs} language={language} />
             </div>
 
             {/* IoT Nodes Hardware list */}
             <div className="w-full">
-              <DeviceStatus simulationState={simulationState} currentScenario={currentScenario} />
+              <DeviceStatus simulationState={simulationState} currentScenario={currentScenario} language={language} />
             </div>
           </>
         ) : activeTab === 'map' ? (
           <FarmMapTab 
             simulationState={simulationState} 
             currentScenario={currentScenario} 
+            language={language}
           />
         ) : activeTab === 'detection' ? (
           <AIDetectionTab 
             simulationState={simulationState} 
             currentScenario={currentScenario} 
+            language={language}
           />
         ) : activeTab === 'devices' ? (
           <DevicesTab 
             simulationState={simulationState} 
             currentScenario={currentScenario} 
+            language={language}
           />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-500 font-mono text-xs py-20 bg-[#0b0f19]/30 rounded-xl border border-slate-900/60">

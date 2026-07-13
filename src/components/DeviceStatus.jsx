@@ -1,7 +1,10 @@
 import React from 'react';
 import { Camera, Cpu, Activity } from 'lucide-react';
+import { getTranslation } from '../utils/translations';
 
-export default function DeviceStatus({ simulationState, currentScenario }) {
+export default function DeviceStatus({ simulationState, currentScenario, language }) {
+  const t = (key) => getTranslation(language, key);
+
   const activeScenario = currentScenario || {
     nodeId: 5,
     nodeName: "FN-5",
@@ -25,7 +28,7 @@ export default function DeviceStatus({ simulationState, currentScenario }) {
       id: 1,
       name: "Farmer Node 1 (FN-1)",
       type: "camera",
-      status: isNodeActive(1) ? "CAPTURING" : "ONLINE",
+      status: isNodeActive(1) ? "CAPTURING" : t('online').toUpperCase(),
       metric: isNodeActive(1) ? "TX Stream • Load 64%" : `Standby • Solar ${solarRates[1]}W`,
       icon: Camera,
       statusClass: isNodeActive(1)
@@ -36,7 +39,7 @@ export default function DeviceStatus({ simulationState, currentScenario }) {
       id: 2,
       name: "Farmer Node 2 (FN-2)",
       type: "camera",
-      status: isNodeActive(2) ? "CAPTURING" : "ONLINE",
+      status: isNodeActive(2) ? "CAPTURING" : t('online').toUpperCase(),
       metric: isNodeActive(2) ? "TX Stream • Load 64%" : `Standby • Solar ${solarRates[2]}W`,
       icon: Camera,
       statusClass: isNodeActive(2)
@@ -47,7 +50,7 @@ export default function DeviceStatus({ simulationState, currentScenario }) {
       id: 3,
       name: "Farmer Node 3 (FN-3)",
       type: "camera",
-      status: isNodeActive(3) ? "CAPTURING" : "ONLINE",
+      status: isNodeActive(3) ? "CAPTURING" : t('online').toUpperCase(),
       metric: isNodeActive(3) ? "TX Stream • Load 64%" : `Standby • Solar ${solarRates[3]}W`,
       icon: Camera,
       statusClass: isNodeActive(3)
@@ -58,7 +61,7 @@ export default function DeviceStatus({ simulationState, currentScenario }) {
       id: 4,
       name: "Farmer Node 4 (FN-4)",
       type: "camera",
-      status: isNodeActive(4) ? "CAPTURING" : "ONLINE",
+      status: isNodeActive(4) ? "CAPTURING" : t('online').toUpperCase(),
       metric: isNodeActive(4) ? "TX Stream • Load 64%" : `Standby • Solar ${solarRates[4]}W`,
       icon: Camera,
       statusClass: isNodeActive(4)
@@ -69,7 +72,7 @@ export default function DeviceStatus({ simulationState, currentScenario }) {
       id: 5,
       name: "Farmer Node 5 (FN-5)",
       type: "camera",
-      status: isNodeActive(5) ? "CAPTURING" : "ONLINE",
+      status: isNodeActive(5) ? "CAPTURING" : t('online').toUpperCase(),
       metric: isNodeActive(5) ? "TX Stream • Load 64%" : `Standby • Solar ${solarRates[5]}W`,
       icon: Camera,
       statusClass: isNodeActive(5)
@@ -80,7 +83,7 @@ export default function DeviceStatus({ simulationState, currentScenario }) {
       id: 6,
       name: "Central AI Hub (Orin Nano)",
       type: "ai",
-      status: simulationState > 0 && simulationState < 5 ? "INFERENCE" : "RUNNING",
+      status: simulationState > 0 && simulationState < 5 ? "INFERENCE" : t('active').toUpperCase(),
       metric: simulationState > 0 && simulationState < 5 ? `Model Load 82%` : "Load 10% • Database OK",
       icon: Cpu,
       statusClass: simulationState > 0 && simulationState < 5
@@ -94,7 +97,7 @@ export default function DeviceStatus({ simulationState, currentScenario }) {
       <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-green-500" />
-          <h2 className="text-lg font-bold text-slate-100">Edge Device Status</h2>
+          <h2 className="text-lg font-bold text-slate-100">{t('deviceStatus')}</h2>
         </div>
         <div className="text-[10px] font-mono text-slate-400">Nodes: 6 Active</div>
       </div>
