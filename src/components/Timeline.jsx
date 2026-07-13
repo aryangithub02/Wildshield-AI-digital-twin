@@ -158,7 +158,7 @@ export default function Timeline({ logs, language }) {
   };
 
   return (
-    <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg flex flex-col h-[270px] select-none">
+    <div id="tour-timeline" className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg flex flex-col h-[270px] select-none">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4 border-b border-slate-900 pb-2">

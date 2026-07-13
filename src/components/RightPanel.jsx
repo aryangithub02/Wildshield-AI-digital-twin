@@ -88,7 +88,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
   };
 
   return (
-    <aside className="w-80 bg-[#090d16] border-l border-slate-900 flex flex-col h-[calc(100vh-4rem)] fixed top-16 right-0 z-30 p-4 space-y-6 overflow-y-auto select-none">
+    <aside className="w-80 bg-[#090d16] border-l border-slate-900 flex flex-col fixed top-16 right-0 bottom-0 z-30 p-4 space-y-6 overflow-y-auto select-none">
       
       {/* 1. ACTIVE ALERTS PANEL */}
       <div className="space-y-3">
@@ -150,64 +150,73 @@ export default function RightPanel({ simulationState, currentScenario, language 
           <span className="font-bold text-slate-100 font-sans uppercase tracking-wider">{t('currentDetection')}</span>
         </div>
 
-        <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3.5 space-y-3">
-          {/* Thermal Viewport Image */}
-          <div className="relative aspect-[4/3] w-full bg-slate-950 rounded-lg border border-slate-900 overflow-hidden flex items-center justify-center crt-overlay">
-            {isTargetDetected ? (
-              <>
-                <img
-                  src={thermalAvatars[activeScenario.species]}
-                  alt={activeScenario.species}
-                  className="w-full h-full object-cover filter brightness-[0.75] contrast-[1.15] hue-rotate-[15deg]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-red-500/10 via-transparent to-blue-500/5 mix-blend-color-burn" />
-                <div className="absolute top-2 right-2 flex items-center gap-1 bg-red-600 text-white font-mono text-[7px] px-1 py-0.5 rounded shadow animate-pulse">
-                  <Radio className="h-2 w-2 animate-ping" />
-                  <span>{t('live').toUpperCase()}</span>
+        <div id="tour-camera" className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3">
+          
+          <div className="flex gap-3 items-center">
+            {/* Left: Thermal Viewport Image (Compact) */}
+            <div className="relative w-28 h-20 bg-slate-950 rounded-lg border border-slate-900 overflow-hidden flex items-center justify-center shrink-0 crt-overlay">
+              {isTargetDetected ? (
+                <>
+                  <img
+                    src={thermalAvatars[activeScenario.species]}
+                    alt={activeScenario.species}
+                    className="w-full h-full object-cover filter brightness-[0.75] contrast-[1.15] hue-rotate-[15deg]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-red-500/10 via-transparent to-blue-500/5 mix-blend-color-burn" />
+                  <div className="absolute top-1 right-1 flex items-center gap-0.5 bg-red-600 text-white font-mono text-[6px] px-1 py-0.2 rounded shadow animate-pulse">
+                    <Radio className="h-1.5 w-1.5 animate-ping" />
+                    <span>{t('live').toUpperCase()}</span>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center text-slate-600 select-none p-2">
+                  <div className="text-base animate-pulse">📡</div>
+                  <p className="text-[6px] font-mono uppercase tracking-widest mt-0.5">Scan</p>
                 </div>
-              </>
-            ) : (
-              <div className="text-center space-y-1 text-slate-600 p-4 select-none">
-                <div className="text-2xl animate-pulse">📡</div>
-                <p className="text-[8px] font-mono uppercase tracking-widest">Scanning Grid...</p>
-              </div>
-            )}
-            
-            <div className="absolute top-1.5 left-1.5 w-2 h-2 border-t border-l border-white/20" />
-            <div className="absolute top-1.5 right-1.5 w-2 h-2 border-t border-r border-white/20" />
-            <div className="absolute bottom-1.5 left-1.5 w-2 h-2 border-b border-l border-white/20" />
-            <div className="absolute bottom-1.5 right-1.5 w-2 h-2 border-b border-r border-white/20" />
-          </div>
-
-          {/* Details Table */}
-          {isTargetDetected ? (
-            <div className="space-y-1.5 text-[10px] font-mono border-t border-slate-900 pt-2">
-              <div className="flex justify-between">
-                <span className="text-slate-400">{t('target')}:</span>
-                <span className="text-slate-100 font-bold font-sans">{getSpeciesTranslated(activeScenario.species)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">{t('confidence')}:</span>
-                <span className="text-green-500 font-bold">{activeScenario.confidenceMax}%</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">{t('threatLevel')}:</span>
-                <span className={`font-bold ${
-                  activeScenario.threat === 'HIGH' ? 'text-red-500' : 'text-amber-500'
-                }`}>{getThreatTranslated(activeScenario.threat)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">{t('location')}:</span>
-                <span className="text-slate-200">Zone FN-0{activeScenario.nodeId}</span>
-              </div>
-              <div className="flex justify-between border-t border-slate-900/60 pt-1 text-[8px] text-slate-500">
-                <span>{t('detectedAt')}:</span>
-                <span>10:23:15 AM</span>
-              </div>
+              )}
+              
+              {/* Corner highlights */}
+              <div className="absolute top-1 left-1 w-1 h-1 border-t border-l border-white/20" />
+              <div className="absolute top-1 right-1 w-1 h-1 border-t border-r border-white/20" />
+              <div className="absolute bottom-1 left-1 w-1 h-1 border-b border-l border-white/20" />
+              <div className="absolute bottom-1 right-1 w-1 h-1 border-b border-r border-white/20" />
             </div>
-          ) : (
-            <div className="text-center py-2 text-[10px] font-mono text-slate-500 italic border-t border-slate-900 pt-2">
-              No active target detected.
+
+            {/* Right: Details Table */}
+            <div className="flex-1 min-w-0">
+              {isTargetDetected ? (
+                <div className="space-y-1 text-[9px] font-mono leading-normal">
+                  <div className="flex justify-between gap-1">
+                    <span className="text-slate-500 shrink-0">{t('target')}:</span>
+                    <span className="text-slate-100 font-bold font-sans truncate">{getSpeciesTranslated(activeScenario.species)}</span>
+                  </div>
+                  <div className="flex justify-between gap-1">
+                    <span className="text-slate-500 shrink-0">{t('confidence')}:</span>
+                    <span className="text-green-500 font-bold">{activeScenario.confidenceMax}%</span>
+                  </div>
+                  <div className="flex justify-between gap-1">
+                    <span className="text-slate-500 shrink-0">{t('threatLevel')}:</span>
+                    <span className={`font-bold ${activeScenario.threat === 'HIGH' ? 'text-red-500' : 'text-amber-500'}`}>
+                      {getThreatTranslated(activeScenario.threat)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between gap-1">
+                    <span className="text-slate-500 shrink-0">{t('location')}:</span>
+                    <span className="text-slate-300 truncate">Zone FN-0{activeScenario.nodeId}</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-slate-500 italic text-[9px] font-mono leading-normal">
+                  Scanning grid... No active target.
+                </div>
+              )}
+            </div>
+          </div>
+          
+          {isTargetDetected && (
+            <div className="flex justify-between border-t border-slate-900/60 pt-1.5 text-[8px] text-slate-500 font-mono">
+              <span>{t('detectedAt')}:</span>
+              <span>10:23:15 AM</span>
             </div>
           )}
         </div>

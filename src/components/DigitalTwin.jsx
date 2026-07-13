@@ -90,6 +90,7 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
 
       {/* Map Board container - realistic background image */}
       <div 
+        id="tour-map"
         className="relative flex-1 min-h-[440px] bg-slate-950 rounded-xl border border-slate-900 overflow-hidden"
         style={{
           backgroundImage: "url('/farm_map_bg.png')",

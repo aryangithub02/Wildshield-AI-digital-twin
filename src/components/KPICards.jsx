@@ -54,7 +54,7 @@ export default function KPICards({ kpi, language }) {
   ];
 
   return (
-    <div className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4 select-none">
+    <div id="tour-kpis" className="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-4 select-none">
       {cards.map((card, index) => {
         const Icon = card.icon;
         return (

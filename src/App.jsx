@@ -11,6 +11,7 @@ import AIDetectionTab from './components/AIDetectionTab';
 import DevicesTab from './components/DevicesTab';
 import FarmMapTab from './components/FarmMapTab';
 import NodeModal from './components/NodeModal';
+import InteractiveTour from './components/InteractiveTour';
 
 const STATE_IDLE = 0;
 const STATE_APPROACHING = 1;
@@ -130,6 +131,18 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
   const [language, setLanguage] = useState('en'); // Translation language state
   const [simulationState, setSimulationState] = useState(STATE_IDLE);
+  
+  const tourRef = useRef(null);
+
+  const startTour = () => {
+    setActiveTab('overview');
+    // Allow brief tab transition tick before calling tour restart
+    setTimeout(() => {
+      if (tourRef.current) {
+        tourRef.current.restartTour();
+      }
+    }, 150);
+  };
   const [scenarioIndex, setScenarioIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [speed, setSpeed] = useState(1);
@@ -280,7 +293,7 @@ export default function App() {
     <div className="w-full min-h-screen bg-[#020617] text-slate-100 font-sans">
       
       {/* 1. Left Sidebar */}
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} language={language} />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} language={language} startTour={startTour} />
 
       {/* 2. Top Navigation Bar */}
       <TopNavbar language={language} setLanguage={setLanguage} />
@@ -357,6 +370,148 @@ export default function App() {
           currentScenario={currentScenario}
         />
       )}
+
+      {/* Onboarding guided interactive walkthrough tour */}
+      <InteractiveTour 
+        ref={tourRef} 
+        language={language} 
+        onStart={() => {
+          setActiveTab('overview');
+          setIsPlaying(false); // Pause auto-simulation loop
+          // Set initial starting logs
+          setLogs([
+            { id: 1, time: "10:20:00 AM", key: "systemInitialized", type: "success" }
+          ]);
+        }} 
+        onStepChange={(stepIndex) => {
+          const elephantScenario = ANIMAL_SCENARIOS[0]; // Elephant breach
+          
+          if (stepIndex === 0 || stepIndex === 1 || stepIndex === 2) {
+            // Steps 1, 2, 3 (Sidebar, Navbar, KPIs): Keep system idle
+            setSimulationState(STATE_IDLE);
+            setScenarioIndex(0);
+            setLogs([
+              { id: 1, time: "10:20:00 AM", key: "systemInitialized", type: "success" }
+            ]);
+          } else if (stepIndex === 3) {
+            // Step 4 (Map Breach): Triggers motion detection and camera active logs
+            setSimulationState(STATE_DETECTED);
+            setScenarioIndex(0);
+            setLogs([
+              { 
+                id: 3, 
+                time: "10:21:05 AM", 
+                key: "cameraActivatedLog", 
+                type: "detection", 
+                params: { nodeName: elephantScenario.nodeName } 
+              },
+              { 
+                id: 2, 
+                time: "10:21:00 AM", 
+                key: "motionDetectedLog", 
+                type: "warning", 
+                params: { nodeName: elephantScenario.nodeName } 
+              },
+              { 
+                id: 1, 
+                time: "10:20:00 AM", 
+                key: "systemInitialized", 
+                type: "success" 
+              }
+            ]);
+          } else if (stepIndex === 4 || stepIndex === 5) {
+            // Steps 5, 6 (AI Camera Feed, Analytics): Triggers species alert confirmation and deterrent active logs
+            setSimulationState(STATE_DETERRENT_ACTIVE);
+            setScenarioIndex(0);
+            setLogs([
+              { 
+                id: 5, 
+                time: "10:21:30 AM", 
+                key: "stage2DeployLog", 
+                type: "danger", 
+                params: { nodeName: elephantScenario.nodeName, actuators: ["Ultrasonic Siren", "Floodlight 01"] } 
+              },
+              { 
+                id: 4, 
+                time: "10:21:15 AM", 
+                key: "targetConfirmedLog", 
+                type: "danger", 
+                params: { species: "Elephant", threat: "HIGH" } 
+              },
+              { 
+                id: 3, 
+                time: "10:21:05 AM", 
+                key: "cameraActivatedLog", 
+                type: "detection", 
+                params: { nodeName: elephantScenario.nodeName } 
+              },
+              { 
+                id: 2, 
+                time: "10:21:00 AM", 
+                key: "motionDetectedLog", 
+                type: "warning", 
+                params: { nodeName: elephantScenario.nodeName } 
+              },
+              { 
+                id: 1, 
+                time: "10:20:00 AM", 
+                key: "systemInitialized", 
+                type: "success" 
+              }
+            ]);
+          } else if (stepIndex === 6 || stepIndex === 7) {
+            // Steps 7, 8 (Timeline, Device Status): Triggers final target repelled log
+            setSimulationState(STATE_RESOLVED);
+            setScenarioIndex(0);
+            setLogs([
+              { 
+                id: 6, 
+                time: "10:22:00 AM", 
+                key: "targetRepelledLog", 
+                type: "success", 
+                params: { species: "Elephant", nodeName: elephantScenario.nodeName } 
+              },
+              { 
+                id: 5, 
+                time: "10:21:30 AM", 
+                key: "stage2DeployLog", 
+                type: "danger", 
+                params: { nodeName: elephantScenario.nodeName, actuators: ["Ultrasonic Siren", "Floodlight 01"] } 
+              },
+              { 
+                id: 4, 
+                time: "10:21:15 AM", 
+                key: "targetConfirmedLog", 
+                type: "danger", 
+                params: { species: "Elephant", threat: "HIGH" } 
+              },
+              { 
+                id: 3, 
+                time: "10:21:05 AM", 
+                key: "cameraActivatedLog", 
+                type: "detection", 
+                params: { nodeName: elephantScenario.nodeName } 
+              },
+              { 
+                id: 2, 
+                time: "10:21:00 AM", 
+                key: "motionDetectedLog", 
+                type: "warning", 
+                params: { nodeName: elephantScenario.nodeName } 
+              },
+              { 
+                id: 1, 
+                time: "10:20:00 AM", 
+                key: "systemInitialized", 
+                type: "success" 
+              }
+            ]);
+          }
+        }}
+        onComplete={() => {
+          setIsPlaying(true); // Resume auto-simulation loop
+        }}
+      />
     </div>
   );
 }

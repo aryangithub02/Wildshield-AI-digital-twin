@@ -93,7 +93,7 @@ export default function DeviceStatus({ simulationState, currentScenario, languag
   ];
 
   return (
-    <div className="glass-panel rounded-card p-6 border-slate-800 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+    <div id="tour-devices" className="glass-panel rounded-card p-6 border-slate-800 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
       <div className="flex items-center justify-between mb-4 border-b border-slate-800 pb-3">
         <div className="flex items-center gap-2">
           <Activity className="h-5 w-5 text-green-500" />

@@ -30,7 +30,7 @@ export default function TopNavbar({ language, setLanguage }) {
   const currentLang = languagesList.find(l => l.code === language) || languagesList[0];
 
   return (
-    <header className="h-16 w-[calc(100%-16rem)] bg-[#090d16] border-b border-slate-900 flex items-center justify-between px-6 fixed top-0 right-0 z-35 select-none">
+    <header id="tour-navbar" className="h-16 fixed top-0 left-64 right-0 bg-[#090d16] border-b border-slate-900 flex items-center justify-between px-6 z-35 select-none">
       
       {/* Left side: Navigation toggle & Breadcrumbs */}
       <div className="flex items-center gap-4">

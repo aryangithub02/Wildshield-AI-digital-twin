@@ -106,7 +106,9 @@ export const TRANSLATIONS = {
     boarDetected: "Wild Boar Detected",
     monkeyDetected: "Monkey Detected",
     deerDetected: "Deer Detected",
-    nilgaiDetected: "Nilgai Detected"
+    nilgaiDetected: "Nilgai Detected",
+    playTour: "Play Tour Guide",
+    topNavbar: "Top Navigation Bar"
   },
   hi: {
     // Navigation & Tabs
@@ -215,7 +217,9 @@ export const TRANSLATIONS = {
     boarDetected: "जंगली सूअर देखा गया",
     monkeyDetected: "बंदर देखा गया",
     deerDetected: "हिरण देखा गया",
-    nilgaiDetected: "नीलगाय देखी गई"
+    nilgaiDetected: "नीलगाय देखी गई",
+    playTour: "मार्गदर्शिका चलाएं",
+    topNavbar: "शीर्ष नेविगेशन बार"
   },
   mr: {
     // Navigation & Tabs
@@ -324,7 +328,9 @@ export const TRANSLATIONS = {
     boarDetected: "रानडुक्कर आढळला",
     monkeyDetected: "माकड आढळले",
     deerDetected: "हरण आढळले",
-    nilgaiDetected: "नीलगाय आढळली"
+    nilgaiDetected: "नीलगाय आढळली",
+    playTour: "मार्गदर्शिका सुरू करा",
+    topNavbar: "शीर्ष नेव्हिगेशन बार"
   }
 };
 
