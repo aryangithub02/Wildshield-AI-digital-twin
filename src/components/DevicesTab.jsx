@@ -8,6 +8,7 @@ export default function DevicesTab({ simulationState, currentScenario, language 
 
   const [selectedDeviceId, setSelectedDeviceId] = useState(0);
   const [inspectorTab, setInspectorTab] = useState('specs');
+  const [cadView, setCadView] = useState('front');
 
   const activeScenario = currentScenario || {
     nodeId: 5,
