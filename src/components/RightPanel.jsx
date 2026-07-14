@@ -80,8 +80,8 @@ export default function RightPanel({ simulationState, currentScenario, language 
   const isTargetDetected = simulationState >= 2 && simulationState <= 4;
 
   const thermalAvatars = {
-    "Elephant": "https://images.unsplash.com/photo-1557050543-4b5f4e07ea49?q=80&w=200&auto=format&fit=crop",
-    "Wild Boar": "https://images.unsplash.com/photo-1590422941838-89c565d6c291?q=80&w=200&auto=format&fit=crop",
+    "Elephant": "https://images.unsplash.com/photo-1549488344-1f9b8d2bd1f3?q=80&w=200&auto=format&fit=crop",
+    "Wild Boar": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?q=80&w=200&auto=format&fit=crop",
     "Monkey": "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=200&auto=format&fit=crop",
     "Deer": "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=200&auto=format&fit=crop",
     "Nilgai": "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=200&auto=format&fit=crop"

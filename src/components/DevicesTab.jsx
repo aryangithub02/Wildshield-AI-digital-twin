@@ -227,39 +227,54 @@ export default function DevicesTab({ simulationState, currentScenario, language 
           {inspectorTab === 'specs' && (
             <div className="space-y-4 text-xs font-mono">
               {selectedDevice.id === 0 ? (
-                <div className="space-y-3">
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
-                    <span className="text-slate-500 text-[9px] block">CPU SYSTEM PROCESSOR</span>
-                    <p className="text-slate-100 font-bold">NVIDIA Jetson Orin Nano (8GB)</p>
-                    <p className="text-[9px] text-slate-500">6-core Arm Cortex-A78AE v8.2 64-bit CPU</p>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">PROCESSOR & PERFORMANCE</span>
+                    <p className="text-slate-100 font-bold text-xs">NVIDIA Jetson Orin Nano (8GB)</p>
+                    <p className="text-[9px] text-slate-400">6-core ARM® Cortex®-A78AE • Up to 40 TOPS AI (INT8)</p>
                   </div>
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
-                    <span className="text-slate-500 text-[9px] block">AI INFERENCE PROCESSING</span>
-                    <p className="text-slate-100 font-bold">40 TOPS AI Engine (Ampere GPU)</p>
-                    <p className="text-[9px] text-slate-500">YOLOv11m wildlife identification framework</p>
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">GPU & GRAPHICS</span>
+                    <p className="text-slate-100 font-bold text-xs">1024-core Ampere GPU</p>
+                    <p className="text-[9px] text-slate-400">YOLOv11m wildlife identification framework</p>
                   </div>
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
-                    <span className="text-slate-500 text-[9px] block">GATEWAY RF MODULE</span>
-                    <p className="text-slate-100 font-bold">SX1278 LoRa SPI Gateway</p>
-                    <p className="text-[9px] text-slate-500">Central collector mesh antenna</p>
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">CONNECTIVITY & STORAGE</span>
+                    <p className="text-slate-100 font-bold text-xs">LoRa SX1276 | Wi-Fi AC8265 | 2x GbE</p>
+                    <p className="text-[9px] text-slate-400">NVMe SSD (256/512GB) / SD Card Backup</p>
+                  </div>
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">PHYSICAL & OPERATIONAL</span>
+                    <p className="text-slate-100 font-bold text-xs">Passive Heatsink (Fanless)</p>
+                    <p className="text-[9px] text-slate-400">200x150x70 mm • ~1.25 kg • 12V 10A DC Input</p>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
-                    <span className="text-slate-500 text-[9px] block">MICROCONTROLLER CORE</span>
-                    <p className="text-slate-100 font-bold">ESP32-WROOM-32 MCU</p>
-                    <p className="text-[9px] text-slate-500">Dual Core Tensilica 32-bit CPU</p>
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">CORE CONTROLLER</span>
+                    <p className="text-slate-100 font-bold text-xs">ESP32 (Dual Core, 240MHz)</p>
+                    <p className="text-[9px] text-slate-400">Tensilica 32-bit CPU • H.264 camera driver</p>
                   </div>
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
-                    <span className="text-slate-500 text-[9px] block">CAMERA & OPTICAL</span>
-                    <p className="text-slate-100 font-bold">2MP OV2640 Image Sensor</p>
-                    <p className="text-[9px] text-slate-500">1080p stream transmission capacity</p>
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">CAMERA & SENSOR RANGE</span>
+                    <p className="text-slate-100 font-bold text-xs">2MP IP Camera (1080p) + PIR (10m)</p>
+                    <p className="text-[9px] text-slate-400">110° FOV motion trigger activation</p>
                   </div>
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
-                    <span className="text-slate-500 text-[9px] block">POWER INFRASTRUCTURE</span>
-                    <p className="text-slate-100 font-bold">10W Solar Panel + 12V 7Ah Li-ion</p>
-                    <p className="text-[9px] text-slate-500">IP65 integrated charge controller board</p>
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">WIRELESS TRANSMISSION</span>
+                    <p className="text-slate-100 font-bold text-xs">LoRa SX1278 (2-5 km Range)</p>
+                    <p className="text-[9px] text-slate-400">433MHz private RF mesh / 2.4 GHz Wi-Fi</p>
+                  </div>
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">POWER INFRASTRUCTURE</span>
+                    <p className="text-slate-100 font-bold text-xs">Solar 10W / 12V • Battery 12V 7Ah</p>
+                    <p className="text-[9px] text-slate-400">12V/10A MPPT charge controller • 5V/12V dual bus</p>
+                  </div>
+                  <div className="p-2.5 bg-slate-950 rounded-lg border border-slate-900 space-y-1">
+                    <span className="text-slate-500 text-[8px] block">ACTUATORS & ENCLOSURE</span>
+                    <p className="text-slate-100 font-bold text-xs">Siren, Flood Light & Sprinkler Relay</p>
+                    <p className="text-[9px] text-slate-400">IP65 Waterproof Enclosure • 200x150x300 mm • ~2.0 kg</p>
                   </div>
                 </div>
               )}
@@ -267,7 +282,7 @@ export default function DevicesTab({ simulationState, currentScenario, language 
               <div className="border-t border-slate-900 pt-3 text-[10px] space-y-1 text-slate-400">
                 <div className="flex justify-between">
                   <span>RF Mesh Protocol:</span>
-                  <span className="text-slate-100">LoRa MAC (Private)</span>
+                  <span className="text-slate-100">LoRa MAC (Private Mesh)</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Hardware Version:</span>
@@ -281,61 +296,180 @@ export default function DevicesTab({ simulationState, currentScenario, language 
             <div className="space-y-4">
               <span className="text-[9px] font-mono text-slate-500 block uppercase">CAD Outer Dimensions Layout (IP65 Enclosure)</span>
               
-              {selectedDevice.id === 0 ? (
-                <div className="relative h-44 w-full bg-slate-950 border border-slate-900 rounded-lg flex items-center justify-center">
-                  <div className="w-36 h-20 bg-slate-900 rounded border border-slate-800 flex flex-col justify-between p-2 shadow-inner relative">
-                    <div className="flex justify-between">
-                      <div className="h-4 w-4 bg-slate-950 border border-slate-800 rounded flex items-center justify-center text-[7px] font-mono text-blue-500">DC</div>
-                      <div className="h-4 w-10 bg-slate-950 border border-slate-800 rounded flex items-center justify-center text-[7px] font-mono text-slate-500">ETH</div>
-                    </div>
-                    <div className="h-6 w-full bg-slate-950 rounded border border-slate-850 flex gap-0.5 p-0.5 overflow-hidden">
-                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
-                        <div key={i} className="h-full w-1 bg-slate-800 rounded-sm" />
-                      ))}
-                    </div>
-                    <div className="absolute top-[40%] left-1/2 transform -translate-x-1/2 text-[7px] font-mono text-slate-600 uppercase font-bold tracking-widest">
-                      Orin Nano Gateway
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex gap-4">
-                  <div className="flex-1 text-center space-y-1">
-                    <span className="text-[8px] font-mono text-slate-600 block">FRONT VIEW</span>
-                    <div className="relative h-32 w-24 mx-auto bg-slate-900 border-2 border-slate-800 rounded p-1.5 flex flex-col justify-between shadow-2xl">
-                      <div className="absolute top-2 -left-1 w-1 h-3 bg-slate-700 rounded-l" />
-                      <div className="absolute bottom-2 -left-1 w-1 h-3 bg-slate-700 rounded-l" />
-                      <div className="absolute top-2 -right-1 w-1 h-3 bg-slate-700 rounded-r" />
-                      <div className="absolute bottom-2 -right-1 w-1 h-3 bg-slate-700 rounded-r" />
+              {/* CAD View Selector */}
+              <div className="flex justify-center gap-1 bg-slate-950 p-1 rounded text-[8px] font-bold font-sans uppercase border border-slate-900">
+                {[
+                  { id: 'front', label: 'Front' },
+                  { id: 'side', label: 'Side' },
+                  { id: 'top', label: 'Top' },
+                  { id: selectedDevice.id === 0 ? 'rear' : 'bottom', label: selectedDevice.id === 0 ? 'Rear' : 'Bottom' }
+                ].map((view) => (
+                  <button
+                    key={view.id}
+                    onClick={() => setCadView(view.id)}
+                    className={`px-2.5 py-1 rounded transition-all ${
+                      cadView === view.id
+                        ? 'bg-green-500 text-slate-950 font-extrabold shadow'
+                        : 'text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {view.label}
+                  </button>
+                ))}
+              </div>
 
-                      <div className="absolute -top-12 right-2 w-1.5 h-12 bg-slate-700 rounded-t" />
-
-                      <div className="h-7 w-7 rounded-full bg-slate-950 border border-slate-800 flex items-center justify-center mx-auto mt-2">
-                        <div className="h-3.5 w-3.5 rounded-full bg-blue-900 border border-blue-500 flex items-center justify-center">
-                          <div className="h-1 w-1 rounded-full bg-white/70" />
-                        </div>
-                      </div>
-
-                      <div className="h-5 w-5 rounded-full bg-slate-300 border border-slate-400 mx-auto mt-1 flex items-center justify-center shadow-inner opacity-80" />
-
-                      <div className="text-[7px] font-mono text-slate-600 uppercase mt-auto">IP65 Waterproof</div>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 text-center space-y-1">
-                    <span className="text-[8px] font-mono text-slate-600 block">SIDE PROFILE</span>
-                    <div className="relative h-32 w-14 mx-auto bg-slate-900 border-2 border-slate-800 rounded p-1 flex flex-col justify-between shadow-2xl">
-                      <div className="absolute top-4 -right-5 w-5 h-1.5 bg-slate-700 transform rotate-12" />
-                      <div className="absolute top-4 -right-1.5 w-1.5 h-6 bg-slate-600" />
-                      
-                      <div className="absolute top-2 -left-1 w-1 h-3 bg-slate-800 rounded-l" />
-                      <div className="absolute bottom-2 -left-1 w-1 h-3 bg-slate-800 rounded-l" />
-
-                      <div className="text-[7px] font-mono text-slate-600 uppercase mt-auto mx-auto pb-1">D: 120mm</div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              {/* CAD Drawing Area */}
+              <div className="relative h-48 w-full bg-slate-950 border border-slate-900 rounded-lg flex items-center justify-center p-2 overflow-hidden shadow-inner">
+                {selectedDevice.id === 0 ? (
+                  /* Orin Nano Gateway Views */
+                  <>
+                    {cadView === 'front' && (
+                      <svg viewBox="0 0 500 240" className="w-full h-auto max-h-[160px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <rect x="110" y="25" width="8" height="8" fill="#1e293b" stroke="#475569" strokeWidth="1" />
+                        <path d="M 114 25 L 114 5" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                        <rect x="382" y="25" width="8" height="8" fill="#1e293b" stroke="#475569" strokeWidth="1" />
+                        <path d="M 386 25 L 386 5" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                        <rect x="100" y="33" width="300" height="105" rx="6" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        {[...Array(30)].map((_, i) => (
+                          <line key={i} x1={105 + i * 10} y1="27" x2={105 + i * 10} y2="33" stroke="#475569" strokeWidth="2" />
+                        ))}
+                        <circle cx="130" cy="80" r="10" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <circle cx="130" cy="80" r="6" fill="none" stroke="#22c55e" strokeWidth="1.5" />
+                        <line x1="130" y1="74" x2="130" y2="80" stroke="#22c55e" strokeWidth="1.5" />
+                        <circle cx="165" cy="80" r="4" fill="#22c55e" className="animate-pulse" />
+                        <rect x="200" y="60" width="22" height="32" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="203" y="64" width="16" height="8" rx="1" fill="#0284c7" />
+                        <rect x="203" y="78" width="16" height="8" rx="1" fill="#0284c7" />
+                        <rect x="235" y="60" width="22" height="32" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="238" y="64" width="16" height="8" rx="1" fill="#0284c7" />
+                        <rect x="238" y="78" width="16" height="8" rx="1" fill="#0284c7" />
+                        <rect x="275" y="60" width="24" height="28" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="281" y="72" width="12" height="12" fill="#0f172a" />
+                        <rect x="310" y="60" width="24" height="28" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="316" y="72" width="12" height="12" fill="#0f172a" />
+                        <rect x="350" y="62" width="20" height="24" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <circle cx="360" cy="74" r="6" fill="#0f172a" stroke="#475569" strokeWidth="1" />
+                        <line x1="100" y1="165" x2="400" y2="165" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="250" y="180" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">200 mm (W) x 70 mm (H)</text>
+                      </svg>
+                    )}
+                    {cadView === 'side' && (
+                      <svg viewBox="0 0 500 240" className="w-full h-auto max-h-[160px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <g transform="translate(325, 33) rotate(15)">
+                          <rect x="-4" y="-4" width="8" height="8" fill="#1e293b" stroke="#475569" />
+                          <path d="M 0 -4 L 0 -70" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                        </g>
+                        <rect x="150" y="33" width="200" height="105" rx="4" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        {[...Array(6)].map((_, i) => (
+                          <rect key={i} x="160" y={45 + i * 14} width="180" height="6" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1" />
+                        ))}
+                        <line x1="150" y1="165" x2="350" y2="165" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="250" y="180" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">150 mm (D) x 70 mm (H)</text>
+                      </svg>
+                    )}
+                    {cadView === 'top' && (
+                      <svg viewBox="0 0 500 240" className="w-full h-auto max-h-[160px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <rect x="125" y="15" width="250" height="187.5" rx="8" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        {[...Array(23)].map((_, i) => (
+                          <rect key={i} x={135 + i * 10} y="22" width="4" height="173.5" rx="1" fill="#1e293b" stroke="#334155" strokeWidth="0.5" />
+                        ))}
+                        <circle cx="133" cy="23" r="3.5" fill="#475569" stroke="#64748b" strokeWidth="0.5" />
+                        <circle cx="367" cy="23" r="3.5" fill="#475569" stroke="#64748b" strokeWidth="0.5" />
+                        <circle cx="133" cy="194.5" r="3.5" fill="#475569" stroke="#64748b" strokeWidth="0.5" />
+                        <circle cx="367" cy="194.5" r="3.5" fill="#475569" stroke="#64748b" strokeWidth="0.5" />
+                        <line x1="125" y1="218" x2="375" y2="218" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="250" y="233" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">200 mm (W) x 150 mm (D)</text>
+                      </svg>
+                    )}
+                    {cadView === 'rear' && (
+                      <svg viewBox="0 0 500 240" className="w-full h-auto max-h-[160px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <path d="M 114 33 L 114 13" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                        <path d="M 386 33 L 386 13" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                        <rect x="100" y="33" width="300" height="105" rx="6" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        {[...Array(30)].map((_, i) => (
+                          <line key={i} x1={105 + i * 10} y1="27" x2={105 + i * 10} y2="33" stroke="#475569" strokeWidth="2" />
+                        ))}
+                        <rect x="130" y="65" width="25" height="16" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="180" y="60" width="22" height="32" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="183" y="64" width="16" height="8" rx="1" fill="#0284c7" />
+                        <rect x="183" y="78" width="16" height="8" rx="1" fill="#0284c7" />
+                        <rect x="230" y="60" width="24" height="28" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="270" y="60" width="24" height="28" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <rect x="320" y="62" width="20" height="24" rx="2" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <circle cx="330" cy="74" r="6" fill="#0f172a" stroke="#475569" />
+                        <line x1="100" y1="165" x2="400" y2="165" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="250" y="180" textAnchor="middle" fill="#94a3b8" fontSize="10" fontWeight="bold">REAR: HDMI | USB 3.0 | GbE LAN</text>
+                      </svg>
+                    )}
+                  </>
+                ) : (
+                  /* Farmer Node Views */
+                  <>
+                    {cadView === 'front' && (
+                      <svg viewBox="0 0 500 280" className="w-full h-auto max-h-[170px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <path d="M 315 60 L 315 15" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                        <rect x="180" y="40" width="140" height="210" rx="10" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        <circle cx="190" cy="50" r="3" fill="#475569" stroke="#64748b" />
+                        <circle cx="310" cy="50" r="3" fill="#475569" stroke="#64748b" />
+                        <circle cx="190" cy="240" r="3" fill="#475569" stroke="#64748b" />
+                        <circle cx="310" cy="240" r="3" fill="#475569" stroke="#64748b" />
+                        <circle cx="250" cy="85" r="22" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        <circle cx="250" cy="85" r="4.5" fill="#0284c7" />
+                        <circle cx="250" cy="155" r="18" fill="#e2e8f0" stroke="#cbd5e1" strokeWidth="1.2" />
+                        <circle cx="250" cy="210" r="3" fill="#22c55e" className={isNodeActive(selectedDevice.id) ? 'animate-ping' : ''} />
+                        {[...Array(4)].map((_, i) => (
+                          <rect key={i} x={200 + i * 30} y="250" width="10" height="12" fill="#1e293b" stroke="#475569" />
+                        ))}
+                        <line x1="180" y1="270" x2="320" y2="270" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="250" y="280" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="bold">200 mm (W) x 300 mm (H)</text>
+                      </svg>
+                    )}
+                    {cadView === 'side' && (
+                      <svg viewBox="0 0 500 280" className="w-full h-auto max-h-[170px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <path d="M 235 50 L 235 5" stroke="#1e293b" strokeWidth="4" strokeLinecap="round" />
+                        <g transform="translate(240, 95) rotate(30)">
+                          <rect x="-3" y="10" width="6" height="40" fill="#475569" />
+                          <rect x="-10" y="45" width="70" height="8" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        </g>
+                        <path d="M 180 120 L 240 120 L 240 155 L 180 155" fill="none" stroke="#475569" strokeWidth="2.5" />
+                        <rect x="145" y="40" width="90" height="210" rx="8" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        <rect x="185" y="250" width="10" height="12" fill="#1e293b" stroke="#475569" />
+                        <line x1="145" y1="270" x2="235" y2="270" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="190" y="280" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="bold">150 mm (D) x 300 mm (H)</text>
+                      </svg>
+                    )}
+                    {cadView === 'top' && (
+                      <svg viewBox="0 0 500 280" className="w-full h-auto max-h-[170px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <rect x="150" y="65" width="200" height="150" rx="8" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        <rect x="155" y="70" width="190" height="140" fill="#1e3a8a" stroke="#3b82f6" strokeWidth="1.5" />
+                        {[...Array(6)].map((_, i) => (
+                          <line key={i} x1={155 + i * 38} y1="70" x2={155 + i * 38} y2="210" stroke="#3b82f6" strokeWidth="1" />
+                        ))}
+                        <line x1="150" y1="240" x2="350" y2="240" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="250" y="255" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="bold">200 mm (W) x 150 mm (D) • 10W Solar</text>
+                      </svg>
+                    )}
+                    {cadView === 'bottom' && (
+                      <svg viewBox="0 0 500 280" className="w-full h-auto max-h-[170px] text-slate-400 font-mono text-[9px] select-none mx-auto">
+                        <rect width="100%" height="100%" fill="none" />
+                        <rect x="150" y="65" width="200" height="150" rx="8" fill="#0f172a" stroke="#475569" strokeWidth="2.5" />
+                        {[...Array(4)].map((_, i) => (
+                          <circle key={i} cx={190 + i * 40} cy="140" r="10" fill="#1e293b" stroke="#475569" strokeWidth="1.5" />
+                        ))}
+                        <line x1="150" y1="240" x2="350" y2="240" stroke="#475569" strokeWidth="1" strokeDasharray="3 3" />
+                        <text x="250" y="255" textAnchor="middle" fill="#94a3b8" fontSize="9" fontWeight="bold">4x Bottom Cable Glands</text>
+                      </svg>
+                    )}
+                  </>
+                )}
+              </div>
             </div>
           )}
 
@@ -344,32 +478,62 @@ export default function DevicesTab({ simulationState, currentScenario, language 
               <span className="text-[9px] font-mono text-slate-500 block uppercase">Real-time Wiring Grid (AutoCAD Schematics)</span>
               
               {selectedDevice.id === 0 ? (
-                <div className="relative h-44 w-full bg-slate-950 border border-slate-900 rounded-lg flex items-center justify-center p-2">
-                  <svg className="w-full h-full text-[7px] font-mono text-slate-400" viewBox="0 0 200 120">
-                    <rect x="70" y="35" width="60" height="50" rx="3" fill="none" stroke="#2563eb" strokeWidth="1" />
-                    <text x="80" y="45" fill="#3b82f6" fontWeight="bold">ORIN NANO</text>
+                /* Orin Nano Connection Diagram */
+                <div className="relative h-48 w-full bg-slate-950 border border-slate-900 rounded-lg flex items-center justify-center p-2 overflow-hidden shadow-inner">
+                  <svg className="w-full h-full text-slate-400 font-mono text-[7px] select-none" viewBox="0 0 200 120">
+                    <rect width="100%" height="100%" fill="none" />
+                    
+                    {/* Jetson Orin Nano */}
+                    <rect x="65" y="35" width="70" height="50" rx="3" fill="#0f172a" stroke="#3b82f6" strokeWidth="1" />
+                    <text x="100" y="47" textAnchor="middle" fill="#fff" fontWeight="bold" fontSize="7">JETSON HUB</text>
+                    <text x="100" y="55" textAnchor="middle" fill="#3b82f6" fontSize="5">ORIN NANO</text>
 
-                    <line x1="20" y1="20" x2="70" y2="45" stroke="#475569" strokeWidth="1" />
-                    <text x="25" y="16" fill="#64748b">12V DC input</text>
+                    {/* Power Supply */}
+                    <rect x="10" y="45" width="35" height="25" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+                    <text x="27" y="55" textAnchor="middle" fill="#fff" fontSize="5">12V DC</text>
+                    <line x1="45" y1="57" x2="65" y2="57" stroke="#22c55e" strokeWidth="1" />
 
-                    <line x1="130" y1="50" x2="175" y2="20" stroke="#3b82f6" strokeWidth="1" strokeDasharray="3 2" />
-                    <text x="140" y="16" fill="#3b82f6">LoRa SPI Link</text>
+                    {/* LoRa Module */}
+                    <rect x="10" y="10" width="35" height="25" rx="2" fill="#1e293b" stroke="#3b82f6" strokeWidth="0.8" />
+                    <text x="27" y="20" textAnchor="middle" fill="#fff" fontSize="5">LoRa</text>
+                    <text x="27" y="28" textAnchor="middle" fill="#3b82f6" fontSize="4">SX1276</text>
+                    <line x1="45" y1="22" x2="65" y2="45" stroke="#3b82f6" strokeWidth="0.8" />
 
-                    <line x1="130" y1="75" x2="175" y2="100" stroke="#475569" strokeWidth="1" />
-                    <text x="142" y="106" fill="#64748b">RJ45 LAN</text>
+                    {/* GPS Module */}
+                    <rect x="10" y="80" width="35" height="25" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+                    <text x="27" y="90" textAnchor="middle" fill="#fff" fontSize="5">GPS</text>
+                    <line x1="45" y1="92" x2="65" y2="70" stroke="#64748b" strokeWidth="0.8" />
+
+                    {/* Router / ETH */}
+                    <rect x="155" y="45" width="35" height="25" rx="2" fill="#1e293b" stroke="#3b82f6" strokeWidth="0.8" />
+                    <text x="172" y="55" textAnchor="middle" fill="#fff" fontSize="5">ROUTER</text>
+                    <text x="172" y="63" textAnchor="middle" fill="#3b82f6" fontSize="4">LAN LINK</text>
+                    <line x1="135" y1="57" x2="155" y2="57" stroke="#3b82f6" strokeWidth="1" strokeDasharray="2 1" />
+
+                    {/* Monitor / HDMI */}
+                    <rect x="155" y="10" width="35" height="25" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+                    <text x="172" y="22" textAnchor="middle" fill="#fff" fontSize="5">DISPLAY</text>
+                    <line x1="135" y1="45" x2="155" y2="22" stroke="#64748b" strokeWidth="0.8" />
+
+                    {/* Storage */}
+                    <rect x="80" y="5" width="40" height="20" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.8" />
+                    <text x="100" y="14" textAnchor="middle" fill="#fff" fontSize="5">NVMe SSD</text>
+                    <line x1="100" y1="25" x2="100" y2="35" stroke="#64748b" strokeWidth="0.8" />
                   </svg>
                 </div>
               ) : (
-                <div className="relative h-44 w-full bg-slate-950 border border-slate-900 rounded-lg flex items-center justify-center p-2">
-                  <svg className="w-full h-full text-[7px] font-mono text-slate-400" viewBox="0 0 200 120">
+                /* ESP32 Perimeter Node Schematic */
+                <div className="relative h-48 w-full bg-slate-950 border border-slate-900 rounded-lg flex items-center justify-center p-2 overflow-hidden shadow-inner">
+                  <svg className="w-full h-full text-slate-400 font-mono text-[7px] select-none" viewBox="0 0 200 120">
                     <line x1="20" y1="20" x2="60" y2="40" stroke="#eab308" strokeWidth="1" />
-                    <text x="22" y="16" fill="#eab308">Solar (12V Charge)</text>
+                    <text x="22" y="16" fill="#eab308" fontSize="6">Solar (12V Charge)</text>
 
                     <rect x="60" y="40" width="80" height="50" rx="2" fill="none" stroke="#059669" strokeWidth="1" />
-                    <text x="85" y="50" fill="#10b981" fontWeight="bold">ESP32 Core</text>
+                    <text x="100" y="52" textAnchor="middle" fill="#10b981" fontWeight="bold" fontSize="8">ESP32 Core</text>
+                    <text x="100" y="62" textAnchor="middle" fill="#64748b" fontSize="6">Perimeter Node</text>
 
                     <line x1="20" y1="85" x2="60" y2="85" stroke="#10b981" strokeWidth="1" />
-                    <text x="15" y="96" fill="#10b981">Li-ion (12V 7Ah)</text>
+                    <text x="15" y="96" fill="#10b981" fontSize="6">Li-ion (12V 7Ah)</text>
 
                     <line 
                       x1="140" 
@@ -381,7 +545,7 @@ export default function DevicesTab({ simulationState, currentScenario, language 
                       strokeWidth="1.2" 
                       strokeDasharray={activeInBreach ? "3 1" : "none"}
                     />
-                    <text x="145" y="24" className={activeInBreach ? "fill-red-500 font-bold" : "fill-slate-500"}>
+                    <text x="145" y="24" className={activeInBreach ? "fill-red-500 font-bold" : "fill-slate-500"} fontSize="5">
                       Relay {activeInBreach ? 'ACTIVE' : 'STANDBY'}
                     </text>
 
