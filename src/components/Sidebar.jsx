@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   LayoutDashboard, Map, Cpu, Bell, BarChart3, 
-  Clock, FileText, Settings, HelpCircle 
+  Clock, FileText, Settings, HelpCircle, GitFork, Workflow
 } from 'lucide-react';
 import { getTranslation } from '../utils/translations';
 
@@ -12,6 +12,8 @@ export default function Sidebar({ activeTab = 'overview', setActiveTab, language
     { id: 'overview', label: t('overview'), icon: LayoutDashboard },
     { id: 'map', label: t('farmMap'), icon: Map },
     { id: 'detection', label: t('aiDetection'), icon: Cpu },
+    { id: 'decision', label: t('decisionMatrix'), icon: GitFork },
+    { id: 'workflow', label: t('systemWorkflow'), icon: Workflow },
     { id: 'devices', label: t('devices'), icon: Settings },
     { id: 'alerts', label: t('alerts'), icon: Bell },
     { id: 'analytics', label: t('analytics'), icon: BarChart3 },

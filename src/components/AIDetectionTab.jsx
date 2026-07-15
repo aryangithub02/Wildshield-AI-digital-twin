@@ -65,8 +65,8 @@ export default function AIDetectionTab({ simulationState, currentScenario, langu
 
   // Thermal/Silhouette animal shapes
   const thermalAvatars = {
-    "Elephant": "https://images.unsplash.com/photo-1557050543-4b5f4e07ea49?q=80&w=350&auto=format&fit=crop",
-    "Wild Boar": "https://images.unsplash.com/photo-1590422941838-89c565d6c291?q=80&w=350&auto=format&fit=crop",
+    "Elephant": "/christoffer-brus-7hGF4emWkXs-unsplash.jpg",
+    "Wild Boar": "/ed-van-duijn-414NZVxzc20-unsplash.jpg",
     "Monkey": "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=350&auto=format&fit=crop",
     "Deer": "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=350&auto=format&fit=crop",
     "Nilgai": "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=350&auto=format&fit=crop"
@@ -139,7 +139,13 @@ export default function AIDetectionTab({ simulationState, currentScenario, langu
               {t('liveCameraFeed')}
             </span>
             <span className="text-[10px] text-slate-500 font-mono">
-              🎥 {activeScenario.nodeName} (North Field)
+              🎥 {activeScenario.nodeName} ({
+                activeScenario.nodeName === "FN-1" ? "North Field" :
+                activeScenario.nodeName === "FN-2" ? "East Field" :
+                activeScenario.nodeName === "FN-3" ? "South-East Field" :
+                activeScenario.nodeName === "FN-4" ? "South-West Field" :
+                activeScenario.nodeName === "FN-5" ? "West Field" : "North Field"
+              })
             </span>
           </div>
 

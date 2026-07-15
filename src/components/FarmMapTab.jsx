@@ -85,6 +85,26 @@ export default function FarmMapTab({ simulationState, currentScenario, language 
           { x: '42%', y: '68%' },
           { x: '22%', y: '92%' }
         ][simulationState];
+        
+      case "Nilgai":
+        return [
+          { x: '90%', y: '105%' },
+          { x: '82%', y: '92%' },
+          { x: '74%', y: '80%' },
+          { x: '68%', y: '72%' },
+          { x: '68%', y: '72%' },
+          { x: '88%', y: '92%' }
+        ][simulationState];
+
+      case "Stray Cattle":
+        return [
+          { x: '18%', y: '105%' },
+          { x: '26%', y: '92%' },
+          { x: '32%', y: '80%' },
+          { x: '42%', y: '68%' },
+          { x: '42%', y: '68%' },
+          { x: '22%', y: '92%' }
+        ][simulationState];
 
       default:
         return { x: '50%', y: '50%' };
@@ -283,10 +303,10 @@ export default function FarmMapTab({ simulationState, currentScenario, language 
           {simulationState > 0 && (
             <motion.div
               key={activeScenario.species}
-              initial={{ x: activeScenario.path[0].x, y: activeScenario.path[0].y, opacity: 0 }}
+              initial={{ left: `${activeScenario.path[0].x}%`, top: `${activeScenario.path[0].y}%`, opacity: 0 }}
               animate={{
-                x: animalPos.x,
-                y: animalPos.y,
+                left: animalPos.x,
+                top: animalPos.y,
                 opacity: 1
               }}
               exit={{ opacity: 0 }}

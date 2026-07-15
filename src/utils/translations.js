@@ -10,6 +10,8 @@ export const TRANSLATIONS = {
     timeline: "Timeline",
     reports: "Reports",
     settings: "Settings",
+    decisionMatrix: "Decision Matrix",
+    systemWorkflow: "System Workflow",
 
     // System status
     systemStatus: "System Status",
@@ -93,6 +95,8 @@ export const TRANSLATIONS = {
     monkey: "Monkey",
     deer: "Deer",
     nilgai: "Nilgai",
+    strayCattle: "Stray Cattle",
+    human: "Human",
     high: "HIGH",
     medium: "MEDIUM",
     low: "LOW",
@@ -107,6 +111,8 @@ export const TRANSLATIONS = {
     monkeyDetected: "Monkey Detected",
     deerDetected: "Deer Detected",
     nilgaiDetected: "Nilgai Detected",
+    strayCattleDetected: "Stray Cattle Detected",
+    humanDetected: "Human Detected",
     playTour: "Play Tour Guide",
     topNavbar: "Top Navigation Bar"
   },
@@ -121,6 +127,8 @@ export const TRANSLATIONS = {
     timeline: "समयरेखा",
     reports: "रिपोर्ट",
     settings: "सेटिंग्स",
+    decisionMatrix: "निर्णय मैट्रिक्स",
+    systemWorkflow: "सिस्टम कार्यप्रवाह",
 
     // System status
     systemStatus: "सिस्टम की स्थिति",
@@ -204,6 +212,8 @@ export const TRANSLATIONS = {
     monkey: "बंदर",
     deer: "हिरण",
     nilgai: "नीलगाय",
+    strayCattle: "आवारा पशु",
+    human: "मनुष्य",
     high: "उच्च",
     medium: "मध्यम",
     low: "कम",
@@ -218,6 +228,8 @@ export const TRANSLATIONS = {
     monkeyDetected: "बंदर देखा गया",
     deerDetected: "हिरण देखा गया",
     nilgaiDetected: "नीलगाय देखी गई",
+    strayCattleDetected: "आवारा पशु देखा गया",
+    humanDetected: "मनुष्य देखा गया",
     playTour: "मार्गदर्शिका चलाएं",
     topNavbar: "शीर्ष नेविगेशन बार"
   },
@@ -232,6 +244,8 @@ export const TRANSLATIONS = {
     timeline: "टाइमलाइन",
     reports: "अहवाल",
     settings: "सेटिंग्ज",
+    decisionMatrix: "निर्णय मॅट्रिक्स",
+    systemWorkflow: "सिस्टम कार्यप्रवाह",
 
     // System status
     systemStatus: "सिस्टम स्थिती",
@@ -315,6 +329,8 @@ export const TRANSLATIONS = {
     monkey: "माकड",
     deer: "हरण",
     nilgai: "नीलगाय",
+    strayCattle: "भटके जनावरे",
+    human: "मानव",
     high: "उच्च",
     medium: "मध्यम",
     low: "कमी",
@@ -323,12 +339,14 @@ export const TRANSLATIONS = {
     responseActions: "प्रतिक्रिया कृती",
     motionDetection: "हालचाल ओळख",
     movementDetected: "हालचाल आढळली",
-    fenceVibration: "कुंपणाचे कंपन",
+    fenceVibration: "कुंपणाची कंपन",
     elephantDetected: "हत्ती आढळला",
     boarDetected: "रानडुक्कर आढळला",
     monkeyDetected: "माकड आढळले",
     deerDetected: "हरण आढळले",
     nilgaiDetected: "नीलगाय आढळली",
+    strayCattleDetected: "भटके जनावरे आढळले",
+    humanDetected: "मानव आढळला",
     playTour: "मार्गदर्शिका सुरू करा",
     topNavbar: "शीर्ष नेव्हिगेशन बार"
   }

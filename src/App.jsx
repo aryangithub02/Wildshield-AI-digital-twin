@@ -10,6 +10,8 @@ import DeviceStatus from './components/DeviceStatus';
 import AIDetectionTab from './components/AIDetectionTab';
 import DevicesTab from './components/DevicesTab';
 import FarmMapTab from './components/FarmMapTab';
+import DecisionMatrixTab from './components/DecisionMatrixTab';
+import WorkflowTab from './components/WorkflowTab';
 import NodeModal from './components/NodeModal';
 import InteractiveTour from './components/InteractiveTour';
 
@@ -123,6 +125,25 @@ const ANIMAL_SCENARIOS = [
       { x: 70, y: 74, rotate: 0 },
       { x: 70, y: 74, rotate: 180 },
       { x: 88, y: 100, rotate: 180 }
+    ]
+  },
+  {
+    species: "Stray Cattle",
+    emoji: "🐄",
+    threat: "LOW",
+    nodeId: 4,
+    nodeName: "FN-4",
+    confidenceBase: 93.4,
+    confidenceMax: 96.5,
+    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: false, buzzer: true },
+    logThreat: "LOW",
+    path: [
+      { x: 15, y: 110, rotate: 0 },
+      { x: 26, y: 92, rotate: 0 },
+      { x: 34, y: 78, rotate: 0 },
+      { x: 38, y: 74, rotate: 0 },
+      { x: 38, y: 74, rotate: 180 },
+      { x: 18, y: 100, rotate: 180 }
     ]
   }
 ];
@@ -306,7 +327,7 @@ export default function App() {
       />
 
       {/* 4. Center Main Panel Viewport */}
-      <div className="ml-64 pr-80 pt-16 min-h-screen flex flex-col p-6 space-y-6">
+      <div className="ml-64 pr-[400px] pt-16 min-h-screen flex flex-col p-6 space-y-6">
         
         {activeTab === 'overview' ? (
           <>
@@ -348,6 +369,18 @@ export default function App() {
           />
         ) : activeTab === 'devices' ? (
           <DevicesTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+            language={language}
+          />
+        ) : activeTab === 'decision' ? (
+          <DecisionMatrixTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+            language={language}
+          />
+        ) : activeTab === 'workflow' ? (
+          <WorkflowTab 
             simulationState={simulationState} 
             currentScenario={currentScenario} 
             language={language}

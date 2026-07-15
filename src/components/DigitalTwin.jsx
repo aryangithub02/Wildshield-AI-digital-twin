@@ -124,8 +124,18 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
             <motion.line
               x1={activeScenarioNode.x}
               y1={activeScenarioNode.y}
-              x2={activeScenario.nodeId === 1 ? 22 : activeScenario.nodeId === 5 ? 34 : 54}
-              y2={activeScenario.nodeId === 1 ? 22 : activeScenario.nodeId === 5 ? 78 : 9}
+              x2={
+                activeScenario.nodeId === 1 ? 22 : 
+                activeScenario.nodeId === 5 ? 34 : 
+                activeScenario.nodeId === 4 ? 74 : 
+                activeScenario.nodeId === 3 ? 78 : 54
+              }
+              y2={
+                activeScenario.nodeId === 1 ? 22 : 
+                activeScenario.nodeId === 5 ? 78 : 
+                activeScenario.nodeId === 4 ? 78 : 
+                activeScenario.nodeId === 3 ? 22 : 9
+              }
               stroke="#ef4444"
               strokeWidth="0.8"
               fill="none"
@@ -349,13 +359,12 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
           {simulationState > 0 && (
             <motion.div
               key={activeScenario.species}
-              initial={{ x: `${activeScenario.path[0].x}%`, y: `${activeScenario.path[0].y}%`, opacity: 0, scale: 0.6 }}
+              initial={{ left: `${activeScenario.path[0].x}%`, top: `${activeScenario.path[0].y}%`, opacity: 0, scale: 0.6 }}
               animate={{
-                x: `${currentCoords.x}%`,
-                y: `${currentCoords.y}%`,
+                left: `${currentCoords.x}%`,
+                top: `${currentCoords.y}%`,
                 opacity: 1,
-                scale: 1,
-                rotateY: currentCoords.rotate
+                scale: 1
               }}
               exit={{ opacity: 0, scale: 0.6 }}
               transition={{
@@ -396,9 +405,13 @@ export default function DigitalTwin({ simulationState, onSelectNode, currentScen
                 </motion.div>
               )}
 
-              <div className="relative text-4xl select-none filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
+              <motion.div 
+                animate={{ rotateY: currentCoords.rotate }}
+                transition={{ type: 'spring', stiffness: 40, damping: 14 }}
+                className="relative text-4xl select-none filter drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)] flex items-center justify-center"
+              >
                 {activeScenario.emoji}
-              </div>
+              </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
