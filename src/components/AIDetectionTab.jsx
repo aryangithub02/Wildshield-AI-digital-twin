@@ -128,6 +128,7 @@ export default function AIDetectionTab({
     // Complete state reset before loading new inference
     setLiveDetectionResult(null);
     setIsInferring(true);
+    setSourceMode('dataset');
 
     try {
       const res = await fetch(`${base}/api/test-detect`, {
@@ -303,7 +304,7 @@ export default function AIDetectionTab({
   };
 
   // Real detection states
-  const isRealModelMode = sourceMode !== 'simulation';
+  const isRealModelMode = sourceMode === 'dataset' || sourceMode === 'upload' || sourceMode === 'webcam' || Boolean(liveDetectionResult?.primary_detection);
   const primaryDet = isRealModelMode ? liveDetectionResult?.primary_detection : null;
   const hasConfidentTarget = isRealModelMode 
     ? (primaryDet !== null && primaryDet !== undefined)
