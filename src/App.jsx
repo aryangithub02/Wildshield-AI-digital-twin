@@ -210,9 +210,19 @@ export default function App() {
     ]);
   };
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL !== undefined ? import.meta.env.VITE_API_BASE_URL : "";
-  const defaultWS = (window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws';
-  const WS_URL = import.meta.env.VITE_WS_URL || defaultWS;
+  const renderBackendUrl = "https://wildshield-ai-digital-twin.onrender.com";
+  const renderWsUrl = "wss://wildshield-ai-digital-twin.onrender.com/ws";
+
+  const defaultApiUrl = window.location.hostname.endsWith('.vercel.app')
+    ? renderBackendUrl
+    : (import.meta.env.VITE_API_BASE_URL !== undefined ? import.meta.env.VITE_API_BASE_URL : renderBackendUrl);
+
+  const defaultWsUrl = window.location.hostname.endsWith('.vercel.app')
+    ? renderWsUrl
+    : ((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws');
+
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || defaultApiUrl;
+  const WS_URL = import.meta.env.VITE_WS_URL || defaultWsUrl;
 
   // 1. Fetch available dataset images on mount & connect live WebSocket
   useEffect(() => {
