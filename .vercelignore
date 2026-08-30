@@ -9,6 +9,8 @@ dist
 *.docx
 Animals Datasets 1
 Animals Datasets 2
-WildShield-Dataset
+WildShield-Dataset/raw
+WildShield-Dataset/processed
+WildShield-Dataset/rejected
 runs
 __pycache__

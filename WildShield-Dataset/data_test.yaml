@@ -1,0 +1,17 @@
+# WildShield AI - Training on Test Split
+path: C:/Users/lenovo/OneDrive/Desktop/Wildshield AI digital twin/WildShield-Dataset
+train: test/images
+val: val/images
+test: test/images
+
+names:
+  0: Wild Boar
+  1: Nilgai
+  2: Spotted Deer
+  3: Rhesus Macaque
+  4: Langur
+  5: Gaur
+  6: Cattle
+  7: Goat
+  8: Human
+  9: Vehicle
