@@ -66,43 +66,39 @@ export default function AIDetectionTab({
 
   const checkBackendAndFetchImages = async () => {
     setBackendStatus(prev => ({ ...prev, checking: true }));
-    const candidateBases = [
-      apiBaseUrl,
-      "http://127.0.0.1:8000",
-      "http://localhost:8000",
-      "http://127.0.0.1:8001",
-      "http://localhost:8001",
-      "http://127.0.0.1:8080"
-    ];
+    const candidateBases = Array.from(new Set([apiBaseUrl, "", "http://127.0.0.1:8000", "http://localhost:8000"])).filter(b => b !== null && b !== undefined);
 
     let foundBase = null;
     let foundData = null;
 
     for (const base of candidateBases) {
       try {
-        const res = await fetch(`${base}/api/status`, { signal: AbortSignal.timeout(1200) });
+        const url = base ? `${base}/api/status` : `/api/status`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(1500) });
         if (res.ok) {
           foundData = await res.json();
           foundBase = base;
           break;
         }
       } catch (e) {
-        // try next port
+        // try next candidate
       }
     }
 
-    if (foundBase && foundData) {
-      setApiBaseUrl(foundBase);
+    if (foundData) {
+      const activeBase = foundBase !== null ? foundBase : "";
+      setApiBaseUrl(activeBase);
       setBackendStatus({ online: true, checking: false, info: foundData });
 
       try {
-        const imgsRes = await fetch(`${foundBase}/api/test-images`);
+        const testImgUrl = activeBase ? `${activeBase}/api/test-images` : `/api/test-images`;
+        const imgsRes = await fetch(testImgUrl);
         if (imgsRes.ok) {
           const imgsData = await imgsRes.json();
           const imgsList = imgsData.images || [];
           setTestImages(imgsList);
           if (imgsList.length > 0) {
-            runTestImageInference(imgsList[0].filename, selectedNodeId, foundBase);
+            runTestImageInference(imgsList[0].filename, selectedNodeId, activeBase);
           }
         }
       } catch (e) {
