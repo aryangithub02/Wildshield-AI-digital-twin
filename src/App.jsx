@@ -210,8 +210,8 @@ export default function App() {
     ]);
   };
 
-  const renderBackendUrl = "https://wildshield-ai-digital-twin.onrender.com";
-  const renderWsUrl = "wss://wildshield-ai-digital-twin.onrender.com/ws";
+  const renderBackendUrl = "https://wildshield-ai-digital-twin-1.onrender.com";
+  const renderWsUrl = "wss://wildshield-ai-digital-twin-1.onrender.com/ws";
 
   const defaultApiUrl = window.location.hostname.endsWith('.vercel.app')
     ? renderBackendUrl

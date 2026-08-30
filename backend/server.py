@@ -20,10 +20,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from PIL import Image, ImageDraw, ImageFont
-try:
-    import torch
-except ImportError:
-    torch = None
 
 from backend.wildshield_classifier import (
     get_species_metadata,
