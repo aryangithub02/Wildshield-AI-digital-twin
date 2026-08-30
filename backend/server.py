@@ -699,8 +699,26 @@ def list_test_images():
 @app.post("/api/test-detect")
 def detect_test_image(payload: TestDetectRequest):
     """Run YOLO inference on a selected dataset image (Simulation Mode)."""
-    img_path = TEST_IMAGES_DIR / payload.filename
-    if not img_path.exists():
+    possible_paths = [
+        TEST_IMAGES_DIR / payload.filename,
+        BASE_DIR / "public" / "sample-test-images" / payload.filename,
+        BASE_DIR / "WildShield-Dataset" / "test" / "images" / payload.filename,
+        BASE_DIR / "WildShield-Dataset" / "val" / "images" / payload.filename,
+        BASE_DIR / "WildShield-Dataset" / "train" / "images" / payload.filename,
+    ]
+    
+    img_path = None
+    for p in possible_paths:
+        if p.exists():
+            img_path = p
+            break
+
+    if not img_path:
+        matches = glob.glob(str(BASE_DIR / "**" / payload.filename), recursive=True)
+        if matches:
+            img_path = Path(matches[0])
+
+    if not img_path or not img_path.exists():
         raise HTTPException(status_code=404, detail=f"Test image {payload.filename} not found.")
 
     try:

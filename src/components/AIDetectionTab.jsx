@@ -580,7 +580,15 @@ export default function AIDetectionTab({
               <div className="relative w-full h-full flex items-center justify-center bg-black">
                 {liveDetectionResult.annotated_image ? (
                   <img
-                    src={liveDetectionResult.annotated_image}
+                    src={
+                      (liveDetectionResult.annotated_image && liveDetectionResult.annotated_image.startsWith("data:"))
+                        ? liveDetectionResult.annotated_image
+                        : (liveDetectionResult.annotated_image ? `data:image/jpeg;base64,${liveDetectionResult.annotated_image}` : `/sample-test-images/${testImages[selectedImageIndex]?.filename || 'WS-WL-WB-00004.jpg'}`)
+                    }
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = `/sample-test-images/${testImages[selectedImageIndex]?.filename || 'WS-WL-WB-00004.jpg'}`;
+                    }}
                     alt="WildShield AI YOLO Inference"
                     className="w-full h-full object-contain filter contrast-[1.05]"
                   />

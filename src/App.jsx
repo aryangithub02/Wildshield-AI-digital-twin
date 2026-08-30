@@ -367,7 +367,11 @@ export default function App() {
         species: primary.class,
         code: primary.code,
         emoji: primary.emoji,
-        image: payload.annotated_image || (payload.source_file ? `${API_BASE_URL}/static-test-images/${payload.source_file}` : null),
+        image: (payload.annotated_image && payload.annotated_image.startsWith("data:"))
+          ? payload.annotated_image
+          : (payload.annotated_image
+              ? `data:image/jpeg;base64,${payload.annotated_image}`
+              : (payload.source_file ? `/sample-test-images/${payload.source_file}` : null)),
         sourceFile: payload.source_file || "",
         timestamp: payload.time_formatted || getFormattedTime(),
         threat: isHigh ? "HIGH" : isMed ? "MEDIUM" : "LOW",
