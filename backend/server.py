@@ -407,7 +407,7 @@ def process_pil_inference(
 
     buffered = io.BytesIO()
     draw_img.save(buffered, format="JPEG", quality=85)
-    annotated_b64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    annotated_b64 = f"data:image/jpeg;base64,{base64.b64encode(buffered.getvalue()).decode('utf-8')}"
 
     now_iso = datetime.utcnow().isoformat()
     time_fmt = datetime.now().strftime("%I:%M:%S %p")

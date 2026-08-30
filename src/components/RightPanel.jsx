@@ -606,19 +606,27 @@ export default function RightPanel({ simulationState, currentScenario, language 
               {/* Animal Photo with Bounding Box Overlay */}
               <img
                 src={
-                  activeScenario.image || (
-                    activeScenario.species === "Elephant" ? "/christoffer-brus-7hGF4emWkXs-unsplash.jpg" :
-                    activeScenario.species === "Wild Boar" ? "/ed-van-duijn-414NZVxzc20-unsplash.jpg" :
-                    (activeScenario.species === "Cattle" || activeScenario.species === "Stray Cattle") ? "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?q=80&w=300&auto=format&fit=crop" :
-                    (activeScenario.species === "Deer" || activeScenario.species === "Spotted Deer") ? "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=300&auto=format&fit=crop" :
-                    activeScenario.species === "Nilgai" ? "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=300&auto=format&fit=crop" :
-                    activeScenario.species === "Goat" ? "https://images.unsplash.com/photo-1524024973431-2ad916746881?q=80&w=300&auto=format&fit=crop" :
-                    (activeScenario.species === "Monkey" || activeScenario.species === "Rhesus Macaque" || activeScenario.species === "Langur") ? "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=300&auto=format&fit=crop" :
-                    activeScenario.species === "Gaur" ? "https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=300&auto=format&fit=crop" :
-                    "/ed-van-duijn-414NZVxzc20-unsplash.jpg"
-                  )
+                  (activeScenario.image && (activeScenario.image.startsWith("data:") || activeScenario.image.startsWith("http")))
+                    ? activeScenario.image
+                    : (
+                      activeScenario.species === "Elephant" ? "/christoffer-brus-7hGF4emWkXs-unsplash.jpg" :
+                      activeScenario.species === "Wild Boar" ? "/ed-van-duijn-414NZVxzc20-unsplash.jpg" :
+                      (activeScenario.species === "Cattle" || activeScenario.species === "Stray Cattle") ? "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?q=80&w=300&auto=format&fit=crop" :
+                      (activeScenario.species === "Deer" || activeScenario.species === "Spotted Deer") ? "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=300&auto=format&fit=crop" :
+                      activeScenario.species === "Nilgai" ? "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=300&auto=format&fit=crop" :
+                      activeScenario.species === "Goat" ? "https://images.unsplash.com/photo-1524024973431-2ad916746881?q=80&w=300&auto=format&fit=crop" :
+                      (activeScenario.species === "Monkey" || activeScenario.species === "Rhesus Macaque" || activeScenario.species === "Langur") ? "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=300&auto=format&fit=crop" :
+                      activeScenario.species === "Gaur" ? "https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=300&auto=format&fit=crop" :
+                      "/ed-van-duijn-414NZVxzc20-unsplash.jpg"
+                    )
                 }
-                alt={activeScenario.species}
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = activeScenario.species === "Elephant"
+                    ? "/christoffer-brus-7hGF4emWkXs-unsplash.jpg"
+                    : "/ed-van-duijn-414NZVxzc20-unsplash.jpg";
+                }}
+                alt={activeScenario.species || "Wildlife Detection"}
                 className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.1]"
               />
               <span className="absolute bottom-1 right-1 text-xs select-none z-10 filter drop-shadow">

@@ -311,7 +311,9 @@ export default function App() {
               species: primary.class,
               code: primary.code,
               emoji: primary.emoji,
-              image: data.annotated_image || `${API_BASE_URL}/static-test-images/${chosenFilename}`,
+              image: (data.annotated_image && data.annotated_image.startsWith("data:"))
+                ? data.annotated_image
+                : (data.annotated_image ? `data:image/jpeg;base64,${data.annotated_image}` : `${API_BASE_URL}/static-test-images/${chosenFilename}`),
               sourceFile: chosenFilename,
               timestamp: data.time_formatted || getFormattedTime(),
               threat: isHigh ? "HIGH" : isMed ? "MEDIUM" : "LOW",
