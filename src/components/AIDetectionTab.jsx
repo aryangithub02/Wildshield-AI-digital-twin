@@ -581,15 +581,23 @@ export default function AIDetectionTab({
                 {liveDetectionResult.annotated_image ? (
                   <img
                     src={
-                      (liveDetectionResult.annotated_image && liveDetectionResult.annotated_image.startsWith("data:"))
+                      liveDetectionResult.annotated_image.startsWith("data:")
                         ? liveDetectionResult.annotated_image
-                        : (liveDetectionResult.annotated_image ? `data:image/jpeg;base64,${liveDetectionResult.annotated_image}` : `/sample-test-images/${testImages[selectedImageIndex]?.filename || 'WS-WL-WB-00004.jpg'}`)
+                        : `data:image/jpeg;base64,${liveDetectionResult.annotated_image}`
                     }
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = `/sample-test-images/${testImages[selectedImageIndex]?.filename || 'WS-WL-WB-00004.jpg'}`;
+                      if (liveDetectionResult.source_file) {
+                        e.target.src = `/sample-test-images/${liveDetectionResult.source_file}`;
+                      }
                     }}
                     alt="WildShield AI YOLO Inference"
+                    className="w-full h-full object-contain filter contrast-[1.05]"
+                  />
+                ) : liveDetectionResult.source_file ? (
+                  <img
+                    src={`/sample-test-images/${liveDetectionResult.source_file}`}
+                    alt="WildShield AI YOLO Source Frame"
                     className="w-full h-full object-contain filter contrast-[1.05]"
                   />
                 ) : (
