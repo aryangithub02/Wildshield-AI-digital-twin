@@ -1,20 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Sidebar from './components/Sidebar';
 import TopNavbar from './components/TopNavbar';
-import RightPanel from './components/RightPanel';
 import KPICards from './components/KPICards';
 import DigitalTwin from './components/DigitalTwin';
-import Timeline from './components/Timeline';
 import Analytics from './components/Analytics';
+import Timeline from './components/Timeline';
 import DeviceStatus from './components/DeviceStatus';
+import RightPanel from './components/RightPanel';
+import InteractiveTour from './components/InteractiveTour';
+import FarmMapTab from './components/FarmMapTab';
 import AIDetectionTab from './components/AIDetectionTab';
 import DevicesTab from './components/DevicesTab';
-import FarmMapTab from './components/FarmMapTab';
 import DecisionMatrixTab from './components/DecisionMatrixTab';
 import WorkflowTab from './components/WorkflowTab';
-import NodeModal from './components/NodeModal';
-import InteractiveTour from './components/InteractiveTour';
+import AlertsTab from './components/AlertsTab';
+import AnalyticsTab from './components/AnalyticsTab';
+import TimelineTab from './components/TimelineTab';
+import SettingsTab from './components/SettingsTab';
+import { getTranslation } from './utils/translations';
+import { SPECIES_TAXONOMY, getSpeciesMetadataByName } from './utils/speciesMapping';
 
+// Simulation state constants
 const STATE_IDLE = 0;
 const STATE_APPROACHING = 1;
 const STATE_DETECTED = 2;
@@ -22,153 +28,153 @@ const STATE_ESCALATED = 3;
 const STATE_DETERRENT_ACTIVE = 4;
 const STATE_RESOLVED = 5;
 
-const STATE_LABELS = {
-  [STATE_IDLE]: "System Idle • Monitoring",
-  [STATE_APPROACHING]: "PIR Motion Warning",
-  [STATE_DETECTED]: "Edge AI Analysis • LoRa TX",
-  [STATE_ESCALATED]: "Threat Confirmed • Actuators Active",
-  [STATE_DETERRENT_ACTIVE]: "Deterrents Active • Repelling",
-  [STATE_RESOLVED]: "Intrusion Resolved • Safe",
+// Dynamic Node Trajectories across farm perimeter
+const NODE_PATHS = {
+  1: [
+    { x: 54, y: -12, rotate: 0, zone: "North Forest Fringe" },
+    { x: 54, y: 0, rotate: 0, zone: "North Buffer Zone" },
+    { x: 54, y: 9, rotate: 0, zone: "North Geofence" },
+    { x: 54, y: 18, rotate: 0, zone: "North Crop Field" },
+    { x: 54, y: 18, rotate: 180, zone: "Deterred & Turning" },
+    { x: 54, y: -10, rotate: 180, zone: "Retreating to Forest" }
+  ],
+  2: [
+    { x: 94, y: 10, rotate: 0, zone: "East Forest Edge" },
+    { x: 86, y: 16, rotate: 0, zone: "East Buffer" },
+    { x: 78, y: 22, rotate: 0, zone: "East Geofence" },
+    { x: 70, y: 28, rotate: 0, zone: "East Orchard Field" },
+    { x: 70, y: 28, rotate: 180, zone: "Deterred & Turning" },
+    { x: 96, y: 18, rotate: 180, zone: "Retreating East" }
+  ],
+  3: [
+    { x: 92, y: 92, rotate: 0, zone: "South-East Riverbed" },
+    { x: 82, y: 84, rotate: 0, zone: "South-East Buffer" },
+    { x: 74, y: 78, rotate: 0, zone: "South-East Geofence" },
+    { x: 66, y: 70, rotate: 0, zone: "South-East Pulse Field" },
+    { x: 66, y: 70, rotate: 180, zone: "Deterred & Turning" },
+    { x: 94, y: 90, rotate: 180, zone: "Retreating South-East" }
+  ],
+  4: [
+    { x: 18, y: 92, rotate: 0, zone: "South-West Hill Slope" },
+    { x: 26, y: 84, rotate: 0, zone: "South-West Buffer" },
+    { x: 34, y: 78, rotate: 0, zone: "South-West Geofence" },
+    { x: 42, y: 70, rotate: 0, zone: "South-West Grassland" },
+    { x: 42, y: 70, rotate: 180, zone: "Deterred & Turning" },
+    { x: 16, y: 90, rotate: 180, zone: "Retreating South-West" }
+  ],
+  5: [
+    { x: 6, y: 10, rotate: 0, zone: "West Boundary Trail" },
+    { x: 14, y: 16, rotate: 0, zone: "West Buffer" },
+    { x: 22, y: 22, rotate: 0, zone: "West Geofence" },
+    { x: 30, y: 28, rotate: 0, zone: "West Vegetable Field" },
+    { x: 30, y: 28, rotate: 180, zone: "Deterred & Turning" },
+    { x: 4, y: 18, rotate: 180, zone: "Retreating West" }
+  ]
 };
 
-const ANIMAL_SCENARIOS = [
+// Initial benchmark scenarios
+const DEFAULT_SCENARIOS = [
   {
-    species: "Elephant",
-    emoji: "🐘",
+    species: "Wild Boar",
+    code: "WS-WL-WB",
+    emoji: "🐗",
+    sourceFile: "WS-WL-WB-00006.jpg",
     threat: "HIGH",
     nodeId: 1,
     nodeName: "FN-1",
-    confidenceBase: 96.2,
-    confidenceMax: 98.4,
-    actuators: { siren: true, floodlight: true, speaker: true, sprinkler: true },
+    zone: "North Crop Field",
+    confidenceBase: 95.5,
+    confidenceMax: 95.5,
+    actuators: { siren: true, floodlight: true, speaker: true, sprinkler: false },
     logThreat: "HIGH",
-    path: [
-      { x: 54, y: -10, rotate: 0 },
-      { x: 54, y: 2, rotate: 0 },
-      { x: 54, y: 9, rotate: 0 },
-      { x: 54, y: 12, rotate: 0 },
-      { x: 54, y: 12, rotate: 180 },
-      { x: 54, y: -5, rotate: 180 }
-    ]
-  },
-  {
-    species: "Wild Boar",
-    emoji: "🐗",
-    threat: "MEDIUM",
-    nodeId: 5,
-    nodeName: "FN-5",
-    confidenceBase: 91.5,
-    confidenceMax: 95.8,
-    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: true },
-    logThreat: "MEDIUM",
-    path: [
-      { x: -10, y: -10, rotate: 0 },
-      { x: 10, y: 10, rotate: 0 },
-      { x: 22, y: 22, rotate: 0 },
-      { x: 25, y: 25, rotate: 0 },
-      { x: 25, y: 25, rotate: 180 },
-      { x: -5, y: -5, rotate: 180 }
-    ]
-  },
-  {
-    species: "Monkey",
-    emoji: "🐒",
-    threat: "LOW",
-    nodeId: 2,
-    nodeName: "FN-2",
-    confidenceBase: 88.4,
-    confidenceMax: 93.6,
-    actuators: { siren: false, floodlight: false, speaker: false, sprinkler: true },
-    logThreat: "LOW",
-    path: [
-      { x: 95, y: -10, rotate: 0 },
-      { x: 85, y: 10, rotate: 0 },
-      { x: 78, y: 22, rotate: 0 },
-      { x: 75, y: 26, rotate: 0 },
-      { x: 75, y: 26, rotate: 180 },
-      { x: 92, y: -5, rotate: 180 }
-    ]
-  },
-  {
-    species: "Deer",
-    emoji: "🦌",
-    threat: "LOW",
-    nodeId: 4,
-    nodeName: "FN-4",
-    confidenceBase: 92.1,
-    confidenceMax: 96.8,
-    actuators: { siren: false, floodlight: true, speaker: false, sprinkler: false },
-    logThreat: "LOW",
-    path: [
-      { x: 15, y: 110, rotate: 0 },
-      { x: 26, y: 92, rotate: 0 },
-      { x: 34, y: 78, rotate: 0 },
-      { x: 38, y: 74, rotate: 0 },
-      { x: 38, y: 74, rotate: 180 },
-      { x: 18, y: 100, rotate: 180 }
-    ]
+    path: NODE_PATHS[1]
   },
   {
     species: "Nilgai",
+    code: "WS-WL-NG",
     emoji: "🐂",
-    threat: "LOW",
+    sourceFile: "WS-WL-NG-00016.jpg",
+    threat: "HIGH",
     nodeId: 3,
     nodeName: "FN-3",
-    confidenceBase: 90.4,
-    confidenceMax: 94.6,
-    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: false },
-    logThreat: "LOW",
-    path: [
-      { x: 90, y: 110, rotate: 0 },
-      { x: 82, y: 92, rotate: 0 },
-      { x: 74, y: 78, rotate: 0 },
-      { x: 70, y: 74, rotate: 0 },
-      { x: 70, y: 74, rotate: 180 },
-      { x: 88, y: 100, rotate: 180 }
-    ]
+    zone: "South-East Pulse Field",
+    confidenceBase: 97.9,
+    confidenceMax: 97.9,
+    actuators: { siren: false, floodlight: true, speaker: true, sprinkler: false },
+    logThreat: "HIGH",
+    path: NODE_PATHS[3]
   },
   {
-    species: "Stray Cattle",
-    emoji: "🐄",
-    threat: "LOW",
+    species: "Spotted Deer",
+    code: "WS-WL-SD",
+    emoji: "🦌",
+    sourceFile: "WS-WL-SD-00106.jpg",
+    threat: "MEDIUM",
     nodeId: 4,
     nodeName: "FN-4",
-    confidenceBase: 93.4,
-    confidenceMax: 96.5,
-    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: false, buzzer: true },
+    zone: "South-West Grassland",
+    confidenceBase: 97.9,
+    confidenceMax: 97.9,
+    actuators: { siren: false, floodlight: true, speaker: false, sprinkler: false },
+    logThreat: "MEDIUM",
+    path: NODE_PATHS[4]
+  },
+  {
+    species: "Cattle",
+    code: "WS-DM-CT",
+    emoji: "🐄",
+    sourceFile: "WS-DM-CT-00023.jpg",
+    threat: "LOW",
+    nodeId: 2,
+    nodeName: "FN-2",
+    zone: "East Orchard Field",
+    confidenceBase: 97.0,
+    confidenceMax: 97.0,
+    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: true },
     logThreat: "LOW",
-    path: [
-      { x: 15, y: 110, rotate: 0 },
-      { x: 26, y: 92, rotate: 0 },
-      { x: 34, y: 78, rotate: 0 },
-      { x: 38, y: 74, rotate: 0 },
-      { x: 38, y: 74, rotate: 180 },
-      { x: 18, y: 100, rotate: 180 }
-    ]
+    path: NODE_PATHS[2]
+  },
+  {
+    species: "Goat",
+    code: "WS-DM-GT",
+    emoji: "🐐",
+    sourceFile: "WS-DM-GT-00053.jpg",
+    threat: "LOW",
+    nodeId: 5,
+    nodeName: "FN-5",
+    zone: "West Vegetable Field",
+    confidenceBase: 96.2,
+    confidenceMax: 96.2,
+    actuators: { siren: false, floodlight: false, speaker: true, sprinkler: false },
+    logThreat: "LOW",
+    path: NODE_PATHS[5]
   }
 ];
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('overview');
-  const [language, setLanguage] = useState('en'); // Translation language state
+  const [language, setLanguage] = useState('en');
   const [simulationState, setSimulationState] = useState(STATE_IDLE);
   
   const tourRef = useRef(null);
-
   const startTour = () => {
     setActiveTab('overview');
-    // Allow brief tab transition tick before calling tour restart
     setTimeout(() => {
       if (tourRef.current) {
         tourRef.current.restartTour();
       }
     }, 150);
   };
-  const [scenarioIndex, setScenarioIndex] = useState(0);
+
+  // Simulation Controls State
   const [isPlaying, setIsPlaying] = useState(true);
+  const [autoSimulation, setAutoSimulation] = useState(true);
   const [speed, setSpeed] = useState(1);
   const [selectedNode, setSelectedNode] = useState(null);
-  
+  const [testImages, setTestImages] = useState([]);
+  const [lastImageIndex, setLastImageIndex] = useState(-1);
+  const [liveModelScenario, setLiveModelScenario] = useState(DEFAULT_SCENARIOS[0]);
+
   const [logs, setLogs] = useState([
     { id: 1, time: getFormattedTime(new Date(Date.now() - 3600000)), key: "coreOnline", type: "info" },
     { id: 2, time: getFormattedTime(new Date(Date.now() - 3000000)), key: "hubConnected", type: "info" },
@@ -178,19 +184,17 @@ export default function App() {
   const [kpi, setKpi] = useState({
     intrusions: 8,
     wildAnimals: 4,
-    activeCameras: 4,
+    activeCameras: 5,
     health: 98,
   });
 
   const timerRef = useRef(null);
-  const currentScenario = ANIMAL_SCENARIOS[scenarioIndex];
+  const currentScenario = liveModelScenario || DEFAULT_SCENARIOS[0];
 
-  // Helper to format time as HH:MM:SS
   function getFormattedTime(date = new Date()) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
   }
 
-  // Add log helper with support for translation keys and parameters
   const addLog = (keyOrText, type = 'info', params = {}) => {
     const isKey = typeof keyOrText === 'string' && keyOrText.indexOf(' ') === -1;
     setLogs(prev => [
@@ -206,52 +210,233 @@ export default function App() {
     ]);
   };
 
-  // State Transition Actions
-  const handleStateTransition = (nextState, activeScenario = currentScenario) => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+  const WS_URL = import.meta.env.VITE_WS_URL || "ws://127.0.0.1:8000/ws";
+
+  // 1. Fetch available dataset images on mount & connect live WebSocket
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/test-images`);
+        if (res.ok) {
+          const data = await res.json();
+          setTestImages(data.images || []);
+        }
+      } catch (err) {
+        console.warn("Dataset images fetch offline fallback:", err);
+      }
+    };
+    fetchImages();
+
+    // Global WebSocket connection for bidirectional sync with Central Edge AI Hub & Mobile App
+    let ws = null;
+    let reconnectTimeout = null;
+
+    const connectWS = () => {
+      try {
+        ws = new WebSocket(WS_URL);
+        ws.onopen = () => {
+          console.log("[WildShield Web WS] Connected to Central Edge AI Hub");
+        };
+        ws.onmessage = (event) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === "DETECTION_EVENT" && msg.data) {
+              handleLiveModelDetection(msg.data);
+            }
+          } catch (e) {
+            console.warn("[WildShield Web WS] Parse error:", e);
+          }
+        };
+        ws.onclose = () => {
+          console.log("[WildShield Web WS] Disconnected. Retrying in 3s...");
+          reconnectTimeout = setTimeout(connectWS, 3000);
+        };
+        ws.onerror = (err) => {
+          console.warn("[WildShield Web WS] Error:", err);
+        };
+      } catch (err) {
+        console.warn("[WildShield Web WS] Init error:", err);
+        reconnectTimeout = setTimeout(connectWS, 5000);
+      }
+    };
+
+    connectWS();
+
+    return () => {
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
+      if (ws) ws.close();
+    };
+  }, []);
+
+  // 2. Trigger Next Event with Real YOLO Inference & Farm Location
+  const triggerNextEvent = async (explicitImage = null, explicitNodeId = null) => {
+    let chosenFilename = explicitImage;
+    let chosenIndex = -1;
+
+    if (!chosenFilename && testImages.length > 0) {
+      // Pick random dataset image distinct from last
+      let newIdx = Math.floor(Math.random() * testImages.length);
+      if (newIdx === lastImageIndex && testImages.length > 1) {
+        newIdx = (newIdx + 1) % testImages.length;
+      }
+      chosenIndex = newIdx;
+      setLastImageIndex(newIdx);
+      chosenFilename = testImages[newIdx].filename;
+    }
+
+    const assignedNodeId = explicitNodeId || Math.floor(Math.random() * 5) + 1;
+    const pathCoords = NODE_PATHS[assignedNodeId] || NODE_PATHS[1];
+
+    if (chosenFilename) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/api/test-detect`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: chosenFilename,
+            conf: 0.25,
+            node_id: assignedNodeId
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const primary = data.primary_detection;
+          if (primary) {
+            const isHigh = primary.threat === "HIGH" || primary.threat === "CRITICAL";
+            const isMed = primary.threat === "MEDIUM" || primary.threat === "WARNING";
+
+            const scenarioObj = {
+              species: primary.class,
+              code: primary.code,
+              emoji: primary.emoji,
+              image: data.annotated_image || `${API_BASE_URL}/static-test-images/${chosenFilename}`,
+              sourceFile: chosenFilename,
+              timestamp: data.time_formatted || getFormattedTime(),
+              threat: isHigh ? "HIGH" : isMed ? "MEDIUM" : "LOW",
+              nodeId: assignedNodeId,
+              nodeName: `FN-${assignedNodeId}`,
+              zone: pathCoords[3]?.zone || "Crop Field",
+              confidenceBase: primary.confidence_pct,
+              confidenceMax: primary.confidence_pct,
+              actuators: primary.actuators || { siren: isHigh, floodlight: isHigh || isMed, speaker: true, sprinkler: false },
+              logThreat: primary.threat,
+              path: pathCoords
+            };
+
+            setLiveModelScenario(scenarioObj);
+            setSimulationState(STATE_APPROACHING);
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn("Live YOLO inference fallback:", e);
+      }
+    }
+
+    // Fallback rotation from DEFAULT_SCENARIOS
+    const nextScenario = DEFAULT_SCENARIOS[(lastImageIndex + 1) % DEFAULT_SCENARIOS.length];
+    setLastImageIndex((lastImageIndex + 1) % DEFAULT_SCENARIOS.length);
+    setLiveModelScenario({
+      ...nextScenario,
+      nodeId: assignedNodeId,
+      nodeName: `FN-${assignedNodeId}`,
+      path: pathCoords
+    });
+    setSimulationState(STATE_APPROACHING);
+  };
+
+  // 3. Handler for Live Model Detection from AIDetectionTab & WebSocket Broadcast
+  const handleLiveModelDetection = (payload) => {
+    if (!payload) return;
+    const primary = payload.primary_detection;
+    if (primary) {
+      const isHigh = primary.threat === "HIGH" || primary.threat === "CRITICAL";
+      const isMed = primary.threat === "MEDIUM" || primary.threat === "WARNING";
+      const assignedNodeId = payload.camera_id === "FN-1" ? 1 : 
+                             payload.camera_id === "FN-2" ? 2 : 
+                             payload.camera_id === "FN-3" ? 3 : 
+                             payload.camera_id === "FN-4" ? 4 : 5;
+      
+      const pathCoords = NODE_PATHS[assignedNodeId] || NODE_PATHS[1];
+
+      const scenarioObj = {
+        species: primary.class,
+        code: primary.code,
+        emoji: primary.emoji,
+        image: payload.annotated_image || (payload.source_file ? `${API_BASE_URL}/static-test-images/${payload.source_file}` : null),
+        sourceFile: payload.source_file || "",
+        timestamp: payload.time_formatted || getFormattedTime(),
+        threat: isHigh ? "HIGH" : isMed ? "MEDIUM" : "LOW",
+        nodeId: assignedNodeId,
+        nodeName: payload.camera_id || `FN-${assignedNodeId}`,
+        zone: pathCoords[3]?.zone || "Perimeter Field",
+        confidenceBase: primary.confidence_pct,
+        confidenceMax: primary.confidence_pct,
+        actuators: primary.actuators || { siren: false, floodlight: false, speaker: false, sprinkler: false },
+        logThreat: primary.threat,
+        path: pathCoords
+      };
+      
+      setLiveModelScenario(scenarioObj);
+      setSimulationState(primary.intrusion ? STATE_DETERRENT_ACTIVE : STATE_DETECTED);
+
+      setKpi(prev => ({
+        ...prev,
+        wildAnimals: prev.wildAnimals + 1,
+        intrusions: primary.intrusion ? prev.intrusions + 1 : prev.intrusions
+      }));
+
+      addLog(
+        `[${primary.code}] ${primary.class} identified at ${payload.camera_id} (${primary.confidence_pct}% Conf) • ${primary.responses.join(' + ')}`,
+        primary.intrusion ? 'danger' : 'detection',
+        { species: primary.class, threat: primary.threat }
+      );
+    }
+  };
+
+  // 4. State Transitions
+  const handleStateTransition = (nextState, active = currentScenario) => {
     setSimulationState(nextState);
 
     switch (nextState) {
       case STATE_IDLE:
         addLog("systemIdle", "info");
-        setScenarioIndex(prev => (prev + 1) % ANIMAL_SCENARIOS.length);
+        if (autoSimulation) {
+          triggerNextEvent();
+        }
         break;
       
       case STATE_APPROACHING:
-        addLog("motionDetectedLog", "warning", { nodeName: activeScenario.nodeName });
+        addLog("motionDetectedLog", "warning", { nodeName: active.nodeName });
         break;
       
       case STATE_DETECTED:
-        addLog("cameraActivatedLog", "detection", { nodeName: activeScenario.nodeName });
+        addLog("cameraActivatedLog", "detection", { nodeName: active.nodeName });
         break;
       
       case STATE_ESCALATED:
-        addLog("targetConfirmedLog", "danger", { species: activeScenario.species, threat: activeScenario.threat });
-        
+        addLog("targetConfirmedLog", "danger", { species: active.species, threat: active.threat });
         const activeActuators = [];
-        if (activeScenario.actuators.speaker) activeActuators.push("Predator Sound");
-        if (activeScenario.actuators.sprinkler) activeActuators.push("Sprinkler Pump");
-        
+        if (active.actuators?.speaker) activeActuators.push("Predator Sound");
+        if (active.actuators?.sprinkler) activeActuators.push("Sprinkler Pump");
         if (activeActuators.length > 0) {
-          addLog("stage1DeployLog", "deterrent", { nodeName: activeScenario.nodeName, actuators: activeActuators });
-        } else {
-          addLog("stage1DeployLog", "info", { nodeName: activeScenario.nodeName, actuators: [] });
+          addLog("stage1DeployLog", "deterrent", { nodeName: active.nodeName, actuators: activeActuators });
         }
         break;
       
       case STATE_DETERRENT_ACTIVE:
         const stage2Actuators = [];
-        if (activeScenario.actuators.siren) stage2Actuators.push("Ultrasonic Siren");
-        if (activeScenario.actuators.floodlight) stage2Actuators.push("Floodlight 01");
-
+        if (active.actuators?.siren) stage2Actuators.push("Ultrasonic Siren");
+        if (active.actuators?.floodlight) stage2Actuators.push("Floodlight 01");
         if (stage2Actuators.length > 0) {
-          addLog("stage2DeployLog", "danger", { nodeName: activeScenario.nodeName, actuators: stage2Actuators });
-        } else {
-          addLog("stage2DeployLog", "success", { nodeName: activeScenario.nodeName, actuators: [] });
+          addLog("stage2DeployLog", "danger", { nodeName: active.nodeName, actuators: stage2Actuators });
         }
         break;
       
       case STATE_RESOLVED:
-        addLog("targetRepelledLog", "success", { species: activeScenario.species, nodeName: activeScenario.nodeName });
+        addLog("targetRepelledLog", "success", { species: active.species, nodeName: active.nodeName });
         setKpi(prev => ({
           ...prev,
           intrusions: prev.intrusions + 1,
@@ -264,14 +449,14 @@ export default function App() {
     }
   };
 
-  // Simulation Logic Timer Loop
+  // 5. Autonomous Simulation Timer Loop
   useEffect(() => {
     if (isPlaying) {
-      const intervalDuration = 2500 / speed;
+      const intervalDuration = 2400 / speed;
       timerRef.current = setInterval(() => {
         setSimulationState(current => {
           const next = (current + 1) % 6;
-          handleStateTransition(next, ANIMAL_SCENARIOS[scenarioIndex]);
+          handleStateTransition(next, currentScenario);
           return next;
         });
       }, intervalDuration);
@@ -286,7 +471,7 @@ export default function App() {
         clearInterval(timerRef.current);
       }
     };
-  }, [isPlaying, speed, scenarioIndex]);
+  }, [isPlaying, speed, autoSimulation, currentScenario?.sourceFile]);
 
   // Reset Simulation
   const handleReset = () => {
@@ -294,20 +479,11 @@ export default function App() {
       clearInterval(timerRef.current);
     }
     setSimulationState(STATE_IDLE);
-    setScenarioIndex(0);
     setIsPlaying(false);
     setLogs([
       { id: 1, time: getFormattedTime(), key: "manualReset", type: "info" }
     ]);
     addLog("systemInitialized", "success");
-  };
-
-  // Manual Step Forward
-  const handleStepForward = () => {
-    if (!isPlaying) {
-      const next = (simulationState + 1) % 6;
-      handleStateTransition(next);
-    }
   };
 
   return (
@@ -334,13 +510,22 @@ export default function App() {
             {/* KPI Cards Grid */}
             <KPICards kpi={kpi} language={language} />
 
-            {/* Map Panel (Digital Twin) */}
+            {/* Map Panel (Digital Twin with Live Dataset Simulation Controls) */}
             <div className="w-full">
               <DigitalTwin 
                 simulationState={simulationState} 
                 onSelectNode={setSelectedNode}
                 currentScenario={currentScenario}
                 language={language}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+                onNextEvent={() => triggerNextEvent()}
+                speed={speed}
+                setSpeed={setSpeed}
+                autoSimulation={autoSimulation}
+                setAutoSimulation={setAutoSimulation}
+                onReset={handleReset}
+                testImagesCount={testImages.length}
               />
             </div>
 
@@ -366,6 +551,7 @@ export default function App() {
             simulationState={simulationState} 
             currentScenario={currentScenario} 
             language={language}
+            onLiveDetection={handleLiveModelDetection}
           />
         ) : activeTab === 'devices' ? (
           <DevicesTab 
@@ -385,164 +571,62 @@ export default function App() {
             currentScenario={currentScenario} 
             language={language}
           />
+        ) : activeTab === 'alerts' ? (
+          <AlertsTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+            language={language}
+            onTriggerNewEvent={() => triggerNextEvent()}
+          />
+        ) : activeTab === 'analytics' ? (
+          <AnalyticsTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+            language={language}
+          />
+        ) : activeTab === 'timeline' ? (
+          <TimelineTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+            language={language}
+            logs={logs}
+          />
+        ) : activeTab === 'settings' ? (
+          <SettingsTab 
+            simulationState={simulationState} 
+            currentScenario={currentScenario} 
+            language={language}
+          />
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center text-slate-500 font-mono text-xs py-20 bg-[#0b0f19]/30 rounded-xl border border-slate-900/60">
             <span className="text-2xl mb-2">⚙️</span>
             <span>Workspace section "{activeTab.toUpperCase()}" is under active configuration.</span>
           </div>
         )}
-
       </div>
 
-      {/* Interactive Enclosure & Circuit Schematic Modal */}
-      {selectedNode && (
-        <NodeModal
-          node={selectedNode}
-          onClose={() => setSelectedNode(null)}
-          simulationState={simulationState}
-          currentScenario={currentScenario}
-        />
-      )}
-
-      {/* Onboarding guided interactive walkthrough tour */}
-      <InteractiveTour 
-        ref={tourRef} 
-        language={language} 
-        onStart={() => {
-          setActiveTab('overview');
-          setIsPlaying(false); // Pause auto-simulation loop
-          // Set initial starting logs
-          setLogs([
-            { id: 1, time: "10:20:00 AM", key: "systemInitialized", type: "success" }
-          ]);
-        }} 
+      {/* Interactive Onboarding Product Tour */}
+      <InteractiveTour
+        ref={tourRef}
+        language={language}
         onStepChange={(stepIndex) => {
-          const elephantScenario = ANIMAL_SCENARIOS[0]; // Elephant breach
-          
-          if (stepIndex === 0 || stepIndex === 1 || stepIndex === 2) {
-            // Steps 1, 2, 3 (Sidebar, Navbar, KPIs): Keep system idle
+          if (stepIndex === 0) {
             setSimulationState(STATE_IDLE);
-            setScenarioIndex(0);
-            setLogs([
-              { id: 1, time: "10:20:00 AM", key: "systemInitialized", type: "success" }
-            ]);
+          } else if (stepIndex === 1 || stepIndex === 2) {
+            setSimulationState(STATE_APPROACHING);
           } else if (stepIndex === 3) {
-            // Step 4 (Map Breach): Triggers motion detection and camera active logs
             setSimulationState(STATE_DETECTED);
-            setScenarioIndex(0);
-            setLogs([
-              { 
-                id: 3, 
-                time: "10:21:05 AM", 
-                key: "cameraActivatedLog", 
-                type: "detection", 
-                params: { nodeName: elephantScenario.nodeName } 
-              },
-              { 
-                id: 2, 
-                time: "10:21:00 AM", 
-                key: "motionDetectedLog", 
-                type: "warning", 
-                params: { nodeName: elephantScenario.nodeName } 
-              },
-              { 
-                id: 1, 
-                time: "10:20:00 AM", 
-                key: "systemInitialized", 
-                type: "success" 
-              }
-            ]);
           } else if (stepIndex === 4 || stepIndex === 5) {
-            // Steps 5, 6 (AI Camera Feed, Analytics): Triggers species alert confirmation and deterrent active logs
             setSimulationState(STATE_DETERRENT_ACTIVE);
-            setScenarioIndex(0);
-            setLogs([
-              { 
-                id: 5, 
-                time: "10:21:30 AM", 
-                key: "stage2DeployLog", 
-                type: "danger", 
-                params: { nodeName: elephantScenario.nodeName, actuators: ["Ultrasonic Siren", "Floodlight 01"] } 
-              },
-              { 
-                id: 4, 
-                time: "10:21:15 AM", 
-                key: "targetConfirmedLog", 
-                type: "danger", 
-                params: { species: "Elephant", threat: "HIGH" } 
-              },
-              { 
-                id: 3, 
-                time: "10:21:05 AM", 
-                key: "cameraActivatedLog", 
-                type: "detection", 
-                params: { nodeName: elephantScenario.nodeName } 
-              },
-              { 
-                id: 2, 
-                time: "10:21:00 AM", 
-                key: "motionDetectedLog", 
-                type: "warning", 
-                params: { nodeName: elephantScenario.nodeName } 
-              },
-              { 
-                id: 1, 
-                time: "10:20:00 AM", 
-                key: "systemInitialized", 
-                type: "success" 
-              }
-            ]);
           } else if (stepIndex === 6 || stepIndex === 7) {
-            // Steps 7, 8 (Timeline, Device Status): Triggers final target repelled log
             setSimulationState(STATE_RESOLVED);
-            setScenarioIndex(0);
-            setLogs([
-              { 
-                id: 6, 
-                time: "10:22:00 AM", 
-                key: "targetRepelledLog", 
-                type: "success", 
-                params: { species: "Elephant", nodeName: elephantScenario.nodeName } 
-              },
-              { 
-                id: 5, 
-                time: "10:21:30 AM", 
-                key: "stage2DeployLog", 
-                type: "danger", 
-                params: { nodeName: elephantScenario.nodeName, actuators: ["Ultrasonic Siren", "Floodlight 01"] } 
-              },
-              { 
-                id: 4, 
-                time: "10:21:15 AM", 
-                key: "targetConfirmedLog", 
-                type: "danger", 
-                params: { species: "Elephant", threat: "HIGH" } 
-              },
-              { 
-                id: 3, 
-                time: "10:21:05 AM", 
-                key: "cameraActivatedLog", 
-                type: "detection", 
-                params: { nodeName: elephantScenario.nodeName } 
-              },
-              { 
-                id: 2, 
-                time: "10:21:00 AM", 
-                key: "motionDetectedLog", 
-                type: "warning", 
-                params: { nodeName: elephantScenario.nodeName } 
-              },
-              { 
-                id: 1, 
-                time: "10:20:00 AM", 
-                key: "systemInitialized", 
-                type: "success" 
-              }
-            ]);
           }
         }}
-        onComplete={() => {
-          setIsPlaying(true); // Resume auto-simulation loop
+        onTourStart={() => {
+          setIsPlaying(false);
+        }}
+        onTourEnd={() => {
+          setIsPlaying(true);
         }}
       />
     </div>

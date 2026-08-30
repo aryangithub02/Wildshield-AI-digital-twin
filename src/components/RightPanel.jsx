@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldAlert, AlertTriangle, Radio, Wifi, CheckCircle2, 
   Cpu, Zap, Compass, Flame, Check, HelpCircle, 
-  RefreshCw, TrendingUp, Info, Play, Clock, ArrowRight, Eye
+  RefreshCw, TrendingUp, Info, Play, Clock, ArrowRight, Eye, AlertOctagon
 } from 'lucide-react';
 import { getTranslation } from '../utils/translations';
+import { getSpeciesMetadataByName, SPECIES_TAXONOMY } from '../utils/speciesMapping';
 
 export default function RightPanel({ simulationState, currentScenario, language }) {
   const t = (key) => getTranslation(language, key);
@@ -27,231 +28,424 @@ export default function RightPanel({ simulationState, currentScenario, language 
   };
 
   const getSpeciesTranslated = (speciesName) => {
+    if (!speciesName) return "N/A";
     if (speciesName === "Elephant") return t('elephant');
     if (speciesName === "Wild Boar") return t('wildBoar');
-    if (speciesName === "Monkey") return t('monkey');
-    if (speciesName === "Deer") return t('deer');
+    if (speciesName === "Monkey" || speciesName === "Rhesus Macaque" || speciesName === "Langur") return t('monkey');
+    if (speciesName === "Deer" || speciesName === "Spotted Deer") return t('deer');
     if (speciesName === "Nilgai") return t('nilgai');
-    if (speciesName === "Stray Cattle") return t('strayCattle');
+    if (speciesName === "Cattle" || speciesName === "Stray Cattle") return t('strayCattle') || "Cattle";
+    if (speciesName === "Goat") return "Goat";
+    if (speciesName === "Gaur") return "Gaur";
+    if (speciesName === "Human") return "Human";
+    if (speciesName === "Vehicle") return "Vehicle";
     return speciesName;
   };
 
   const getThreatTranslated = (threatLevel) => {
-    if (threatLevel === "HIGH") return t('high').toUpperCase();
-    if (threatLevel === "MEDIUM") return t('medium').toUpperCase();
+    if (threatLevel === "HIGH" || threatLevel === "CRITICAL") return t('high').toUpperCase();
+    if (threatLevel === "MEDIUM" || threatLevel === "WARNING") return t('medium').toUpperCase();
     return t('low').toUpperCase();
   };
 
-  // 1. Species Specific Configs
+  // 1. Knowledge Base-Driven Species Configuration
   const getSpeciesConfig = () => {
-    switch (activeScenario.species) {
-      case "Elephant":
-        return {
-          threatScore: 96,
-          threatStatus: "CRITICAL",
-          threatColor: "text-red-500 bg-red-500/10 border-red-500/20",
-          threatBg: "bg-red-600",
-          count: 3,
-          speed: "Walking",
-          direction: "Forest",
-          gpsZone: "North-East",
-          matrixRowIndex: 0,
-          learning: { visits: 12, successful: "Directional Flood Lights", successRate: 86, exitTime: 48 },
-          reasons: [
-            "Species identified as Elephant.",
-            `Crop configured as ${currentCrop}.`,
-            currentCrop === "Cotton" ? "Sprinkler disabled to avoid cotton damage." : "Sprinkler active for irrigation deterrent.",
-            "Village located within 200 meters of North Boundary.",
-            "High-volume siren avoided to prevent village panic.",
-            "Directional speaker selected to target herd path.",
-            "Visual strobe and LED floodlights activated.",
-            "Forest department notification triggered automatically."
-          ],
-          tree: [
-            "Wildlife Detected",
-            "Elephant",
-            "Threat Level: Critical",
-            `Crop: ${currentCrop}`,
-            currentCrop === "Cotton" ? "Sprinkler Disabled" : "Sprinkler Enabled",
-            "Village Nearby",
-            "Avoid High Volume Siren",
-            "Activate Directional Speaker",
-            "Activate Flood Lights",
-            "Notify Farmer",
-            "Notify Forest Officer"
-          ]
-        };
-      case "Wild Boar":
-        return {
-          threatScore: 68,
-          threatStatus: "WARNING",
-          threatColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-          threatBg: "bg-amber-500",
-          count: 5,
-          speed: "Foraging",
-          direction: "North Boundary",
-          gpsZone: "North-West",
-          matrixRowIndex: 1,
-          learning: { visits: 24, successful: "Predator Audio", successRate: 91, exitTime: 28 },
-          reasons: [
-            "Species identified as Wild Boar.",
-            `Crop configured as ${currentCrop}.`,
-            "Acoustic sensors indicate foraging behavior.",
-            "Predator sounds (tiger/leopard roar) selected.",
-            "LED strobe lights activated in flash mode.",
-            currentCrop === "Cotton" ? "Sprinkler disabled (Cotton Crop)." : "Sprinkler active (Water jet deterrent).",
-            "Local buzzer activated to clear border.",
-            "Notification pushed to Farmer App."
-          ],
-          tree: [
-            "Wildlife Detected",
-            "Wild Boar",
-            "Threat Level: Warning",
-            `Crop: ${currentCrop}`,
-            currentCrop === "Cotton" ? "Sprinkler Disabled" : "Sprinkler Enabled",
-            "Play Predator Audio",
-            "Enable Flash Lights",
-            "Notify Farmer"
-          ]
-        };
-      case "Monkey":
-        return {
-          threatScore: 42,
-          threatStatus: "MODERATE",
-          threatColor: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
-          threatBg: "bg-yellow-500",
-          count: 12,
-          speed: "Agile Climbing",
-          direction: "Village Edge",
-          gpsZone: "East Field",
-          matrixRowIndex: 2,
-          learning: { visits: 45, successful: "Monkey Distress Call", successRate: 79, exitTime: 15 },
-          reasons: [
-            "Species identified as Monkey herd.",
-            `Crop configured as ${currentCrop}.`,
-            "High spatial agility detected in tree line.",
-            "Monkey distress calls broadcasted over speaker.",
-            "Visual high-frequency flash lights active.",
-            currentCrop === "Cotton" ? "Sprinkler disabled (Cotton Crop)." : "Sprinkler active (overhead spray).",
-            "Farmer alerted of active intrusion."
-          ],
-          tree: [
-            "Wildlife Detected",
-            "Monkey",
-            "Threat Level: Moderate",
-            `Crop: ${currentCrop}`,
-            currentCrop === "Cotton" ? "Sprinkler Disabled" : "Sprinkler Enabled",
-            "Play Monkey Distress Call",
-            "Flash Lights",
-            "Notify Farmer"
-          ]
-        };
-      case "Deer":
-        return {
-          threatScore: 35,
-          threatStatus: "LOW THREAT",
-          threatColor: "text-green-500 bg-green-500/10 border-green-500/20",
-          threatBg: "bg-green-500",
-          count: 2,
-          speed: "Grazing",
-          direction: "River Edge",
-          gpsZone: "South Field",
-          matrixRowIndex: 3,
-          learning: { visits: 18, successful: "Soft Flash Lights", successRate: 83, exitTime: 35 },
-          reasons: [
-            "Species identified as Deer.",
-            `Crop configured as ${currentCrop}.`,
-            "Soft flash lights triggered to gently deter.",
-            "Acoustic siren bypassed to prevent panic run.",
-            "Farmer alerted via app.",
-            "Camera recording saved for log."
-          ],
-          tree: [
-            "Wildlife Detected",
-            "Deer",
-            "Threat Level: Low",
-            `Crop: ${currentCrop}`,
-            "Soft Flash Lights",
-            "Farmer Alert"
-          ]
-        };
-      case "Nilgai":
-        return {
-          threatScore: 52,
-          threatStatus: "MODERATE",
-          threatColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
-          threatBg: "bg-amber-500",
-          count: 1,
-          speed: "Walking",
-          direction: "Crop Center",
-          gpsZone: "South-East",
-          matrixRowIndex: 9, // Doesn't match direct matrix index but highlighted
-          learning: { visits: 9, successful: "Directional Speaker", successRate: 72, exitTime: 55 },
-          reasons: [
-            "Species identified as Nilgai.",
-            `Crop configured as ${currentCrop}.`,
-            "Directional speaker playing human shouting audio.",
-            "Visual strobe flash active.",
-            currentCrop === "Cotton" ? "Sprinkler disabled (Cotton Crop)." : "Sprinkler active (Water jets).",
-            "Farmer app notification dispatched."
-          ],
-          tree: [
-            "Wildlife Detected",
-            "Nilgai",
-            "Threat Level: Moderate",
-            `Crop: ${currentCrop}`,
-            currentCrop === "Cotton" ? "Sprinkler Disabled" : "Sprinkler Enabled",
-            "Activate Directional Speaker",
-            "Strobe Lights Active",
-            "Notify Farmer"
-          ]
-        };
-      case "Stray Cattle":
-        return {
-          threatScore: 28,
-          threatStatus: "LOW THREAT",
-          threatColor: "text-green-500 bg-green-500/10 border-green-500/20",
-          threatBg: "bg-green-500",
-          count: 2,
-          speed: "Grazing",
-          direction: "Farm Path",
-          gpsZone: "South-West",
-          matrixRowIndex: 4,
-          learning: { visits: 31, successful: "Local Buzzer", successRate: 68, exitTime: 110 },
-          reasons: [
-            "Species identified as Stray Cattle.",
-            `Crop configured as ${currentCrop}.`,
-            "High risk of crop ingestion.",
-            "Local buzzer activated to urge movement.",
-            "Farmer notified for manual removal.",
-            "Forest department alert bypassed (domestic species)."
-          ],
-          tree: [
-            "Wildlife Detected",
-            "Stray Cattle",
-            "Threat Level: Low",
-            `Crop: ${currentCrop}`,
-            "Local Buzzer ON",
-            "Farmer Notification",
-            "No Forest Alert"
-          ]
-        };
-      default:
-        return {
-          threatScore: 10,
-          threatStatus: "STABLE",
-          threatColor: "text-slate-500 bg-slate-500/10 border-slate-500/20",
-          threatBg: "bg-slate-500",
-          count: 0,
-          speed: "N/A",
-          direction: "N/A",
-          gpsZone: "N/A",
-          matrixRowIndex: -1,
-          learning: { visits: 0, successful: "None", successRate: 0, exitTime: 0 },
-          reasons: ["No active threat detected."],
-          tree: ["Perimeter Scan", "All Clear"]
-        };
+    const meta = getSpeciesMetadataByName(activeScenario.species);
+    const sp = activeScenario.species;
+
+    if (sp === "Elephant") {
+      return {
+        threatScore: 96,
+        threatStatus: "CRITICAL",
+        farmThreat: "🔴 High",
+        threatColor: "text-red-500 bg-red-500/10 border-red-500/20",
+        threatBg: "bg-red-600",
+        damageCategory: "Massive crop consumption + fence destruction + village safety risk",
+        activityPeriod: "Nocturnal & Crepuscular (Night fringe grazing)",
+        socialBehavior: "Breeding matriarchal herds & solitary bulls",
+        diet: "Sugarcane, banana, paddy, maize, cotton shoots",
+        safetyRisk: "CRITICAL — Avoid loud sirens near villages to prevent herd panic stampede",
+        count: 3,
+        speed: "Walking",
+        direction: "Forest Fringe",
+        gpsZone: "North-East Boundary",
+        matrixRowIndex: 0,
+        learning: { visits: 12, successful: "Directional Flood Lights", successRate: 86, exitTime: 48 },
+        reasons: [
+          "Species identified as Elephant (WS-WL-EL).",
+          `Crop configured as ${currentCrop}.`,
+          currentCrop === "Cotton" ? "Sprinkler disabled to avoid cotton boll moisture damage." : "Sprinkler active for perimeter barrier.",
+          "Village located within 200m of North Boundary.",
+          "High-volume siren inhibited to avoid village-wide panic.",
+          "Directional LED floodlights + targeted acoustic speaker engaged.",
+          "Automatic Forest Department dispatch alert triggered."
+        ],
+        tree: [
+          "What is it? → Elephant (WS-WL-EL)",
+          "Where is it? → North-East Boundary (CAM-01)",
+          "When is it active? → Nocturnal Fringe Window",
+          "What is it doing? → Herd Transit towards Crops",
+          "Is it inside Geofence? → BREACH DETECTED",
+          `Crop Risk Assessment → High (${currentCrop})`,
+          "Safe Response Selection → Directional Strobe + Forest Alert"
+        ]
+      };
     }
+
+    if (sp === "Wild Boar") {
+      return {
+        threatScore: 92,
+        threatStatus: "CRITICAL",
+        farmThreat: "🔴 High",
+        threatColor: "text-red-500 bg-red-500/10 border-red-500/20",
+        threatBg: "bg-red-600",
+        damageCategory: "Rooting tubers, soil excavation, grain consumption & repeat raids",
+        activityPeriod: "Crepuscular / Nocturnal (Late evening & night peak)",
+        socialBehavior: "Sounders (Females & young); Solitary mature males",
+        diet: "Roots, tubers, standing grains, groundnuts, fallen fruit",
+        safetyRisk: "Moderate — Aggressive if cornered with young",
+        count: 5,
+        speed: "Rooting / Foraging",
+        direction: "North Boundary",
+        gpsZone: "North-West Field",
+        matrixRowIndex: 1,
+        learning: { visits: 24, successful: "Predator Audio", successRate: 91, exitTime: 28 },
+        reasons: [
+          "Species identified as Wild Boar (WS-WL-WB).",
+          `Crop configured as ${currentCrop}.`,
+          "High threat: Major root/tuber destruction and soil excavation risk.",
+          "Acoustic predator sound (tiger/leopard roar) selected.",
+          "LED strobe lights activated in rapid flash mode.",
+          currentCrop === "Cotton" ? "Sprinkler disabled (Cotton Crop Guard)." : "Sprinkler active (Water jet deterrent).",
+          "Farmer alert pushed via mobile app."
+        ],
+        tree: [
+          "What is it? → Wild Boar (WS-WL-WB)",
+          "Where is it? → North-West Field (CAM-01)",
+          "When is it active? → Nocturnal Foraging Window",
+          "What is it doing? → Soil Rooting & Tuber Feeding",
+          "Is it inside Geofence? → INTRUSION DETECTED",
+          `Crop Risk Assessment → High Risk (${currentCrop})`,
+          "Safe Response Selection → Siren + LED Floodlight"
+        ]
+      };
+    }
+
+    if (sp === "Nilgai") {
+      return {
+        threatScore: 84,
+        threatStatus: "HIGH THREAT",
+        farmThreat: "🔴 High",
+        threatColor: "text-red-400 bg-red-500/10 border-red-500/20",
+        threatBg: "bg-red-500",
+        damageCategory: "Cereal & pulse crop loss + structural trampling + dung fouling",
+        activityPeriod: "Early Morning (05:00-08:30) & Late Afternoon (16:30-19:30)",
+        socialBehavior: "Herds (~10+ individuals); Acute vision & hearing",
+        diet: "Herbivore (Grasses, cereals, pulses, vegetables, shoots)",
+        safetyRisk: "Low–Medium — High flight distance; rapid escape",
+        count: 1,
+        speed: "Crop Grazing",
+        direction: "Crop Center",
+        gpsZone: "South-East Field",
+        matrixRowIndex: 2,
+        learning: { visits: 9, successful: "Floodlight + Alarm", successRate: 78, exitTime: 45 },
+        reasons: [
+          "Species identified as Nilgai / Blue Bull (WS-WL-NG).",
+          `Crop configured as ${currentCrop}.`,
+          "High threat: Major agricultural conflict species for cereals & pulses.",
+          "Directional Floodlight + Acoustic Alarm engaged to deter large herbivore.",
+          "Farmer app notification dispatched with GPS vector."
+        ],
+        tree: [
+          "What is it? → Nilgai (WS-WL-NG)",
+          "Where is it? → South-East Field (CAM-03)",
+          "When is it active? → Peak Feeding Window",
+          "What is it doing? → Cereal & Pulse Crop Grazing",
+          "Is it inside Geofence? → INTRUSION DETECTED",
+          `Crop Risk Assessment → High (${currentCrop})`,
+          "Safe Response Selection → Floodlight + Alarm"
+        ]
+      };
+    }
+
+    if (sp === "Spotted Deer" || sp === "Deer") {
+      return {
+        threatScore: 58,
+        threatStatus: "WARNING",
+        farmThreat: "🟠 Medium",
+        threatColor: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+        threatBg: "bg-amber-500",
+        damageCategory: "Herbaceous grazing loss + young shoot consumption",
+        activityPeriod: "Crepuscular / Variable daytime foraging",
+        socialBehavior: "Herd-forming (Female-young groups & bachelor herds)",
+        diet: "Grasses, tender crop shoots, flowers, fallen fruits",
+        safetyRisk: "Low — Panic stampede risk if loud siren triggered",
+        count: 2,
+        speed: "Grazing",
+        direction: "River Edge",
+        gpsZone: "South Field",
+        matrixRowIndex: 3,
+        learning: { visits: 18, successful: "Soft Flash Lights", successRate: 83, exitTime: 35 },
+        reasons: [
+          "Species identified as Spotted Deer (WS-WL-SD).",
+          `Crop configured as ${currentCrop}.`,
+          "Medium threat: Young shoot grazing risk.",
+          "Soft Floodlight + Low-Frequency Alarm active (Bypassing loud siren).",
+          "Farmer alert logged in telemetry history."
+        ],
+        tree: [
+          "What is it? → Spotted Deer (WS-WL-SD)",
+          "Where is it? → South Field (CAM-04)",
+          "When is it active? → Crepuscular Window",
+          "What is it doing? → Herbaceous Shoot Grazing",
+          "Is it inside Geofence? → PERIMETER BREACH",
+          `Crop Risk Assessment → Moderate (${currentCrop})`,
+          "Safe Response Selection → Soft Floodlight + Alarm"
+        ]
+      };
+    }
+
+    if (sp === "Rhesus Macaque" || sp === "Monkey") {
+      return {
+        threatScore: 82,
+        threatStatus: "HIGH THREAT",
+        farmThreat: "🔴 High",
+        threatColor: "text-red-400 bg-red-500/10 border-red-500/20",
+        threatBg: "bg-red-500",
+        damageCategory: "Orchard fruit loss + vegetable destruction + stem breaking",
+        activityPeriod: "Diurnal (Full daylight orchard raiding)",
+        socialBehavior: "Multi-male, multi-female troops with sentinel scouts",
+        diet: "Fruits, vegetables, tubers, seeds, tender crop leaves",
+        safetyRisk: "Moderate — Intimidation display when in large troops",
+        count: 8,
+        speed: "Agile Canopy Raid",
+        direction: "Tree Line",
+        gpsZone: "East Field",
+        matrixRowIndex: 4,
+        learning: { visits: 45, successful: "Monkey Distress Call", successRate: 79, exitTime: 15 },
+        reasons: [
+          "Species identified as Rhesus Macaque (WS-WL-RM).",
+          `Crop configured as ${currentCrop}.`,
+          "High waste ratio: Fruit plucking and branch breaking.",
+          "Sprinkler pulse + Primate distress call broadcasted.",
+          "Farmer notified of troop intrusion."
+        ],
+        tree: [
+          "What is it? → Rhesus Macaque (WS-WL-RM)",
+          "Where is it? → East Field Canopy (CAM-02)",
+          "When is it active? → Diurnal Daylight Window",
+          "What is it doing? → Orchard & Fruit Plucking Raid",
+          "Is it inside Geofence? → ACTIVE TROOP INTRUSION",
+          `Crop Risk Assessment → High (${currentCrop})`,
+          "Safe Response Selection → Sprinkler Pulse + Distress Call"
+        ]
+      };
+    }
+
+    if (sp === "Langur") {
+      return {
+        threatScore: 65,
+        threatStatus: "MODERATE",
+        farmThreat: "🟠 Medium–High",
+        threatColor: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+        threatBg: "bg-amber-500",
+        damageCategory: "Leaf stripping, blossom damage, canopy fruit consumption",
+        activityPeriod: "Diurnal (Morning & late afternoon summer peaks)",
+        socialBehavior: "Social troops (10 to 50+ individuals)",
+        diet: "Leaves, blossoms, wild fruits, tender pods",
+        safetyRisk: "Low — High agility, retreats into upper canopy",
+        count: 6,
+        speed: "Canopy Transit",
+        direction: "Perimeter Trees",
+        gpsZone: "North-West Field",
+        matrixRowIndex: 5,
+        learning: { visits: 14, successful: "Visual Strobe Flash", successRate: 82, exitTime: 18 },
+        reasons: [
+          "Species identified as Langur (WS-WL-LG).",
+          `Crop configured as ${currentCrop}.`,
+          "Overhead sprinkler pulse + Visual strobe flash engaged.",
+          "Safe non-contact deterrent for arboreal primates."
+        ],
+        tree: [
+          "What is it? → Langur (WS-WL-LG)",
+          "Where is it? → North-West Tree Buffer",
+          "When is it active? → Diurnal Window",
+          "What is it doing? → Leaf & Blossom Foraging",
+          "Is it inside Geofence? → CANOPY BREACH",
+          `Crop Risk Assessment → Moderate (${currentCrop})`,
+          "Safe Response Selection → Visual Flash + Sprinkler"
+        ]
+      };
+    }
+
+    if (sp === "Gaur") {
+      return {
+        threatScore: 98,
+        threatStatus: "CRITICAL",
+        farmThreat: "🔴 Very High",
+        threatColor: "text-red-500 bg-red-500/10 border-red-500/20",
+        threatBg: "bg-red-600",
+        damageCategory: "Massive biomass consumption + fence flattening + extreme safety risk",
+        activityPeriod: "Morning / Evening feeding; Nocturnal in disturbed buffers",
+        socialBehavior: "Massive bovine weight (600–1000 kg); Dominant herds",
+        diet: "Coarse grasses, bamboo shoots, agricultural foliage",
+        safetyRisk: "EXTREME — Do NOT approach, corner, or chase. High hazard to human life",
+        count: 1,
+        speed: "Approaching",
+        direction: "Forest Edge",
+        gpsZone: "North Field",
+        matrixRowIndex: 6,
+        learning: { visits: 5, successful: "Non-Contact Siren", successRate: 90, exitTime: 30 },
+        reasons: [
+          "Species identified as Gaur / Indian Bison (WS-WL-GR).",
+          `Crop configured as ${currentCrop}.`,
+          "CRITICAL SAFETY RULE: Non-contact deterrence only.",
+          "Do NOT approach or corner the animal.",
+          "Automatic emergency alert sent to Forest Department & Farmer Hub."
+        ],
+        tree: [
+          "What is it? → Gaur / Indian Bison (WS-WL-GR)",
+          "Where is it? → North Field Buffer (CAM-01)",
+          "When is it active? → Evening Feeding Window",
+          "What is it doing? → Heavy Biomass Grazing",
+          "Is it inside Geofence? → MEGAFAUNA INTRUSION",
+          "Human Safety Risk → EXTREME (Do NOT approach)",
+          "Safe Response Selection → Non-Contact Strobe + Forest Alert"
+        ]
+      };
+    }
+
+    if (sp === "Cattle" || sp === "Stray Cattle") {
+      return {
+        threatScore: 28,
+        threatStatus: "LOW THREAT",
+        farmThreat: "🟡 Medium (Domestic)",
+        threatColor: "text-green-500 bg-green-500/10 border-green-500/20",
+        threatBg: "bg-green-500",
+        damageCategory: "Casual grazing on young foliage + minor boundary trampling",
+        activityPeriod: "Mostly daytime grazing & resting",
+        socialBehavior: "Domestic livestock (Escaped or stray village herd)",
+        diet: "Herbivore (Grasses, crop leaves, stubble)",
+        safetyRisk: "Negligible — Docile domestic livestock",
+        count: 2,
+        speed: "Grazing",
+        direction: "Farm Path",
+        gpsZone: "South-West Field",
+        matrixRowIndex: 7,
+        learning: { visits: 31, successful: "Sprinkler / Warning", successRate: 75, exitTime: 90 },
+        reasons: [
+          "Species identified as Domestic Cattle (WS-DM-CT).",
+          `Crop configured as ${currentCrop}.`,
+          "Domestic discrimination: Safe non-hostile deterrent.",
+          "Aggressive predator siren & forest alerts inhibited.",
+          "Low-intensity sprinkler / warning buzzer active.",
+          "Farmer notified for routine boundary check."
+        ],
+        tree: [
+          "What is it? → Domestic Cattle (WS-DM-CT)",
+          "Where is it? → South-West Farm Path (CAM-04)",
+          "When is it active? → Daytime Grazing Window",
+          "What is it doing? → Boundary Foliage Grazing",
+          "Is it inside Geofence? → LIVESTOCK MONITORED",
+          "Domestic Discrimination → True (Siren Bypassed)",
+          "Safe Response Selection → Sprinkler Pulse / Warning Buzzer"
+        ]
+      };
+    }
+
+    if (sp === "Goat") {
+      return {
+        threatScore: 20,
+        threatStatus: "LOW THREAT",
+        farmThreat: "🟢 Low–Med (Domestic)",
+        threatColor: "text-green-500 bg-green-500/10 border-green-500/20",
+        threatBg: "bg-green-500",
+        damageCategory: "Seedling browsing + young leaf consumption",
+        activityPeriod: "Daytime grazing & browsing",
+        socialBehavior: "Domestic herd-forming browsers",
+        diet: "Shrubs, leaves, young crop seedlings",
+        safetyRisk: "Negligible",
+        count: 3,
+        speed: "Grazing",
+        direction: "Boundary Fence",
+        gpsZone: "West Field",
+        matrixRowIndex: 8,
+        learning: { visits: 15, successful: "Warning Buzzer", successRate: 85, exitTime: 20 },
+        reasons: [
+          "Species identified as Domestic Goat (WS-DM-GT).",
+          `Crop configured as ${currentCrop}.`,
+          "Domestic discrimination: Low threat level.",
+          "Safe non-hostile local warning beep engaged.",
+          "Farmer notified for herd retrieval."
+        ],
+        tree: [
+          "What is it? → Domestic Goat (WS-DM-GT)",
+          "Where is it? → West Boundary Fence (CAM-05)",
+          "When is it active? → Daytime Browsing",
+          "What is it doing? → Seedling Browsing",
+          "Is it inside Geofence? → LIVESTOCK MONITORED",
+          "Domestic Discrimination → True (Low Threat)",
+          "Safe Response Selection → Warning Audio Beep"
+        ]
+      };
+    }
+
+    if (sp === "Human") {
+      return {
+        threatScore: 15,
+        threatStatus: "ALERT ONLY",
+        farmThreat: "⚠️ Context-dependent",
+        threatColor: "text-blue-400 bg-blue-500/10 border-blue-500/20",
+        threatBg: "bg-blue-500",
+        damageCategory: "Safety monitoring + false positive mitigation",
+        activityPeriod: "Day / Night (Farmers, workers, researchers)",
+        socialBehavior: "Individual or working group",
+        diet: "N/A",
+        safetyRisk: "CRITICAL SAFETY RULE: Automated wildlife deterrents are INHIBITED",
+        count: 1,
+        speed: "Walking",
+        direction: "Perimeter Trail",
+        gpsZone: "Farm Entrance",
+        matrixRowIndex: 9,
+        learning: { visits: 50, successful: "Notification Log", successRate: 100, exitTime: 60 },
+        reasons: [
+          "Entity identified as Human (WS-HM-HU).",
+          "CRITICAL SAFETY RULE: Wildlife deterrents automatically inhibited.",
+          "Telemetry logged with timestamp for perimeter safety audit.",
+          "App push notification sent to farm manager."
+        ],
+        tree: [
+          "What is it? → Human (WS-HM-HU)",
+          "Where is it? → Farm Entrance (CAM-01)",
+          "Safety Context Check → Farm Worker / Person",
+          "Wildlife Deterrence → STRICTLY INHIBITED",
+          "Telemetry Event → Logged with Timestamp",
+          "Response Selection → Silent App Notification"
+        ]
+      };
+    }
+
+    // Default Fallback
+    return {
+      threatScore: 10,
+      threatStatus: "STABLE",
+      farmThreat: "🟡 Monitored",
+      threatColor: "text-slate-500 bg-slate-500/10 border-slate-500/20",
+      threatBg: "bg-slate-500",
+      damageCategory: "Perimeter monitoring",
+      activityPeriod: "Variable",
+      socialBehavior: "Standard",
+      diet: "N/A",
+      safetyRisk: "Standard caution",
+      count: 0,
+      speed: "N/A",
+      direction: "N/A",
+      gpsZone: "Perimeter Boundary",
+      matrixRowIndex: -1,
+      learning: { visits: 0, successful: "None", successRate: 0, exitTime: 0 },
+      reasons: ["Scanning perimeter... No active wildlife threat detected."],
+      tree: ["Perimeter Scan", "All Clear"]
+    };
   };
 
   const specConfig = getSpeciesConfig();
@@ -259,15 +453,15 @@ export default function RightPanel({ simulationState, currentScenario, language 
   // 2. Animated confidence counter
   const [animatedConfidence, setAnimatedConfidence] = useState(0);
   useEffect(() => {
-    if (simulationState >= 2 && simulationState <= 4) {
+    if (simulationState >= 1 || activeScenario?.confidenceBase) {
       let start = 0;
-      const end = activeScenario.confidenceMax || 98.6;
-      const duration = 1200; // ms
-      const stepTime = Math.abs(Math.floor(duration / end));
+      const end = activeScenario.confidenceBase || activeScenario.confidenceMax || 96.0;
+      const duration = 800; // ms
+      const stepTime = Math.max(10, Math.floor(duration / end));
       
       const timer = setInterval(() => {
-        start += 1;
-        if (start > end) {
+        start += 2;
+        if (start >= end) {
           setAnimatedConfidence(end);
           clearInterval(timer);
         } else {
@@ -278,40 +472,40 @@ export default function RightPanel({ simulationState, currentScenario, language 
     } else {
       setAnimatedConfidence(0);
     }
-  }, [simulationState, activeScenario.species]);
+  }, [simulationState, activeScenario?.species, activeScenario?.confidenceBase]);
 
   // 3. Actuators states mapping based on Species + Crop
   const getActuatorState = (actuator) => {
-    if (simulationState < 3) return { state: "OFF", color: "bg-slate-800 text-slate-400" };
+    const isLiveDetected = simulationState >= 1 || activeScenario?.confidenceBase;
+    if (!isLiveDetected) return { state: "OFF", color: "bg-slate-800 text-slate-400" };
     
     // Crop-Aware Sprinkler override
     if (actuator === "Sprinkler") {
       if (currentCrop === "Cotton") {
         return { state: "DISABLED", color: "bg-red-500/10 border border-red-500/30 text-red-500 font-bold" };
       }
-      // If other crops, check if scenario uses sprinkler
-      const usesSprinkler = activeScenario.actuators.sprinkler || activeScenario.species === "Elephant" || activeScenario.species === "Wild Boar" || activeScenario.species === "Monkey";
+      const usesSprinkler = activeScenario.actuators?.sprinkler || activeScenario.species === "Elephant" || activeScenario.species === "Rhesus Macaque" || activeScenario.species === "Langur" || activeScenario.species === "Cattle";
       return usesSprinkler 
         ? { state: "ON", color: "bg-green-500 text-slate-950 font-bold" }
         : { state: "OFF", color: "bg-slate-800 text-slate-400" };
     }
 
     if (actuator === "Floodlights") {
-      const usesFlood = activeScenario.actuators.floodlight || activeScenario.species === "Elephant" || activeScenario.species === "Wild Boar" || activeScenario.species === "Monkey" || activeScenario.species === "Deer";
+      const usesFlood = activeScenario.actuators?.floodlight || activeScenario.species === "Elephant" || activeScenario.species === "Wild Boar" || activeScenario.species === "Nilgai" || activeScenario.species === "Spotted Deer" || activeScenario.species === "Gaur";
       return usesFlood
         ? { state: "ON", color: "bg-green-500 text-slate-950 font-bold" }
         : { state: "OFF", color: "bg-slate-800 text-slate-400" };
     }
 
     if (actuator === "Speaker") {
-      const usesSpeaker = activeScenario.actuators.speaker || activeScenario.species === "Elephant" || activeScenario.species === "Wild Boar" || activeScenario.species === "Monkey" || activeScenario.species === "Nilgai" || activeScenario.species === "Stray Cattle";
+      const usesSpeaker = activeScenario.actuators?.speaker || activeScenario.species === "Elephant" || activeScenario.species === "Wild Boar" || activeScenario.species === "Nilgai" || activeScenario.species === "Rhesus Macaque" || activeScenario.species === "Gaur";
       return usesSpeaker
         ? { state: "ON", color: "bg-green-500 text-slate-950 font-bold" }
         : { state: "OFF", color: "bg-slate-800 text-slate-400" };
     }
 
     if (actuator === "ForestAlert") {
-      return activeScenario.species === "Elephant"
+      return (activeScenario.species === "Elephant" || activeScenario.species === "Gaur")
         ? { state: "SENT", color: "bg-blue-500 text-white font-bold" }
         : { state: "OFF", color: "bg-slate-800 text-slate-400" };
     }
@@ -321,21 +515,24 @@ export default function RightPanel({ simulationState, currentScenario, language 
     }
 
     if (actuator === "CameraTracking") {
-      return simulationState >= 2 && simulationState <= 4
-        ? { state: "ACTIVE", color: "bg-blue-500 text-white font-bold" }
-        : { state: "OFF", color: "bg-slate-800 text-slate-400" };
+      return { state: "ACTIVE", color: "bg-blue-500 text-white font-bold" };
     }
 
     return { state: "OFF", color: "bg-slate-800 text-slate-400" };
   };
 
-  // Matrix data for Section 5
+  // Matrix data for Section 5 (from WII Animal Behaviour & Farm Impact Knowledge Base)
   const matrixData = [
-    { species: "Elephant", emoji: "🐘", primary: "Directional LED Flood Lights", secondary: "Directional Speaker", reason: "Avoid village-wide noise" },
-    { species: "Wild Boar", emoji: "🐗", primary: "Predator Audio", secondary: "LED Flashing Lights", reason: "Sensitive to predator sounds" },
-    { species: "Monkey", emoji: "🐒", primary: "Monkey Distress Call", secondary: "Visual Flash", reason: "Avoid crop damage" },
-    { species: "Deer", emoji: "🦌", primary: "Soft Flash Lights", secondary: "Farmer Alert", reason: "Avoid panic response" },
-    { species: "Stray Cattle", emoji: "🐄", primary: "Mobile Notification", secondary: "Local Buzzer", reason: "Manual removal required" }
+    { species: "Wild Boar", code: "WS-WL-WB", emoji: "🐗", threat: "🔴 High", primary: "Siren + LED Floodlight", secondary: "Predator Roar Audio", reason: "Rooting soil & tubers, repeat raiding" },
+    { species: "Nilgai", code: "WS-WL-NG", emoji: "🐂", threat: "🔴 High", primary: "Directional Floodlight", secondary: "Acoustic Alarm", reason: "Cereal/pulse grazing + trampling" },
+    { species: "Spotted Deer", code: "WS-WL-SD", emoji: "🦌", threat: "🟠 Medium", primary: "Soft Floodlight", secondary: "Low-Frequency Alarm", reason: "Shoot grazing (Avoid siren panic)" },
+    { species: "Rhesus Macaque", code: "WS-WL-RM", emoji: "🐒", threat: "🔴 High", primary: "Smart Sprinkler Pulse", secondary: "Primate Distress Call", reason: "Fruit plucking, branch breaking" },
+    { species: "Langur", code: "WS-WL-LG", emoji: "🐒", threat: "🟠 Med–High", primary: "Overhead Sprinkler", secondary: "Visual Strobe Flash", reason: "Leaf stripping & blossom damage" },
+    { species: "Gaur", code: "WS-WL-GR", emoji: "🦬", threat: "🔴 Very High", primary: "Non-Contact Strobe", secondary: "Forest Dept Alert", reason: "Extreme safety hazard (Do NOT approach)" },
+    { species: "Cattle", code: "WS-DM-CT", emoji: "🐄", threat: "🟡 Medium", primary: "Water Sprinkler Pulse", secondary: "Warning Buzzer", reason: "Livestock control (Siren inhibit)" },
+    { species: "Goat", code: "WS-DM-GT", emoji: "🐐", threat: "🟢 Low–Med", primary: "Local Beep Buzzer", secondary: "Farmer App Check", reason: "Seedling browsing" },
+    { species: "Human", code: "WS-HM-HU", emoji: "🚶", threat: "⚠️ Context", primary: "Telemetry Logging", secondary: "Silent App Alert", reason: "Safety rule: Deterrents INHIBITED" },
+    { species: "Elephant", code: "WS-WL-EL", emoji: "🐘", threat: "🔴 High", primary: "Directional Floodlight", secondary: "Directional Speaker", reason: "Paddy/Sugarcane (Avoid village siren)" }
   ];
 
   return (
@@ -378,38 +575,51 @@ export default function RightPanel({ simulationState, currentScenario, language 
       <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3">
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5 flex justify-between items-center">
           <span>Current Detection</span>
-          {simulationState >= 2 && simulationState <= 4 && (
-            <span className="flex items-center gap-1 text-[8px] font-mono text-red-500 animate-pulse">
-              <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
-              BREACH DETECTED
-            </span>
+          {(simulationState >= 1 || activeScenario?.confidenceBase) && (
+            (activeScenario.threat === "HIGH" || activeScenario.threat === "CRITICAL" || activeScenario.threat === "MEDIUM" || activeScenario.threat === "WARNING" || activeScenario.threat === "ALERT") ? (
+              <span className="flex items-center gap-1 text-[8px] font-mono text-red-500 animate-pulse font-bold">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                BREACH DETECTED
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-[8px] font-mono text-green-400 font-bold bg-green-500/10 px-1.5 py-0.5 rounded border border-green-500/20">
+                <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
+                LIVESTOCK / DOMESTIC
+              </span>
+            )
           )}
         </div>
 
-        {simulationState > 0 ? (
+        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
           <div className="flex gap-3">
             {/* Image / Bounding Box viewport */}
             <div className="relative w-24 h-24 bg-slate-950 rounded-lg border border-slate-900 overflow-hidden flex items-center justify-center shrink-0 crt-overlay">
-              {simulationState >= 2 && simulationState <= 4 && (
+              {(activeScenario.threat === "HIGH" || activeScenario.threat === "CRITICAL" || activeScenario.threat === "MEDIUM" || activeScenario.threat === "WARNING") ? (
                 <motion.div
                   initial={{ scale: 1.1, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   className="absolute inset-1.5 border-2 border-red-500 rounded-md pointer-events-none z-10"
                 />
+              ) : (
+                <div className="absolute inset-1.5 border-2 border-green-500/80 rounded-md pointer-events-none z-10" />
               )}
-              {/* Fallback image */}
+              {/* Animal Photo with Bounding Box Overlay */}
               <img
                 src={
-                  activeScenario.species === "Elephant" ? "/christoffer-brus-7hGF4emWkXs-unsplash.jpg" :
-                  activeScenario.species === "Wild Boar" ? "/ed-van-duijn-414NZVxzc20-unsplash.jpg" :
-                  activeScenario.species === "Monkey" ? "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=200&auto=format&fit=crop" :
-                  activeScenario.species === "Deer" ? "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=200&auto=format&fit=crop" :
-                  activeScenario.species === "Nilgai" ? "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=200&auto=format&fit=crop" :
-                  activeScenario.species === "Stray Cattle" ? "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?q=80&w=200&auto=format&fit=crop" :
-                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"
+                  activeScenario.image || (
+                    activeScenario.species === "Elephant" ? "/christoffer-brus-7hGF4emWkXs-unsplash.jpg" :
+                    activeScenario.species === "Wild Boar" ? "/ed-van-duijn-414NZVxzc20-unsplash.jpg" :
+                    (activeScenario.species === "Cattle" || activeScenario.species === "Stray Cattle") ? "https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?q=80&w=300&auto=format&fit=crop" :
+                    (activeScenario.species === "Deer" || activeScenario.species === "Spotted Deer") ? "https://images.unsplash.com/photo-1484406566174-9da000fda645?q=80&w=300&auto=format&fit=crop" :
+                    activeScenario.species === "Nilgai" ? "https://images.unsplash.com/photo-1589656966895-2f33e7653819?q=80&w=300&auto=format&fit=crop" :
+                    activeScenario.species === "Goat" ? "https://images.unsplash.com/photo-1524024973431-2ad916746881?q=80&w=300&auto=format&fit=crop" :
+                    (activeScenario.species === "Monkey" || activeScenario.species === "Rhesus Macaque" || activeScenario.species === "Langur") ? "https://images.unsplash.com/photo-1540573133985-87b6da6d54a9?q=80&w=300&auto=format&fit=crop" :
+                    activeScenario.species === "Gaur" ? "https://images.unsplash.com/photo-1553531384-cc64ac80f931?q=80&w=300&auto=format&fit=crop" :
+                    "/ed-van-duijn-414NZVxzc20-unsplash.jpg"
+                  )
                 }
                 alt={activeScenario.species}
-                className="w-full h-full object-cover filter brightness-[0.75] contrast-[1.15]"
+                className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.1]"
               />
               <span className="absolute bottom-1 right-1 text-xs select-none z-10 filter drop-shadow">
                 {activeScenario.emoji}
@@ -425,17 +635,17 @@ export default function RightPanel({ simulationState, currentScenario, language 
               <div className="flex justify-between">
                 <span className="text-slate-500">Confidence:</span>
                 <span className="text-green-500 font-bold">
-                  {simulationState >= 2 ? `${animatedConfidence}%` : "0%"}
+                  {activeScenario.confidenceBase ? `${activeScenario.confidenceBase}%` : (simulationState >= 1 ? `${animatedConfidence}%` : "0%")}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Camera:</span>
-                <span className="text-slate-300">CAM-0{activeScenario.nodeId}</span>
+                <span className="text-slate-300">{activeScenario.nodeName || `CAM-0${activeScenario.nodeId}`}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Distance:</span>
                 <span className="text-slate-300">
-                  {simulationState >= 2 ? `${specConfig.threatScore - 55} meters` : "N/A"}
+                  {`${Math.max(12, specConfig.threatScore - 40)} meters`}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -444,7 +654,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Timestamp:</span>
-                <span className="text-slate-400">10:23:15 PM</span>
+                <span className="text-slate-400">{activeScenario.timestamp || "10:23:15 PM"}</span>
               </div>
             </div>
           </div>
@@ -455,12 +665,13 @@ export default function RightPanel({ simulationState, currentScenario, language 
         )}
       </div>
 
-      {/* SECTION 2: THREAT ANALYSIS */}
-      <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3">
-        <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
-          Threat Analysis
+      {/* SECTION 2: THREAT ANALYSIS (Knowledge-Base Enriched) */}
+      <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3 text-left">
+        <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5 flex justify-between items-center">
+          <span>Threat & Impact Analysis</span>
+          <span className="text-[8px] font-mono text-slate-400">{specConfig.farmThreat}</span>
         </div>
-        {simulationState >= 2 && simulationState <= 4 ? (
+        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-slate-400">Threat Index:</span>
@@ -477,6 +688,19 @@ export default function RightPanel({ simulationState, currentScenario, language 
                 className={`h-full rounded-full ${specConfig.threatBg}`}
               />
             </div>
+
+            {/* Farm Impact & Safety Caution */}
+            <div className="bg-slate-950/70 border border-slate-900 rounded p-2 text-[9px] font-mono space-y-1">
+              <div className="text-slate-400">
+                <strong className="text-slate-300">Farm Damage Risk:</strong> {specConfig.damageCategory}
+              </div>
+              {specConfig.safetyRisk && (
+                <div className="text-amber-400/90 flex items-start gap-1 pt-0.5 border-t border-slate-900">
+                  <AlertOctagon className="h-3 w-3 shrink-0 text-amber-400 mt-0.5" />
+                  <span><strong>Safety Protocol:</strong> {specConfig.safetyRisk}</span>
+                </div>
+              )}
+            </div>
           </div>
         ) : (
           <div className="text-center py-2 text-slate-500 font-mono text-[10px] italic">
@@ -485,23 +709,21 @@ export default function RightPanel({ simulationState, currentScenario, language 
         )}
       </div>
 
-      {/* SECTION 3: CONTEXT ANALYSIS */}
-      <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3">
+      {/* SECTION 3: CONTEXT ANALYSIS (Knowledge-Base Enriched) */}
+      <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3 text-left">
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
-          Context Analysis
+          Context & Animal Behaviour
         </div>
-        {simulationState >= 2 && simulationState <= 4 ? (
-          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[9px] font-mono text-left">
-            <div><span className="text-slate-500">Current Crop:</span> <span className="text-slate-200">{currentCrop}</span></div>
-            <div><span className="text-slate-500">Crop Sensitivity:</span> <span className="text-slate-200">High</span></div>
-            <div><span className="text-slate-500">Weather:</span> <span className="text-slate-200">Cloudy</span></div>
-            <div><span className="text-slate-500">Visibility:</span> <span className="text-slate-200">Low</span></div>
-            <div><span className="text-slate-500 font-sans">Village Dist:</span> <span className="text-slate-200">120m</span></div>
-            <div><span className="text-slate-500">Farmer House:</span> <span className="text-slate-200">310m</span></div>
-            <div><span className="text-slate-500">Count:</span> <span className="text-slate-200 font-sans">{specConfig.count}</span></div>
-            <div><span className="text-slate-500">Speed:</span> <span className="text-slate-200">{specConfig.speed}</span></div>
-            <div><span className="text-slate-500">Zone:</span> <span className="text-slate-300 font-bold">{specConfig.gpsZone}</span></div>
-            <div><span className="text-slate-500">Intrusion History:</span> <span className="text-amber-500">Yes</span></div>
+        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
+          <div className="space-y-1.5 text-[9px] font-mono">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-300">
+              <div><span className="text-slate-500">Current Crop:</span> <span className="text-slate-200">{currentCrop}</span></div>
+              <div><span className="text-slate-500">Crop Sensitivity:</span> <span className="text-slate-200">{currentCrop === 'Cotton' ? 'High (Sprinkler Guard)' : 'Medium'}</span></div>
+              <div><span className="text-slate-500">Active Window:</span> <span className="text-slate-200">{specConfig.activityPeriod}</span></div>
+              <div><span className="text-slate-500">Social Group:</span> <span className="text-slate-200">{specConfig.socialBehavior}</span></div>
+              <div><span className="text-slate-500">Diet / Foraging:</span> <span className="text-slate-200">{specConfig.diet}</span></div>
+              <div><span className="text-slate-500">Farm Zone:</span> <span className="text-slate-300 font-bold">{specConfig.gpsZone}</span></div>
+            </div>
           </div>
         ) : (
           <div className="text-center py-2 text-slate-500 font-mono text-[10px] italic">
@@ -510,28 +732,29 @@ export default function RightPanel({ simulationState, currentScenario, language 
         )}
       </div>
 
-      {/* SECTION 4: DECISION REASONING TREE */}
+      {/* SECTION 4: DECISION REASONING TREE (7-Step Cognitive Chain) */}
       <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3 text-left">
-        <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
-          Decision Reasoning Tree
+        <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5 flex justify-between items-center">
+          <span>Decision Reasoning Tree</span>
+          <span className="text-[8px] font-mono text-slate-500">7-Step Cognitive Chain</span>
         </div>
-        {simulationState >= 2 && simulationState <= 4 ? (
+        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
           <div className="space-y-1">
             {specConfig.tree.map((step, index) => (
               <motion.div
                 key={step}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.3 }}
+                transition={{ delay: index * 0.2 }}
                 className="flex items-center gap-1.5 text-[9px] font-mono text-slate-400"
               >
                 {index > 0 && <span className="text-slate-600 pl-2">↳</span>}
                 <span className={`px-1.5 py-0.5 rounded border leading-none ${
                   index === 0 ? "bg-slate-950 border-slate-900 text-slate-300 font-bold" :
-                  step.includes("Threat") ? "bg-red-500/10 border-red-500/20 text-red-400 font-bold" :
-                  step.includes("Crop") ? "bg-blue-500/10 border-blue-500/20 text-blue-400 font-bold" :
-                  step.includes("Disabled") || step.includes("Avoid") ? "bg-amber-500/10 border border-amber-500/20 text-amber-400 font-extrabold" :
-                  step.includes("Notify") || step.includes("Activate") ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                  step.includes("Threat") || step.includes("BREACH") || step.includes("CRITICAL") ? "bg-red-500/10 border-red-500/20 text-red-400 font-bold" :
+                  step.includes("Crop") || step.includes("Geofence") ? "bg-blue-500/10 border-blue-500/20 text-blue-400 font-bold" :
+                  step.includes("Disabled") || step.includes("Avoid") || step.includes("INHIBITED") ? "bg-amber-500/10 border border-amber-500/20 text-amber-400 font-extrabold" :
+                  step.includes("Notify") || step.includes("Alert") || step.includes("Selection") ? "bg-green-500/10 border-green-500/20 text-green-400" :
                   "bg-slate-900/60 border-slate-800 text-slate-300"
                 }`}>
                   {step}
@@ -548,35 +771,40 @@ export default function RightPanel({ simulationState, currentScenario, language 
 
       {/* SECTION 5: SPECIES SPECIFIC DECISION MATRIX */}
       <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3">
-        <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
-          Species Specific Decision Matrix
+        <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5 flex justify-between items-center">
+          <span>Species Decision Matrix</span>
+          <span className="text-[8px] font-mono text-slate-500">WII Literature Taxonomy</span>
         </div>
-        <div className="overflow-x-auto text-[8px] font-mono">
+        <div className="overflow-x-auto text-[8px] font-mono max-h-[220px] overflow-y-auto pr-1">
           <table className="w-full text-left">
             <thead>
               <tr className="text-slate-500 border-b border-slate-900 h-6">
                 <th>Species</th>
+                <th>Threat</th>
                 <th>Primary</th>
                 <th>Secondary</th>
-                <th>Reason</th>
+                <th>Farm Reason</th>
               </tr>
             </thead>
             <tbody>
               {matrixData.map((row, index) => {
-                const isHighlighted = activeScenario.species === row.species && simulationState >= 2 && simulationState <= 4;
+                const isHighlighted = (activeScenario.species === row.species || activeScenario.code === row.code) && (simulationState >= 1 || activeScenario?.confidenceBase);
                 return (
                   <tr 
                     key={index} 
-                    className={`border-b border-slate-900 h-7 transition-all duration-300 ${
+                    className={`border-b border-slate-900/70 h-7.5 transition-all duration-300 ${
                       isHighlighted 
                         ? 'bg-green-500/10 border-green-500/30 text-green-400 font-bold' 
-                        : 'text-slate-500'
+                        : 'text-slate-400 hover:bg-slate-900/30'
                     }`}
                   >
-                    <td>{row.emoji} {row.species}</td>
-                    <td>{row.primary}</td>
-                    <td>{row.secondary}</td>
-                    <td>{row.reason}</td>
+                    <td className="whitespace-nowrap font-sans font-semibold text-slate-200">
+                      {row.emoji} {row.species}
+                    </td>
+                    <td className="whitespace-nowrap">{row.threat}</td>
+                    <td className="whitespace-nowrap">{row.primary}</td>
+                    <td className="whitespace-nowrap">{row.secondary}</td>
+                    <td className="text-slate-400">{row.reason}</td>
                   </tr>
                 );
               })}
@@ -628,7 +856,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
           Why Did AI Choose This Response?
         </div>
-        {simulationState >= 2 && simulationState <= 4 ? (
+        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
           <div className="space-y-1.5">
             {specConfig.reasons.map((reason, index) => (
               <motion.div 
@@ -650,7 +878,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
         )}
       </div>
 
-      {/* SECTION 8: AI CONFIDENCE */}
+      {/* SECTION 8: AI CONFIDENCE & TELEMETRY */}
       <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3">
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
           AI Confidence & System Stats
@@ -658,22 +886,22 @@ export default function RightPanel({ simulationState, currentScenario, language 
         <div className="grid grid-cols-3 gap-2 text-center text-[9px] font-mono">
           <div className="bg-slate-950/60 border border-slate-900 rounded p-1.5">
             <span className="text-slate-500 block">Detect Conf</span>
-            <span className="text-green-500 font-bold">{simulationState >= 2 ? `${activeScenario.confidenceMax}%` : "0%"}</span>
+            <span className="text-green-500 font-bold">{animatedConfidence > 0 ? `${animatedConfidence}%` : "0%"}</span>
           </div>
           <div className="bg-slate-950/60 border border-slate-900 rounded p-1.5">
             <span className="text-slate-500 block">Decide Conf</span>
-            <span className="text-green-500 font-bold">{simulationState >= 2 ? "95%" : "0%"}</span>
+            <span className="text-green-500 font-bold">{(simulationState >= 1 || activeScenario?.confidenceBase) ? "95%" : "0%"}</span>
           </div>
           <div className="bg-slate-950/60 border border-slate-900 rounded p-1.5">
-            <span className="text-slate-500 block">Risk Predict</span>
-            <span className="text-amber-500 font-bold">{simulationState >= 2 ? "91%" : "0%"}</span>
+            <span className="text-slate-500 block">Risk Score</span>
+            <span className="text-amber-500 font-bold">{(simulationState >= 1 || activeScenario?.confidenceBase) ? `${specConfig.threatScore}/100` : "0%"}</span>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-[9px] font-mono text-left pt-1">
-          <div><span className="text-slate-500">Model:</span> <span className="text-slate-300">YOLOv11m</span></div>
-          <div><span className="text-slate-500">Inference Time:</span> <span className="text-slate-300">182 ms</span></div>
-          <div><span className="text-slate-500">GPU Usage:</span> <span className="text-slate-300">42%</span></div>
-          <div><span className="text-slate-500">VRAM Allocation:</span> <span className="text-slate-300">2.4 GB</span></div>
+          <div><span className="text-slate-500">Model:</span> <span className="text-slate-300">YOLOv11 Edge</span></div>
+          <div><span className="text-slate-500">Inference Time:</span> <span className="text-slate-300">142 ms</span></div>
+          <div><span className="text-slate-500">Inference Device:</span> <span className="text-slate-300">Edge CPU</span></div>
+          <div><span className="text-slate-500">Precision:</span> <span className="text-slate-300">FP32 Torch</span></div>
           <div><span className="text-slate-500">Frames Per Second:</span> <span className="text-slate-300">28 FPS</span></div>
         </div>
       </div>
@@ -683,14 +911,14 @@ export default function RightPanel({ simulationState, currentScenario, language 
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
           Learning Log (Adaptive AI)
         </div>
-        {simulationState >= 2 && simulationState <= 4 ? (
+        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
           <div className="space-y-1 text-[9px] font-mono text-slate-400">
             <div><span className="text-slate-500">Previous Visits:</span> <span className="text-slate-200">{specConfig.learning.visits}</span></div>
             <div><span className="text-slate-500 font-sans">Most Successful:</span> <span className="text-green-400 font-sans font-bold">{specConfig.learning.successful}</span></div>
             <div><span className="text-slate-500">Historical Success Rate:</span> <span className="text-green-500 font-bold">{specConfig.learning.successRate}%</span></div>
             <div><span className="text-slate-500 font-sans">Avg Exit Time:</span> <span className="text-slate-300">{specConfig.learning.exitTime} seconds</span></div>
             <div className="border-t border-slate-900 pt-1.5 mt-1.5">
-              <span className="text-slate-500">Recommendation:</span> <span className="text-blue-400 block font-sans font-bold mt-0.5">Continue Current Strategy</span>
+              <span className="text-slate-500">Recommendation:</span> <span className="text-blue-400 block font-sans font-bold mt-0.5">Autonomous Deterrence Protocol Confirmed</span>
             </div>
           </div>
         ) : (
@@ -698,39 +926,6 @@ export default function RightPanel({ simulationState, currentScenario, language 
             Scanning historical databases...
           </div>
         )}
-      </div>
-
-      {/* SECTION 10: ANIMATED TIMELINE */}
-      <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3 text-left">
-        <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
-          Animated Decision Timeline
-        </div>
-        <div className="flex flex-col gap-1.5 text-[9px] font-mono pl-2">
-          {[
-            { label: "Motion Detection", stateMin: 1 },
-            { label: "Camera Frame Capture", stateMin: 2 },
-            { label: "Species Classification", stateMin: 2 },
-            { label: "Threat Assessment", stateMin: 2 },
-            { label: "Decision Engine Logic", stateMin: 3 },
-            { label: "Deterrent Activation", stateMin: 3 },
-            { label: "Perimeter Monitoring", stateMin: 3 },
-            { label: "Animal Repelled / Exit", stateMin: 5 }
-          ].map((item, index) => {
-            const isCompleted = simulationState >= item.stateMin;
-            return (
-              <div key={index} className="flex items-center gap-2">
-                <span className={`h-2 w-2 rounded-full border transition-all duration-300 ${
-                  isCompleted 
-                    ? "bg-green-500 border-green-400 shadow-[0_0_6px_rgba(34,197,94,0.6)]" 
-                    : "bg-slate-950 border-slate-800"
-                }`} />
-                <span className={isCompleted ? "text-green-400 font-semibold" : "text-slate-500"}>
-                  {item.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
       </div>
 
     </aside>

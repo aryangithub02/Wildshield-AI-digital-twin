@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+.vercel
+.env*
+wildshield.db
+runs/
+__pycache__/
+Animals Datasets 1/
+Animals Datasets 2/
+WildShield-Dataset/
+yolo11n.pt

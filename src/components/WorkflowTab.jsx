@@ -128,6 +128,12 @@ function ScanIcon(props) {
 // Schematics data mapping copied image assets
 const SCHEMATIC_GALLERY = [
   {
+    id: "system-workflow-infographic",
+    title: "AI System Workflow Overview",
+    src: "/workflow/wildshield_workflow_infographic.png",
+    desc: "A premium technical infographic detailing the WildShield AI Wildlife Prevention System Workflow. Outlines the 5 core stages of the system: PIR Motion Trigger, YOLO Edge AI Scanning, Risk Assessment Matrix, Tailored Non-lethal Repellent, and GSM Alert Sync."
+  },
+  {
     id: "edge-node",
     title: "Edge IoT Node Hardware Layout",
     src: "/workflow/CPv71.jpg",
