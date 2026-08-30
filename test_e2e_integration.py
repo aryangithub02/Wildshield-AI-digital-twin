@@ -9,10 +9,12 @@ import time
 from pathlib import Path
 from fastapi.testclient import TestClient
 
-# Ensure root workspace is in sys.path
-BASE_DIR = Path(__file__).resolve().parent
-if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
+# Ensure UTF-8 stdout encoding on Windows terminal
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 from backend.server import app, load_yolo_model
 from backend.database import init_db, SessionLocal, Detection, Intrusion, PreventionAction, Notification
@@ -63,7 +65,8 @@ def run_tests():
     print(f"Intrusion ID: {detect_data.get('intrusion_id')}")
     print(f"Source: {detect_data.get('source')}")
     print(f"Intrusion Flag: {detect_data.get('intrusion')}")
-    print(f"Primary Detection: {detect_data.get('primary_detection')}")
+    prim = detect_data.get('primary_detection') or {}
+    print(f"Primary Detection: {prim.get('class')} ({prim.get('code', 'N/A')}) - {prim.get('confidence_pct')}% Conf")
     assert detect_res.status_code == 200
     assert detect_data.get("event_id").startswith("WS-EVT-")
     assert detect_data.get("intrusion_id").startswith("WS-INT-")
