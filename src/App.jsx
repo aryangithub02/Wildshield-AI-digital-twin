@@ -229,14 +229,71 @@ export default function App() {
     };
     fetchImages();
 
-    // Global WebSocket connection for bidirectional sync with Central Edge AI Hub & Mobile App
+    // Global WebSocket connection & Vercel Serverless REST polling fallback
     let ws = null;
     let reconnectTimeout = null;
+    let pollInterval = null;
+    let reconnectAttempts = 0;
+    const MAX_RECONNECT_ATTEMPTS = 3;
+
+    // Vercel serverless functions handle REST API (/api/*) natively but do not support persistent WebSockets
+    const isVercelServerless = !import.meta.env.VITE_WS_URL && window.location.hostname.endsWith('.vercel.app');
+
+    const startRestPolling = () => {
+      let lastSeenEventId = null;
+      pollInterval = setInterval(async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/api/events?limit=1`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.events && data.events.length > 0) {
+              const latest = data.events[0];
+              if (lastSeenEventId && latest.event_id !== lastSeenEventId) {
+                handleLiveModelDetection({
+                  camera_id: latest.camera_id || "FN-1",
+                  time_formatted: latest.time,
+                  source_file: latest.source,
+                  annotated_image: latest.annotated_image,
+                  primary_detection: {
+                    class: latest.species,
+                    code: latest.code || "ANML",
+                    emoji: "🐾",
+                    threat: latest.threat,
+                    confidence_pct: Math.round((latest.confidence || 0.9) * (latest.confidence <= 1 ? 100 : 1)),
+                    intrusion: latest.intrusion,
+                    responses: latest.response || ["ULTRASONIC_ALERT"],
+                    actuators: { siren: true, floodlight: true, speaker: true, sprinkler: false }
+                  }
+                });
+              }
+              lastSeenEventId = latest.event_id;
+            }
+          }
+        } catch (e) {
+          // Silent catch for background poll
+        }
+      }, 4000);
+    };
+
+    if (isVercelServerless) {
+      console.info("[WildShield Web WS] Running on Vercel Serverless backend. Enabled live REST polling fallback.");
+      startRestPolling();
+      return () => {
+        if (pollInterval) clearInterval(pollInterval);
+      };
+    }
 
     const connectWS = () => {
+      if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        console.warn(`[WildShield Web WS] Max reconnection attempts (${MAX_RECONNECT_ATTEMPTS}) reached. Switching to REST API polling fallback.`);
+        startRestPolling();
+        return;
+      }
+
       try {
         ws = new WebSocket(WS_URL);
         ws.onopen = () => {
+          reconnectAttempts = 0;
           console.log("[WildShield Web WS] Connected to Central Edge AI Hub");
         };
         ws.onmessage = (event) => {
@@ -250,15 +307,26 @@ export default function App() {
           }
         };
         ws.onclose = () => {
-          console.log("[WildShield Web WS] Disconnected. Retrying in 3s...");
-          reconnectTimeout = setTimeout(connectWS, 3000);
+          if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+            reconnectAttempts++;
+            const delay = Math.min(3000 * Math.pow(1.5, reconnectAttempts - 1), 10000);
+            console.log(`[WildShield Web WS] Connection closed. Retrying (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS}) in ${Math.round(delay / 1000)}s...`);
+            reconnectTimeout = setTimeout(connectWS, delay);
+          } else {
+            startRestPolling();
+          }
         };
-        ws.onerror = (err) => {
-          console.warn("[WildShield Web WS] Error:", err);
+        ws.onerror = () => {
+          console.warn("[WildShield Web WS] Connection error.");
         };
       } catch (err) {
         console.warn("[WildShield Web WS] Init error:", err);
-        reconnectTimeout = setTimeout(connectWS, 5000);
+        if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+          reconnectAttempts++;
+          reconnectTimeout = setTimeout(connectWS, 5000);
+        } else {
+          startRestPolling();
+        }
       }
     };
 
@@ -266,7 +334,11 @@ export default function App() {
 
     return () => {
       if (reconnectTimeout) clearTimeout(reconnectTimeout);
-      if (ws) ws.close();
+      if (pollInterval) clearInterval(pollInterval);
+      if (ws) {
+        ws.onclose = null;
+        ws.close();
+      }
     };
   }, []);
 
