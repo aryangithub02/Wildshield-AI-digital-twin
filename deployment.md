@@ -105,31 +105,56 @@ docker run -d -p 8080:80 wildshield-digital-twin
 
 ---
 
-## 🔒 Step 3: SPA Routing Redirect Configurations
+## 🐍 Step 3: Backend FastAPI Deployment Options
 
-If routing is added later, configure redirects to avoid HTTP 404 errors on browser page reloads.
+### Option A: Vercel Serverless Backend (Instant & Integrated)
+Deploy both the React frontend and FastAPI backend together on Vercel in a single command.
 
-### Vercel (`vercel.json`)
-Add a `vercel.json` file in the root folder:
-```json
-{
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
-```
+1. Ensure [`vercel.json`](file:///c:/Users/lenovo/OneDrive/Desktop/Wildshield%20AI%20digital%20twin/vercel.json) routes `/api/(.*)` to [`api/index.py`](file:///c:/Users/lenovo/OneDrive/Desktop/Wildshield%20AI%20digital%20twin/api/index.py):
+   ```json
+   {
+     "rewrites": [
+       { "source": "/api/(.*)", "destination": "/api/index.py" },
+       { "source": "/static-test-images/(.*)", "destination": "/api/index.py" },
+       { "source": "/(.*)", "destination": "/index.html" }
+     ]
+   }
+   ```
+2. Set Environment Variables in Vercel Dashboard:
+   - `DATABASE_URL`: `postgresql://neondb_owner:...@ep-floral-resonance...neon.tech/neondb?sslmode=require`
+3. Deploy:
+   ```bash
+   vercel --prod
+   ```
 
-### Netlify (`_redirects`)
-Add a `_redirects` file to the public folder:
-```text
-/*    /index.html   200
-```
+---
+
+### Option B: Render Web Service (For Persistent WebSockets `/ws`)
+If you require persistent, bi-directional WebSocket streaming (`wss://.../ws`) without serverless timeouts:
+
+1. Push your code to GitHub.
+2. Go to [Render Dashboard](https://dashboard.render.com) -> **New Web Service**.
+3. Connect your repository and configure:
+   - **Environment**: `Python 3`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn backend.server:app --host 0.0.0.0 --port $PORT`
+4. Add Environment Variable:
+   - `DATABASE_URL`: `postgresql://neondb_owner:...@ep-floral-resonance...neon.tech/neondb?sslmode=require`
+5. Click **Create Web Service**.
+6. Copy your Render backend URL (e.g., `https://wildshield-backend.onrender.com`).
+7. Update your Vercel Frontend environment variables:
+   ```env
+   VITE_API_BASE_URL=https://wildshield-backend.onrender.com
+   VITE_WS_URL=wss://wildshield-backend.onrender.com/ws
+   ```
 
 ---
 
 ## ⚙️ Diagnostics & Verification
 
-To verify the production build locally before uploading to static hosts:
+To verify the production build locally before uploading:
 ```bash
 # Preview build assets on local web server
 npm run preview
 ```
-*This starts a local server on port 4173 (usually) to inspect the built bundle.*
+
