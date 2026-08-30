@@ -49,7 +49,9 @@ from backend.services.sync_service import sync_service
 # Base Paths
 BASE_DIR = Path(__file__).resolve().parent.parent
 WEIGHTS_PATH = BASE_DIR / "runs" / "detect" / "WildShield-Experiments" / "wildshield_surveillance_v1-2" / "weights" / "best.pt"
-TEST_IMAGES_DIR = BASE_DIR / "WildShield-Dataset" / "test" / "images"
+TEST_IMAGES_DIR = BASE_DIR / "public" / "sample-test-images"
+if not TEST_IMAGES_DIR.exists():
+    TEST_IMAGES_DIR = BASE_DIR / "WildShield-Dataset" / "test" / "images"
 
 # Model Benchmarks (Preserved separately from live events)
 MODEL_BENCHMARKS = {
