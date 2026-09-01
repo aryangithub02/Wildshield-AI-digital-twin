@@ -210,19 +210,23 @@ export default function App() {
     ]);
   };
 
+  const isLocalHost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.') ||
+    window.location.hostname.startsWith('10.')
+  );
+
   const renderBackendUrl = "https://wildshield-ai-digital-twin-1.onrender.com";
   const renderWsUrl = "wss://wildshield-ai-digital-twin-1.onrender.com/ws";
 
-  const defaultApiUrl = window.location.hostname.endsWith('.vercel.app')
-    ? renderBackendUrl
-    : (import.meta.env.VITE_API_BASE_URL !== undefined ? import.meta.env.VITE_API_BASE_URL : renderBackendUrl);
+  const API_BASE_URL = isLocalHost
+    ? `http://${window.location.hostname}:8000`
+    : (import.meta.env.VITE_API_BASE_URL || renderBackendUrl);
 
-  const defaultWsUrl = window.location.hostname.endsWith('.vercel.app')
-    ? renderWsUrl
-    : ((window.location.protocol === 'https:' ? 'wss://' : 'ws://') + window.location.host + '/ws');
-
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || defaultApiUrl;
-  const WS_URL = import.meta.env.VITE_WS_URL || defaultWsUrl;
+  const WS_URL = isLocalHost
+    ? `ws://${window.location.hostname}:8000/ws`
+    : (import.meta.env.VITE_WS_URL || renderWsUrl);
 
   // 1. Fetch available dataset images on mount & connect live WebSocket
   useEffect(() => {
@@ -301,7 +305,12 @@ export default function App() {
       }
 
       try {
-        ws = new WebSocket(WS_URL);
+        const sep = WS_URL.includes('?') ? '&' : '?';
+        const fullWsUrl = WS_URL.includes('client_type=') 
+          ? WS_URL 
+          : `${WS_URL}${sep}client_type=web&client_id=WEB_DASHBOARD`;
+
+        ws = new WebSocket(fullWsUrl);
         ws.onopen = () => {
           reconnectAttempts = 0;
           console.log("[WildShield Web WS] Connected to Central Edge AI Hub");
@@ -347,7 +356,15 @@ export default function App() {
       if (pollInterval) clearInterval(pollInterval);
       if (ws) {
         ws.onclose = null;
-        ws.close();
+        ws.onerror = null;
+        if (ws.readyState === WebSocket.CONNECTING) {
+          const socket = ws;
+          socket.onopen = () => {
+            try { socket.close(); } catch (e) {}
+          };
+        } else if (ws.readyState === WebSocket.OPEN) {
+          try { ws.close(); } catch (e) {}
+        }
       }
     };
   }, []);

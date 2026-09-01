@@ -6,7 +6,7 @@ Conforms to WILDSHIELD_ID_SPECIFICATION_REPORT.md
 from typing import Dict, List, Any, Optional
 import datetime
 
-# Master taxonomy and response rules
+# Master taxonomy and response rules conforming strictly to animal_action_matrix
 SPECIES_CONFIG = {
     "Wild Boar": {
         "code": "WS-WL-WB",
@@ -15,22 +15,24 @@ SPECIES_CONFIG = {
         "emoji": "🐗",
         "threat": "HIGH",
         "intrusion": True,
+        "recommended_action": "Siren + Floodlight",
         "responses": ["Siren", "Floodlight"],
-        "actuators": {"siren": True, "floodlight": True, "speaker": True, "sprinkler": False},
-        "description": "Wild Boar breach detected. High risk of crop damage.",
-        "risk_level": "CRITICAL"
+        "actuators": {"siren": True, "floodlight": True, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Wild Boar breach detected. Recommended action: Siren + Floodlight.",
+        "risk_level": "HIGH"
     },
     "Nilgai": {
         "code": "WS-WL-NG",
         "domain": "Wildlife",
         "scientific_name": "Boselaphus tragocamelus",
         "emoji": "🐂",
-        "threat": "MEDIUM",
+        "threat": "HIGH",
         "intrusion": True,
-        "responses": ["Floodlight", "Alarm"],
-        "actuators": {"siren": False, "floodlight": True, "speaker": True, "sprinkler": False},
-        "description": "Nilgai / Blue Bull detected. Grazing risk in crop fields.",
-        "risk_level": "WARNING"
+        "recommended_action": "Floodlight + Siren",
+        "responses": ["Floodlight", "Siren"],
+        "actuators": {"siren": True, "floodlight": True, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Nilgai detected. Recommended action: Floodlight + Siren.",
+        "risk_level": "HIGH"
     },
     "Spotted Deer": {
         "code": "WS-WL-SD",
@@ -39,45 +41,49 @@ SPECIES_CONFIG = {
         "emoji": "🦌",
         "threat": "MEDIUM",
         "intrusion": True,
-        "responses": ["Floodlight", "Alarm"],
-        "actuators": {"siren": False, "floodlight": True, "speaker": True, "sprinkler": False},
-        "description": "Spotted Deer (Chital) detected. Herbivore crop grazing threat.",
-        "risk_level": "WARNING"
+        "recommended_action": "Floodlight + Mild Alarm",
+        "responses": ["Floodlight", "Mild Alarm"],
+        "actuators": {"siren": True, "floodlight": True, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Spotted Deer detected. Recommended action: Floodlight + Mild Alarm.",
+        "risk_level": "MEDIUM"
     },
     "Rhesus Macaque": {
         "code": "WS-WL-RM",
         "domain": "Wildlife",
         "scientific_name": "Macaca mulatta",
         "emoji": "🐒",
-        "threat": "LOW",
+        "threat": "HIGH",
         "intrusion": True,
-        "responses": ["Sprinkler", "Warning"],
-        "actuators": {"siren": False, "floodlight": False, "speaker": False, "sprinkler": True},
-        "description": "Rhesus Macaque troop detected. Fruit and crop plucking risk.",
-        "risk_level": "MODERATE"
+        "recommended_action": "Predator Audio + Floodlight",
+        "responses": ["Predator Audio", "Floodlight"],
+        "actuators": {"siren": False, "floodlight": True, "speaker": True, "predator_speaker": True, "sprinkler": False},
+        "description": "Rhesus Macaque troop detected. Recommended action: Predator Audio + Floodlight.",
+        "risk_level": "HIGH"
     },
     "Langur": {
         "code": "WS-WL-LG",
         "domain": "Wildlife",
         "scientific_name": "Semnopithecus entellus",
         "emoji": "🐒",
-        "threat": "LOW",
+        "threat": "MEDIUM",
         "intrusion": True,
-        "responses": ["Sprinkler", "Warning"],
-        "actuators": {"siren": False, "floodlight": False, "speaker": False, "sprinkler": True},
-        "description": "Gray Langur detected in perimeter canopy.",
-        "risk_level": "MODERATE"
+        "recommended_action": "Predator Audio + Floodlight",
+        "responses": ["Predator Audio", "Floodlight"],
+        "actuators": {"siren": False, "floodlight": True, "speaker": True, "predator_speaker": True, "sprinkler": False},
+        "description": "Gray Langur detected. Recommended action: Predator Audio + Floodlight.",
+        "risk_level": "MEDIUM"
     },
     "Gaur": {
         "code": "WS-WL-GR",
         "domain": "Wildlife",
         "scientific_name": "Bos gaurus",
         "emoji": "🦬",
-        "threat": "HIGH",
+        "threat": "CRITICAL",
         "intrusion": True,
-        "responses": ["Siren", "Floodlight"],
-        "actuators": {"siren": True, "floodlight": True, "speaker": True, "sprinkler": True},
-        "description": "Indian Bison / Gaur detected. Severe structural perimeter risk.",
+        "recommended_action": "Siren + Floodlight + Farmer Alert",
+        "responses": ["Siren", "Floodlight", "Farmer Alert"],
+        "actuators": {"siren": True, "floodlight": True, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Indian Bison / Gaur detected. Recommended action: Siren + Floodlight + Farmer Alert.",
         "risk_level": "CRITICAL"
     },
     "Cattle": {
@@ -87,9 +93,10 @@ SPECIES_CONFIG = {
         "emoji": "🐄",
         "threat": "LOW",
         "intrusion": False,
-        "responses": ["Sprinkler", "Warning"],
-        "actuators": {"siren": False, "floodlight": False, "speaker": True, "sprinkler": True, "buzzer": True},
-        "description": "Domestic / Stray Cattle detected. Non-hostile deterrent.",
+        "recommended_action": "Farmer Notification Only",
+        "responses": ["Farmer Notification Only"],
+        "actuators": {"siren": False, "floodlight": False, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Domestic Cattle detected. Recommended action: Farmer Notification Only.",
         "risk_level": "LOW"
     },
     "Goat": {
@@ -99,34 +106,37 @@ SPECIES_CONFIG = {
         "emoji": "🐐",
         "threat": "LOW",
         "intrusion": False,
-        "responses": ["Warning"],
-        "actuators": {"siren": False, "floodlight": False, "speaker": False, "sprinkler": False, "buzzer": True},
-        "description": "Domestic livestock (Goat/Sheep) detected near boundary.",
+        "recommended_action": "Farmer Notification Only",
+        "responses": ["Farmer Notification Only"],
+        "actuators": {"siren": False, "floodlight": False, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Domestic Goat detected. Recommended action: Farmer Notification Only.",
         "risk_level": "LOW"
     },
     "Human": {
-        "code": "WS-HM-HM",
+        "code": "WS-SEC-HM",
         "domain": "Human",
         "scientific_name": "Homo sapiens",
         "emoji": "🚶",
-        "threat": "LOW",
-        "intrusion": False,
-        "responses": ["Security Alert"],
-        "actuators": {"siren": False, "floodlight": False, "speaker": False, "sprinkler": False},
-        "description": "Human detected in surveillance zone.",
-        "risk_level": "ALERT"
+        "threat": "CRITICAL",
+        "intrusion": True,
+        "recommended_action": "Emergency Farmer Alert + Floodlight",
+        "responses": ["Emergency Farmer Alert", "Floodlight"],
+        "actuators": {"siren": False, "floodlight": True, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Human security detection. Recommended action: Emergency Farmer Alert + Floodlight.",
+        "risk_level": "CRITICAL"
     },
     "Vehicle": {
-        "code": "WS-VH-VH",
+        "code": "WS-SEC-VE",
         "domain": "Vehicle",
         "scientific_name": "Automobile",
         "emoji": "🚜",
-        "threat": "LOW",
+        "threat": "MEDIUM",
         "intrusion": False,
-        "responses": ["Log Only"],
-        "actuators": {"siren": False, "floodlight": False, "speaker": False, "sprinkler": False},
-        "description": "Farm vehicle / Tractor in transit.",
-        "risk_level": "SAFE"
+        "recommended_action": "Warning + Farmer Alert",
+        "responses": ["Warning", "Farmer Alert"],
+        "actuators": {"siren": True, "floodlight": True, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Vehicle detection. Recommended action: Warning + Farmer Alert.",
+        "risk_level": "MEDIUM"
     }
 }
 

@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 from dotenv import load_dotenv
 from pathlib import Path
 from sqlalchemy import (
-    create_engine, Column, String, Integer, Float, Boolean, Text, DateTime, ForeignKey, Index
+    create_engine, Column, String, Integer, Float, Boolean, Text, DateTime, ForeignKey, Index, text
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session, relationship
 
@@ -18,8 +18,11 @@ from sqlalchemy.orm import declarative_base, sessionmaker, scoped_session, relat
 ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 load_dotenv(dotenv_path=ENV_PATH)
 
-DEFAULT_NEON_URL = "postgresql://neondb_owner:npg_kyaHfWR0OhD2@ep-floral-resonance-za1ksthg-pooler.c-2.eu-west-2.aws.neon.tech/neondb?sslmode=require"
-DATABASE_URL = os.getenv("DATABASE_URL", DEFAULT_NEON_URL)
+BASE_DIR = Path(__file__).resolve().parent.parent
+LOCAL_SQLITE_URL = f"sqlite:///{BASE_DIR / 'wildshield.db'}"
+
+DEFAULT_NEON_URL = "postgresql://neondb_owner:npg_NFQR2KEz9oYT@ep-cold-sound-ax2lq6zu-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+DATABASE_URL = os.getenv("POSTGRES_DATABASE_URL") or os.getenv("DATABASE_URL", DEFAULT_NEON_URL)
 
 # Strip channel_binding if present to avoid driver parse warning if needed
 if "channel_binding=" in DATABASE_URL:
@@ -27,19 +30,32 @@ if "channel_binding=" in DATABASE_URL:
     if DATABASE_URL.endswith("?"):
         DATABASE_URL = DATABASE_URL[:-1]
 
-# Connection pooling for Neon PostgreSQL
-connect_args = {"check_same_thread": False} if "sqlite" in DATABASE_URL else {
-    "connect_timeout": 15
-}
+def create_db_engine(url: str):
+    if "sqlite" in url:
+        return create_engine(
+            url,
+            connect_args={"check_same_thread": False}
+        )
+    return create_engine(
+        url,
+        pool_size=5,
+        max_overflow=10,
+        pool_recycle=300,
+        pool_pre_ping=True,
+        pool_timeout=4,
+        connect_args={"connect_timeout": 4}
+    )
 
-engine = create_engine(
-    DATABASE_URL,
-    pool_size=10,
-    max_overflow=20,
-    pool_recycle=300,
-    pool_pre_ping=True,
-    connect_args=connect_args
-)
+# Try connecting to configured DATABASE_URL (Neon PostgreSQL), fallback to local SQLite if connection fails
+try:
+    engine = create_db_engine(DATABASE_URL)
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    print(f"[DATABASE] Connected successfully to primary PostgreSQL database.")
+except Exception as err:
+    print(f"[DATABASE WARNING] Primary database connection failed ({err}). Falling back to local SQLite database.")
+    DATABASE_URL = LOCAL_SQLITE_URL
+    engine = create_db_engine(DATABASE_URL)
 
 SessionLocal = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=engine))
 Base = declarative_base()
@@ -294,13 +310,25 @@ def seed_database(db):
     db.commit()
 
 
-from sqlalchemy import (
-    create_engine, Column, String, Integer, Float, Boolean, Text, DateTime, ForeignKey, Index, text
-)
-
 def init_db():
-    """Create all database tables on Neon PostgreSQL, run safe migrations and seed defaults."""
-    Base.metadata.create_all(bind=engine)
+    """Create all database tables on primary DB or SQLite fallback, run safe migrations and seed defaults."""
+    # SQLite schema migration helper
+    if "sqlite" in str(engine.url):
+        try:
+            with engine.connect() as conn:
+                for tbl in ["devices", "notifications", "detections", "intrusions"]:
+                    res = conn.execute(text(f"PRAGMA table_info({tbl});")).fetchall()
+                    col_names = [r[1] for r in res]
+                    if col_names and "id" not in col_names:
+                        conn.execute(text(f"DROP TABLE {tbl};"))
+                        conn.commit()
+        except Exception as e:
+            print(f"[SQLITE MIGRATION NOTICE] {e}")
+
+    try:
+        Base.metadata.create_all(bind=engine)
+    except Exception as e:
+        print(f"[DATABASE WARNING] create_all failed: {e}")
     
     # Run column migrations for existing PostgreSQL tables if necessary
     if "postgresql" in DATABASE_URL:
@@ -336,11 +364,10 @@ def init_db():
     db = SessionLocal()
     try:
         seed_database(db)
-        print("[DATABASE] Neon PostgreSQL connected & tables verified.")
+        print(f"[DATABASE] Connected & tables verified for engine ({engine.url.drivername}).")
     except Exception as e:
         db.rollback()
-        print(f"[DATABASE ERROR] Failed to seed Neon database: {e}")
-
+        print(f"[DATABASE ERROR] Failed to seed database: {e}")
     finally:
         db.close()
 
