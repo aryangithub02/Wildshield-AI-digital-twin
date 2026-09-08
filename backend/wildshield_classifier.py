@@ -137,6 +137,45 @@ SPECIES_CONFIG = {
         "actuators": {"siren": True, "floodlight": True, "speaker": False, "predator_speaker": False, "sprinkler": False},
         "description": "Vehicle detection. Recommended action: Warning + Farmer Alert.",
         "risk_level": "MEDIUM"
+    },
+    "Tiger": {
+        "code": "WS-WL-TG",
+        "domain": "Wildlife",
+        "scientific_name": "Panthera tigris",
+        "emoji": "🐅",
+        "threat": "CRITICAL",
+        "intrusion": True,
+        "recommended_action": "Emergency Siren + Strobe Floodlight + Immediate Ranger Alert",
+        "responses": ["Emergency Siren", "Floodlight", "Farmer Alert", "Forest Dept Alert"],
+        "actuators": {"siren": True, "floodlight": True, "speaker": True, "predator_speaker": False, "sprinkler": False},
+        "description": "Apex Predator (Bengal Tiger) detected near perimeter! Highest emergency alert protocol active.",
+        "risk_level": "CRITICAL"
+    },
+    "Asiatic Lion": {
+        "code": "WS-WL-LN",
+        "domain": "Wildlife",
+        "scientific_name": "Panthera leo persica",
+        "emoji": "🦁",
+        "threat": "CRITICAL",
+        "intrusion": True,
+        "recommended_action": "High Siren + Perimeter Floodlight + Farmer Alert",
+        "responses": ["High Siren", "Floodlight", "Farmer Alert"],
+        "actuators": {"siren": True, "floodlight": True, "speaker": True, "predator_speaker": False, "sprinkler": False},
+        "description": "Asiatic Lion detected. Autonomous perimeter deterrence & farmer notification triggered.",
+        "risk_level": "CRITICAL"
+    },
+    "Dog": {
+        "code": "WS-DM-DG",
+        "domain": "Domestic",
+        "scientific_name": "Canis lupus familiaris",
+        "emoji": "🐕",
+        "threat": "LOW",
+        "intrusion": False,
+        "recommended_action": "Farmer Notification Only",
+        "responses": ["Farmer Notification Only"],
+        "actuators": {"siren": False, "floodlight": False, "speaker": False, "predator_speaker": False, "sprinkler": False},
+        "description": "Domestic / Stray Dog detected in buffer zone. Non-destructive presence.",
+        "risk_level": "LOW"
     }
 }
 

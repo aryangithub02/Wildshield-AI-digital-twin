@@ -1,0 +1,3842 @@
+[
+  {
+    "filename": "WS-DM-CT-00007.jpg",
+    "category": "Cattle",
+    "confidence": 98.97,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00010.jpg",
+    "category": "Cattle",
+    "confidence": 98.38,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00019.jpg",
+    "category": "Cattle",
+    "confidence": 99.3,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00028.jpg",
+    "category": "Cattle",
+    "confidence": 99.18,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00036.jpg",
+    "category": "Cattle",
+    "confidence": 92.92,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00043.jpg",
+    "category": "Cattle",
+    "confidence": 98.5,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00044.jpg",
+    "category": "Cattle",
+    "confidence": 96.9,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00054.jpg",
+    "category": "Cattle",
+    "confidence": 99.26,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00059.jpg",
+    "category": "Cattle",
+    "confidence": 98.42,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00091.jpg",
+    "category": "Cattle",
+    "confidence": 98.86,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00097.jpg",
+    "category": "Cattle",
+    "confidence": 99.01,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00107.jpg",
+    "category": "Cattle",
+    "confidence": 99.25,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00118.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00129.jpg",
+    "category": "Cattle",
+    "confidence": 99.35,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00153.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00159.jpg",
+    "category": "Cattle",
+    "confidence": 99.22,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00167.jpg",
+    "category": "Cattle",
+    "confidence": 99.02,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00189.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00201.jpg",
+    "category": "Cattle",
+    "confidence": 99.46,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00208.jpg",
+    "category": "Cattle",
+    "confidence": 98.91,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00225.jpg",
+    "category": "Cattle",
+    "confidence": 96.23,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00232.jpg",
+    "category": "Cattle",
+    "confidence": 98.91,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00242.jpg",
+    "category": "Cattle",
+    "confidence": 99.23,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00252.jpg",
+    "category": "Cattle",
+    "confidence": 98.74,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00283.jpg",
+    "category": "Cattle",
+    "confidence": 99.49,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00318.jpg",
+    "category": "Cattle",
+    "confidence": 99.05,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00320.jpg",
+    "category": "Cattle",
+    "confidence": 99.52,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00321.jpg",
+    "category": "Cattle",
+    "confidence": 99.15,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00334.jpg",
+    "category": "Cattle",
+    "confidence": 99.25,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00340.jpg",
+    "category": "Cattle",
+    "confidence": 99.55,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00345.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00388.jpg",
+    "category": "Cattle",
+    "confidence": 99.26,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00401.jpg",
+    "category": "Cattle",
+    "confidence": 99.11,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00407.jpg",
+    "category": "Cattle",
+    "confidence": 90.88,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-00410.jpg",
+    "category": "Cattle",
+    "confidence": 99.37,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00421.jpg",
+    "category": "Cattle",
+    "confidence": 99.3,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00424.jpg",
+    "category": "Cattle",
+    "confidence": 98.95,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00435.jpg",
+    "category": "Cattle",
+    "confidence": 99.43,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00442.jpg",
+    "category": "Cattle",
+    "confidence": 99.35,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00445.jpg",
+    "category": "Cattle",
+    "confidence": 99.52,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00453.jpg",
+    "category": "Cattle",
+    "confidence": 98.35,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00471.jpg",
+    "category": "Cattle",
+    "confidence": 98.87,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00473.jpg",
+    "category": "Cattle",
+    "confidence": 99.47,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00475.jpg",
+    "category": "Cattle",
+    "confidence": 98.26,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00476.jpg",
+    "category": "Cattle",
+    "confidence": 99.38,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00489.jpg",
+    "category": "Cattle",
+    "confidence": 98.25,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00509.jpg",
+    "category": "Cattle",
+    "confidence": 98.84,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00515.jpg",
+    "category": "Cattle",
+    "confidence": 98.99,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00521.jpg",
+    "category": "Cattle",
+    "confidence": 99.09,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00526.jpg",
+    "category": "Cattle",
+    "confidence": 98.07,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00535.jpg",
+    "category": "Cattle",
+    "confidence": 98.48,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00589.jpg",
+    "category": "Cattle",
+    "confidence": 99.12,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00591.jpg",
+    "category": "Cattle",
+    "confidence": 97.89,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00602.jpg",
+    "category": "Cattle",
+    "confidence": 99.51,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00607.jpg",
+    "category": "Cattle",
+    "confidence": 97.47,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00627.jpg",
+    "category": "Cattle",
+    "confidence": 99.25,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00635.jpg",
+    "category": "Cattle",
+    "confidence": 99.26,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00652.jpg",
+    "category": "Cattle",
+    "confidence": 99.13,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00654.jpg",
+    "category": "Cattle",
+    "confidence": 99.47,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00660.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00673.jpg",
+    "category": "Cattle",
+    "confidence": 99.47,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00686.jpg",
+    "category": "Cattle",
+    "confidence": 99.34,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00712.jpg",
+    "category": "Cattle",
+    "confidence": 98.43,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00716.jpg",
+    "category": "Cattle",
+    "confidence": 99.43,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00723.jpg",
+    "category": "Cattle",
+    "confidence": 99.34,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00728.jpg",
+    "category": "Cattle",
+    "confidence": 98.79,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00746.jpg",
+    "category": "Cattle",
+    "confidence": 99.24,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00751.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00754.jpg",
+    "category": "Cattle",
+    "confidence": 97.95,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00758.jpg",
+    "category": "Cattle",
+    "confidence": 98.42,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00772.jpg",
+    "category": "Cattle",
+    "confidence": 99.42,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00822.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00823.jpg",
+    "category": "Cattle",
+    "confidence": 99.45,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00824.jpg",
+    "category": "Cattle",
+    "confidence": 99.35,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00829.jpg",
+    "category": "Cattle",
+    "confidence": 99.48,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00833.jpg",
+    "category": "Cattle",
+    "confidence": 98.73,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00842.jpg",
+    "category": "Cattle",
+    "confidence": 98.52,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00846.jpg",
+    "category": "Cattle",
+    "confidence": 98.77,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00854.jpg",
+    "category": "Cattle",
+    "confidence": 98.97,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00879.jpg",
+    "category": "Cattle",
+    "confidence": 98.78,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00888.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00889.jpg",
+    "category": "Cattle",
+    "confidence": 98.9,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00894.jpg",
+    "category": "Cattle",
+    "confidence": 99.03,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00917.jpg",
+    "category": "Cattle",
+    "confidence": 99.33,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00920.jpg",
+    "category": "Cattle",
+    "confidence": 99.24,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00932.jpg",
+    "category": "Cattle",
+    "confidence": 98.81,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00937.jpg",
+    "category": "Cattle",
+    "confidence": 93.09,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00950.jpg",
+    "category": "Cattle",
+    "confidence": 99.14,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00959.jpg",
+    "category": "Cattle",
+    "confidence": 97.7,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00961.jpg",
+    "category": "Cattle",
+    "confidence": 97.87,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00965.jpg",
+    "category": "Cattle",
+    "confidence": 99.24,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00978.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00987.jpg",
+    "category": "Cattle",
+    "confidence": 99.41,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00994.jpg",
+    "category": "Cattle",
+    "confidence": 99.45,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-00999.jpg",
+    "category": "Cattle",
+    "confidence": 99.31,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01021.jpg",
+    "category": "Cattle",
+    "confidence": 83.68,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-01041.jpg",
+    "category": "Cattle",
+    "confidence": 99.48,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01050.jpg",
+    "category": "Cattle",
+    "confidence": 98.81,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01053.jpg",
+    "category": "Cattle",
+    "confidence": 99.02,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01071.jpg",
+    "category": "Cattle",
+    "confidence": 98.62,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01085.jpg",
+    "category": "Cattle",
+    "confidence": 98.76,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01105.jpg",
+    "category": "Cattle",
+    "confidence": 98.76,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01114.jpg",
+    "category": "Cattle",
+    "confidence": 99.29,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01122.jpg",
+    "category": "Cattle",
+    "confidence": 99.5,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01123.jpg",
+    "category": "Cattle",
+    "confidence": 98.2,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01127.jpg",
+    "category": "Cattle",
+    "confidence": 87.02,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-01131.jpeg",
+    "category": "Cattle",
+    "confidence": 98.88,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01133.jpg",
+    "category": "Cattle",
+    "confidence": 73.0,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-01137.jpg",
+    "category": "Cattle",
+    "confidence": 62.93,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-01143.jpg",
+    "category": "Cattle",
+    "confidence": 66.42,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-01149.jpg",
+    "category": "Cattle",
+    "confidence": 96.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01151.jpg",
+    "category": "Cattle",
+    "confidence": 96.03,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01157.jpg",
+    "category": "Cattle",
+    "confidence": 94.14,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01160.jpg",
+    "category": "Dog",
+    "confidence": 48.4,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-01176.jpg",
+    "category": "Cattle",
+    "confidence": 66.85,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-01181.jpg",
+    "category": "Cattle",
+    "confidence": 94.0,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01184.jpg",
+    "category": "Cattle",
+    "confidence": 98.56,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01187.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01206.jpg",
+    "category": "Cattle",
+    "confidence": 98.67,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01211.jpg",
+    "category": "Cattle",
+    "confidence": 99.15,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01218.jpg",
+    "category": "Cattle",
+    "confidence": 97.87,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01231.jpg",
+    "category": "Cattle",
+    "confidence": 99.11,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01243.jpg",
+    "category": "Cattle",
+    "confidence": 99.19,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01247.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01250.jpg",
+    "category": "Cattle",
+    "confidence": 98.78,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01253.jpg",
+    "category": "Cattle",
+    "confidence": 99.07,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01263.jpg",
+    "category": "Cattle",
+    "confidence": 97.12,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01287.jpg",
+    "category": "Cattle",
+    "confidence": 98.63,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01308.jpg",
+    "category": "Cattle",
+    "confidence": 99.02,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01309.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01325.jpg",
+    "category": "Cattle",
+    "confidence": 99.1,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01330.jpg",
+    "category": "Cattle",
+    "confidence": 91.84,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-01333.jpg",
+    "category": "Cattle",
+    "confidence": 98.42,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01335.jpg",
+    "category": "Cattle",
+    "confidence": 99.3,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01338.jpg",
+    "category": "Cattle",
+    "confidence": 96.84,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01348.jpg",
+    "category": "Cattle",
+    "confidence": 99.0,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01359.jpg",
+    "category": "Cattle",
+    "confidence": 98.78,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01361.jpg",
+    "category": "Cattle",
+    "confidence": 98.49,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01393.jpg",
+    "category": "Cattle",
+    "confidence": 99.01,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01407.jpg",
+    "category": "Cattle",
+    "confidence": 98.76,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01413.jpg",
+    "category": "Cattle",
+    "confidence": 99.26,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01420.jpg",
+    "category": "Cattle",
+    "confidence": 98.28,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01421.jpg",
+    "category": "Cattle",
+    "confidence": 98.64,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01437.jpg",
+    "category": "Cattle",
+    "confidence": 99.27,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01442.jpg",
+    "category": "Cattle",
+    "confidence": 98.08,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01460.jpg",
+    "category": "Cattle",
+    "confidence": 98.44,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01498.jpg",
+    "category": "Cattle",
+    "confidence": 97.83,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01507.jpg",
+    "category": "Cattle",
+    "confidence": 98.22,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01512.jpg",
+    "category": "Cattle",
+    "confidence": 98.97,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01514.jpg",
+    "category": "Cattle",
+    "confidence": 98.75,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01530.jpg",
+    "category": "Cattle",
+    "confidence": 99.45,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01537.jpg",
+    "category": "Cattle",
+    "confidence": 99.19,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01542.jpg",
+    "category": "Cattle",
+    "confidence": 98.33,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01545.jpg",
+    "category": "Cattle",
+    "confidence": 98.85,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01546.jpg",
+    "category": "Cattle",
+    "confidence": 99.46,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01548.jpg",
+    "category": "Cattle",
+    "confidence": 99.08,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01553.jpg",
+    "category": "Cattle",
+    "confidence": 98.11,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01563.jpg",
+    "category": "Cattle",
+    "confidence": 99.31,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01602.jpg",
+    "category": "Cattle",
+    "confidence": 98.61,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01606.jpg",
+    "category": "Cattle",
+    "confidence": 98.23,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01622.jpg",
+    "category": "Cattle",
+    "confidence": 98.29,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01630.jpg",
+    "category": "Cattle",
+    "confidence": 99.16,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01643.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01651.jpg",
+    "category": "Cattle",
+    "confidence": 99.27,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01656.jpg",
+    "category": "Cattle",
+    "confidence": 97.9,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01662.jpg",
+    "category": "Cattle",
+    "confidence": 98.82,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01664.jpg",
+    "category": "Cattle",
+    "confidence": 98.7,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01665.jpg",
+    "category": "Cattle",
+    "confidence": 99.4,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01672.jpg",
+    "category": "Cattle",
+    "confidence": 99.31,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01687.jpg",
+    "category": "Cattle",
+    "confidence": 90.17,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-01692.jpg",
+    "category": "Cattle",
+    "confidence": 98.63,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01697.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01698.jpg",
+    "category": "Cattle",
+    "confidence": 99.24,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01702.jpg",
+    "category": "Cattle",
+    "confidence": 99.13,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01715.jpg",
+    "category": "Cattle",
+    "confidence": 98.74,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01731.jpg",
+    "category": "Cattle",
+    "confidence": 99.03,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01747.jpg",
+    "category": "Cattle",
+    "confidence": 99.2,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01761.jpg",
+    "category": "Cattle",
+    "confidence": 99.05,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01764.jpg",
+    "category": "Cattle",
+    "confidence": 97.38,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01771.jpg",
+    "category": "Cattle",
+    "confidence": 99.41,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01789.jpg",
+    "category": "Cattle",
+    "confidence": 92.77,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01794.jpg",
+    "category": "Cattle",
+    "confidence": 98.01,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01808.jpg",
+    "category": "Cattle",
+    "confidence": 90.42,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-01814.jpg",
+    "category": "Cattle",
+    "confidence": 98.76,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01842.jpg",
+    "category": "Cattle",
+    "confidence": 93.47,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01845.jpg",
+    "category": "Cattle",
+    "confidence": 98.86,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01850.jpg",
+    "category": "Cattle",
+    "confidence": 99.04,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01876.jpg",
+    "category": "Cattle",
+    "confidence": 99.39,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01887.jpg",
+    "category": "Cattle",
+    "confidence": 99.22,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01892.jpg",
+    "category": "Cattle",
+    "confidence": 98.14,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01894.jpg",
+    "category": "Cattle",
+    "confidence": 97.45,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01898.jpg",
+    "category": "Cattle",
+    "confidence": 98.19,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01907.jpg",
+    "category": "Cattle",
+    "confidence": 99.12,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01909.jpg",
+    "category": "Cattle",
+    "confidence": 97.92,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01912.jpg",
+    "category": "Cattle",
+    "confidence": 97.51,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01917.jpg",
+    "category": "Cattle",
+    "confidence": 99.36,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01942.jpg",
+    "category": "Cattle",
+    "confidence": 99.05,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01958.jpg",
+    "category": "Cattle",
+    "confidence": 98.67,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01976.jpg",
+    "category": "Cattle",
+    "confidence": 99.1,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-01982.jpg",
+    "category": "Cattle",
+    "confidence": 87.73,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-01994.jpg",
+    "category": "Cattle",
+    "confidence": 43.35,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02000.jpg",
+    "category": "Cattle",
+    "confidence": 97.63,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02001.jpg",
+    "category": "Cattle",
+    "confidence": 99.31,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02006.jpg",
+    "category": "Cattle",
+    "confidence": 89.83,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-02007.jpg",
+    "category": "Cattle",
+    "confidence": 81.47,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02055.jpg",
+    "category": "Cattle",
+    "confidence": 93.98,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02059.jpg",
+    "category": "Cattle",
+    "confidence": 97.17,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02063.jpg",
+    "category": "Cattle",
+    "confidence": 99.53,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02078.jpg",
+    "category": "Cattle",
+    "confidence": 73.36,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02086.jpg",
+    "category": "Cattle",
+    "confidence": 77.95,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02091.jpg",
+    "category": "Cattle",
+    "confidence": 71.61,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02103.jpg",
+    "category": "Cattle",
+    "confidence": 95.76,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02106.jpg",
+    "category": "Cattle",
+    "confidence": 67.3,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02109.jpg",
+    "category": "Cattle",
+    "confidence": 87.19,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-02121.jpg",
+    "category": "Cattle",
+    "confidence": 72.78,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02161.jpg",
+    "category": "Goat",
+    "confidence": 49.21,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02162.jpg",
+    "category": "Goat",
+    "confidence": 40.36,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02164.jpg",
+    "category": "Goat",
+    "confidence": 51.83,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02185.jpg",
+    "category": "Cattle",
+    "confidence": 99.2,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02188.jpg",
+    "category": "Cattle",
+    "confidence": 98.99,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02202.jpg",
+    "category": "Cattle",
+    "confidence": 82.59,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02218.jpg",
+    "category": "Cattle",
+    "confidence": 82.48,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02241.jpg",
+    "category": "Cattle",
+    "confidence": 98.98,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-CT-02254.jpg",
+    "category": "Cattle",
+    "confidence": 78.24,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02284.jpg",
+    "category": "Cattle",
+    "confidence": 88.57,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-02285.jpg",
+    "category": "Cattle",
+    "confidence": 79.24,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02304.jpg",
+    "category": "Cattle",
+    "confidence": 82.17,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02305.jpg",
+    "category": "Cattle",
+    "confidence": 89.7,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-CT-02314.jpg",
+    "category": "Goat",
+    "confidence": 47.78,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-CT-02348.jpg",
+    "category": "Cattle",
+    "confidence": 95.81,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00009.jpg",
+    "category": "Cattle",
+    "confidence": 81.34,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00031.jpg",
+    "category": "Cattle",
+    "confidence": 89.7,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-DG-00039.jpg",
+    "category": "Goat",
+    "confidence": 42.17,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00084.jpg",
+    "category": "Cattle",
+    "confidence": 43.64,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00087.jpg",
+    "category": "Cattle",
+    "confidence": 89.5,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-DG-00096.jpg",
+    "category": "Cattle",
+    "confidence": 90.33,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-DG-00104.jpg",
+    "category": "Cattle",
+    "confidence": 55.18,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00111.jpg",
+    "category": "Cattle",
+    "confidence": 40.14,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00112.jpg",
+    "category": "Cattle",
+    "confidence": 87.93,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-DG-00114.jpg",
+    "category": "Goat",
+    "confidence": 34.92,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00141.jpg",
+    "category": "Cattle",
+    "confidence": 83.68,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00155.jpg",
+    "category": "Cattle",
+    "confidence": 93.84,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00162.jpg",
+    "category": "Cattle",
+    "confidence": 94.92,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00166.jpg",
+    "category": "Cattle",
+    "confidence": 96.3,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00173.jpg",
+    "category": "Cattle",
+    "confidence": 94.05,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00174.jpg",
+    "category": "Dog",
+    "confidence": 51.95,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00176.jpg",
+    "category": "Cattle",
+    "confidence": 43.03,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00192.jpg",
+    "category": "Cattle",
+    "confidence": 76.79,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00199.jpg",
+    "category": "Goat",
+    "confidence": 44.86,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00202.jpg",
+    "category": "Cattle",
+    "confidence": 54.35,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00206.jpg",
+    "category": "Cattle",
+    "confidence": 98.02,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00216.jpg",
+    "category": "Cattle",
+    "confidence": 99.21,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00217.jpg",
+    "category": "Cattle",
+    "confidence": 96.78,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00234.jpg",
+    "category": "Cattle",
+    "confidence": 64.43,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00243.jpg",
+    "category": "Cattle",
+    "confidence": 59.43,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00249.jpg",
+    "category": "Cattle",
+    "confidence": 49.92,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00254.jpg",
+    "category": "Cattle",
+    "confidence": 79.22,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00261.jpg",
+    "category": "Cattle",
+    "confidence": 57.19,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00264.jpg",
+    "category": "Cattle",
+    "confidence": 77.56,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00277.jpg",
+    "category": "Cattle",
+    "confidence": 96.96,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00278.jpg",
+    "category": "Cattle",
+    "confidence": 98.78,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00285.jpg",
+    "category": "Cattle",
+    "confidence": 95.85,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00291.jpg",
+    "category": "Cattle",
+    "confidence": 98.67,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00304.jpg",
+    "category": "Cattle",
+    "confidence": 70.65,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00316.jpg",
+    "category": "Cattle",
+    "confidence": 96.84,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00317.jpg",
+    "category": "Cattle",
+    "confidence": 89.67,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-DG-00332.jpg",
+    "category": "Cattle",
+    "confidence": 89.88,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-DG-00334.jpg",
+    "category": "Cattle",
+    "confidence": 92.56,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00347.jpg",
+    "category": "Cattle",
+    "confidence": 92.08,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00353.jpg",
+    "category": "Cattle",
+    "confidence": 98.59,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00367.jpg",
+    "category": "Cattle",
+    "confidence": 63.21,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00374.jpg",
+    "category": "Cattle",
+    "confidence": 59.64,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00375.jpg",
+    "category": "Cattle",
+    "confidence": 67.75,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00388.jpg",
+    "category": "Cattle",
+    "confidence": 74.11,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00394.jpg",
+    "category": "Cattle",
+    "confidence": 44.63,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00395.jpg",
+    "category": "Goat",
+    "confidence": 50.71,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00419.jpg",
+    "category": "Goat",
+    "confidence": 44.86,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00450.jpg",
+    "category": "Goat",
+    "confidence": 35.29,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00473.jpg",
+    "category": "Cattle",
+    "confidence": 98.66,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-DG-00517.jpg",
+    "category": "Cattle",
+    "confidence": 91.28,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-DG-00521.jpg",
+    "category": "Cattle",
+    "confidence": 48.15,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00540.jpg",
+    "category": "Cattle",
+    "confidence": 78.03,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-DG-00551.jpg",
+    "category": "Cattle",
+    "confidence": 43.07,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00002.jpeg",
+    "category": "Cattle",
+    "confidence": 98.29,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00002.jpg",
+    "category": "Cattle",
+    "confidence": 98.18,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00017.jpeg",
+    "category": "Cattle",
+    "confidence": 94.15,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00017.jpg",
+    "category": "Cattle",
+    "confidence": 81.59,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00042.jpeg",
+    "category": "Cattle",
+    "confidence": 70.35,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00042.jpg",
+    "category": "Cattle",
+    "confidence": 61.99,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00044.jpeg",
+    "category": "Cattle",
+    "confidence": 66.85,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00044.jpg",
+    "category": "Cattle",
+    "confidence": 81.22,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00055.jpeg",
+    "category": "Cattle",
+    "confidence": 83.75,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00055.jpg",
+    "category": "Cattle",
+    "confidence": 75.73,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00056.jpeg",
+    "category": "Cattle",
+    "confidence": 94.43,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00056.jpg",
+    "category": "Cattle",
+    "confidence": 98.91,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00066.jpeg",
+    "category": "Goat",
+    "confidence": 39.97,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00070.jpeg",
+    "category": "Cattle",
+    "confidence": 57.34,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00077.jpeg",
+    "category": "Cattle",
+    "confidence": 83.15,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00093.jpeg",
+    "category": "Cattle",
+    "confidence": 54.27,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00106.jpeg",
+    "category": "Cattle",
+    "confidence": 63.95,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00108.png",
+    "category": "Cattle",
+    "confidence": 45.28,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00112.jpeg",
+    "category": "Cattle",
+    "confidence": 51.19,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00121.jpeg",
+    "category": "Tiger",
+    "confidence": 70.49,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00124.jpeg",
+    "category": "Cattle",
+    "confidence": 93.44,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00126.jpeg",
+    "category": "Cattle",
+    "confidence": 97.57,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00162.jpg",
+    "category": "Cattle",
+    "confidence": 58.04,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00166.jpg",
+    "category": "Goat",
+    "confidence": 46.1,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00168.jpg",
+    "category": "Cattle",
+    "confidence": 98.78,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00195.jpg",
+    "category": "Cattle",
+    "confidence": 98.83,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00209.jpg",
+    "category": "Cattle",
+    "confidence": 91.51,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00222.jpg",
+    "category": "Cattle",
+    "confidence": 68.83,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00233.jpg",
+    "category": "Goat",
+    "confidence": 39.13,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00262.jpg",
+    "category": "Cattle",
+    "confidence": 98.77,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00279.jpg",
+    "category": "Cattle",
+    "confidence": 73.04,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00300.jpg",
+    "category": "Cattle",
+    "confidence": 69.89,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00303.jpg",
+    "category": "Cattle",
+    "confidence": 93.88,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00305.jpg",
+    "category": "Cattle",
+    "confidence": 99.01,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00308.jpg",
+    "category": "Cattle",
+    "confidence": 98.96,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00311.jpg",
+    "category": "Cattle",
+    "confidence": 82.45,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00319.jpg",
+    "category": "Cattle",
+    "confidence": 73.19,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00327.jpg",
+    "category": "Cattle",
+    "confidence": 82.99,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00328.jpg",
+    "category": "Cattle",
+    "confidence": 86.21,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00332.jpg",
+    "category": "Cattle",
+    "confidence": 90.5,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00339.jpg",
+    "category": "Cattle",
+    "confidence": 65.44,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00344.jpg",
+    "category": "Cattle",
+    "confidence": 78.11,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00353.jpg",
+    "category": "Cattle",
+    "confidence": 69.16,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00369.jpg",
+    "category": "Cattle",
+    "confidence": 52.87,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00374.jpg",
+    "category": "Cattle",
+    "confidence": 51.78,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00417.jpg",
+    "category": "Cattle",
+    "confidence": 87.84,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00430.jpg",
+    "category": "Cattle",
+    "confidence": 96.5,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00438.jpg",
+    "category": "Cattle",
+    "confidence": 75.84,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00446.jpg",
+    "category": "Cattle",
+    "confidence": 74.23,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00447.jpg",
+    "category": "Cattle",
+    "confidence": 94.45,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00451.jpg",
+    "category": "Cattle",
+    "confidence": 68.07,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00455.jpg",
+    "category": "Cattle",
+    "confidence": 96.2,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00458.jpg",
+    "category": "Cattle",
+    "confidence": 90.15,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00484.jpg",
+    "category": "Cattle",
+    "confidence": 87.0,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00524.jpg",
+    "category": "Cattle",
+    "confidence": 89.69,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00535.jpg",
+    "category": "Cattle",
+    "confidence": 84.29,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00577.jpg",
+    "category": "Cattle",
+    "confidence": 86.92,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00593.jpg",
+    "category": "Cattle",
+    "confidence": 95.03,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00621.jpg",
+    "category": "Cattle",
+    "confidence": 84.99,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00630.jpg",
+    "category": "Cattle",
+    "confidence": 84.07,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00632.jpg",
+    "category": "Tiger",
+    "confidence": 70.71,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00639.jpg",
+    "category": "Cattle",
+    "confidence": 85.05,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00645.jpg",
+    "category": "Dog",
+    "confidence": 50.83,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00646.jpg",
+    "category": "Goat",
+    "confidence": 54.92,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00656.jpg",
+    "category": "Cattle",
+    "confidence": 89.65,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00659.jpg",
+    "category": "Cattle",
+    "confidence": 93.85,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00664.jpg",
+    "category": "Goat",
+    "confidence": 45.93,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00672.jpg",
+    "category": "Cattle",
+    "confidence": 82.27,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00681.jpg",
+    "category": "Cattle",
+    "confidence": 90.56,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00690.jpg",
+    "category": "Cattle",
+    "confidence": 87.72,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00691.jpg",
+    "category": "Cattle",
+    "confidence": 95.22,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00694.jpg",
+    "category": "Goat",
+    "confidence": 43.39,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00699.jpg",
+    "category": "Cattle",
+    "confidence": 94.23,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00716.jpg",
+    "category": "Cattle",
+    "confidence": 82.84,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00734.jpg",
+    "category": "Cattle",
+    "confidence": 95.0,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00755.jpg",
+    "category": "Cattle",
+    "confidence": 93.06,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00760.jpg",
+    "category": "Cattle",
+    "confidence": 52.16,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00771.jpg",
+    "category": "Cattle",
+    "confidence": 62.74,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00774.jpg",
+    "category": "Cattle",
+    "confidence": 69.66,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00782.jpg",
+    "category": "Goat",
+    "confidence": 43.59,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00784.jpg",
+    "category": "Cattle",
+    "confidence": 46.6,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00787.jpg",
+    "category": "Cattle",
+    "confidence": 89.08,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00797.jpg",
+    "category": "Cattle",
+    "confidence": 74.99,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00800.jpg",
+    "category": "Cattle",
+    "confidence": 84.87,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00802.jpg",
+    "category": "Cattle",
+    "confidence": 84.8,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00819.jpg",
+    "category": "Cattle",
+    "confidence": 78.98,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00833.jpg",
+    "category": "Goat",
+    "confidence": 49.62,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00841.jpg",
+    "category": "Cattle",
+    "confidence": 95.7,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00846.jpg",
+    "category": "Cattle",
+    "confidence": 91.0,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00862.jpg",
+    "category": "Cattle",
+    "confidence": 95.2,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-DM-GT-00869.jpg",
+    "category": "Tiger",
+    "confidence": 49.77,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00870.jpg",
+    "category": "Goat",
+    "confidence": 44.82,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00872.jpg",
+    "category": "Cattle",
+    "confidence": 91.42,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00886.jpg",
+    "category": "Cattle",
+    "confidence": 85.64,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-DM-GT-00916.jpg",
+    "category": "Goat",
+    "confidence": 49.08,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00917.jpg",
+    "category": "Cattle",
+    "confidence": 62.39,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-DM-GT-00922.jpg",
+    "category": "Cattle",
+    "confidence": 83.0,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00009.jpeg",
+    "category": "Cattle",
+    "confidence": 92.47,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00016.jpeg",
+    "category": "Cattle",
+    "confidence": 89.62,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00026.jpeg",
+    "category": "Cattle",
+    "confidence": 78.43,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00037.jpeg",
+    "category": "Cattle",
+    "confidence": 74.33,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00039.jpeg",
+    "category": "Cattle",
+    "confidence": 42.16,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00041.jpeg",
+    "category": "Cattle",
+    "confidence": 72.56,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00045.jpeg",
+    "category": "Cattle",
+    "confidence": 67.84,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00053.jpeg",
+    "category": "Cattle",
+    "confidence": 81.89,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00055.jpeg",
+    "category": "Cattle",
+    "confidence": 50.63,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00070.jpg",
+    "category": "Goat",
+    "confidence": 34.39,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00072.jpg",
+    "category": "Cattle",
+    "confidence": 46.1,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00090.jpg",
+    "category": "Cattle",
+    "confidence": 70.86,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00097.jpg",
+    "category": "Cattle",
+    "confidence": 90.93,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00108.jpg",
+    "category": "Cattle",
+    "confidence": 98.91,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00112.jpg",
+    "category": "Cattle",
+    "confidence": 96.21,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00131.jpg",
+    "category": "Cattle",
+    "confidence": 90.83,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00134.jpg",
+    "category": "Tiger",
+    "confidence": 35.66,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00144.jpg",
+    "category": "Tiger",
+    "confidence": 56.8,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00146.jpg",
+    "category": "Goat",
+    "confidence": 38.2,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00161.jpg",
+    "category": "Cattle",
+    "confidence": 93.79,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00166.jpg",
+    "category": "Cattle",
+    "confidence": 70.52,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00168.jpg",
+    "category": "Cattle",
+    "confidence": 62.91,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00173.jpg",
+    "category": "Cattle",
+    "confidence": 69.87,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00192.jpg",
+    "category": "Cattle",
+    "confidence": 87.19,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00198.jpg",
+    "category": "Cattle",
+    "confidence": 89.41,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00219.jpg",
+    "category": "Cattle",
+    "confidence": 66.36,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00228.jpg",
+    "category": "Cattle",
+    "confidence": 49.76,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00230.jpg",
+    "category": "Cattle",
+    "confidence": 41.29,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00232.jpg",
+    "category": "Cattle",
+    "confidence": 78.64,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00239.jpg",
+    "category": "Cattle",
+    "confidence": 99.07,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00240.jpg",
+    "category": "Cattle",
+    "confidence": 98.24,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00243.jpg",
+    "category": "Cattle",
+    "confidence": 98.72,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00249.jpg",
+    "category": "Cattle",
+    "confidence": 94.56,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00257.jpg",
+    "category": "Cattle",
+    "confidence": 84.9,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00266.jpg",
+    "category": "Cattle",
+    "confidence": 57.76,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00274.jpg",
+    "category": "Cattle",
+    "confidence": 99.04,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00298.jpg",
+    "category": "Cattle",
+    "confidence": 73.87,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00301.jpg",
+    "category": "Cattle",
+    "confidence": 83.08,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00306.jpg",
+    "category": "Cattle",
+    "confidence": 59.81,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00313.jpg",
+    "category": "Cattle",
+    "confidence": 86.76,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00315.jpg",
+    "category": "Cattle",
+    "confidence": 80.21,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00317.jpg",
+    "category": "Cattle",
+    "confidence": 70.48,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00322.jpg",
+    "category": "Goat",
+    "confidence": 45.58,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00330.jpg",
+    "category": "Cattle",
+    "confidence": 44.02,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00331.jpg",
+    "category": "Tiger",
+    "confidence": 38.83,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00332.jpg",
+    "category": "Cattle",
+    "confidence": 61.67,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00342.jpg",
+    "category": "Goat",
+    "confidence": 40.65,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00353.jpg",
+    "category": "Cattle",
+    "confidence": 94.08,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00360.jpg",
+    "category": "Goat",
+    "confidence": 29.13,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00370.jpg",
+    "category": "Cattle",
+    "confidence": 78.32,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00371.jpg",
+    "category": "Cattle",
+    "confidence": 76.28,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00381.jpg",
+    "category": "Cattle",
+    "confidence": 57.64,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00385.jpg",
+    "category": "Cattle",
+    "confidence": 76.14,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00386.jpg",
+    "category": "Cattle",
+    "confidence": 74.47,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00393.jpg",
+    "category": "Cattle",
+    "confidence": 88.66,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00402.jpg",
+    "category": "Cattle",
+    "confidence": 74.71,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00408.jpg",
+    "category": "Cattle",
+    "confidence": 87.67,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00412.jpg",
+    "category": "Cattle",
+    "confidence": 86.03,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00422.jpg",
+    "category": "Cattle",
+    "confidence": 98.08,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-GR-00434.jpg",
+    "category": "Cattle",
+    "confidence": 73.82,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00438.jpg",
+    "category": "Tiger",
+    "confidence": 58.32,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00439.jpg",
+    "category": "Goat",
+    "confidence": 44.09,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00453.jpg",
+    "category": "Cattle",
+    "confidence": 81.26,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00455.jpg",
+    "category": "Cattle",
+    "confidence": 86.48,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-GR-00456.jpg",
+    "category": "Cattle",
+    "confidence": 82.24,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00493.jpg",
+    "category": "Cattle",
+    "confidence": 48.04,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-GR-00518.jpg",
+    "category": "Cattle",
+    "confidence": 57.72,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00003.jpg",
+    "category": "Cattle",
+    "confidence": 87.67,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LG-00017.jpg",
+    "category": "Cattle",
+    "confidence": 95.93,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00033.jpg",
+    "category": "Cattle",
+    "confidence": 41.52,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00045.jpg",
+    "category": "Cattle",
+    "confidence": 89.68,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LG-00052.jpg",
+    "category": "Cattle",
+    "confidence": 79.27,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00064.jpg",
+    "category": "Goat",
+    "confidence": 44.62,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00077.jpg",
+    "category": "Cattle",
+    "confidence": 97.33,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00088.jpg",
+    "category": "Cattle",
+    "confidence": 98.86,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00098.jpg",
+    "category": "Goat",
+    "confidence": 35.11,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00106.jpg",
+    "category": "Cattle",
+    "confidence": 57.25,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00107.jpg",
+    "category": "Cattle",
+    "confidence": 81.06,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00108.jpg",
+    "category": "Cattle",
+    "confidence": 98.49,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00112.jpg",
+    "category": "Cattle",
+    "confidence": 98.06,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00115.jpg",
+    "category": "Cattle",
+    "confidence": 96.81,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00118.jpg",
+    "category": "Cattle",
+    "confidence": 84.93,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00122.jpg",
+    "category": "Cattle",
+    "confidence": 78.45,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00124.jpg",
+    "category": "Cattle",
+    "confidence": 72.75,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00125.jpg",
+    "category": "Cattle",
+    "confidence": 80.27,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00144.jpg",
+    "category": "Cattle",
+    "confidence": 97.6,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00147.jpg",
+    "category": "Cattle",
+    "confidence": 98.6,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00148.jpg",
+    "category": "Cattle",
+    "confidence": 50.67,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00150.jpg",
+    "category": "Cattle",
+    "confidence": 63.46,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00159.jpg",
+    "category": "Cattle",
+    "confidence": 79.33,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00170.jpg",
+    "category": "Cattle",
+    "confidence": 71.48,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00188.jpg",
+    "category": "Cattle",
+    "confidence": 88.32,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LG-00195.jpg",
+    "category": "Cattle",
+    "confidence": 97.25,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00198.jpg",
+    "category": "Cattle",
+    "confidence": 67.5,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00211.jpg",
+    "category": "Cattle",
+    "confidence": 98.62,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00224.jpg",
+    "category": "Goat",
+    "confidence": 52.72,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00233.jpg",
+    "category": "Cattle",
+    "confidence": 70.82,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00235.jpg",
+    "category": "Cattle",
+    "confidence": 97.34,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00244.jpg",
+    "category": "Cattle",
+    "confidence": 98.53,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00252.jpg",
+    "category": "Goat",
+    "confidence": 38.23,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00267.jpg",
+    "category": "Cattle",
+    "confidence": 97.77,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00272.jpg",
+    "category": "Cattle",
+    "confidence": 85.35,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LG-00279.jpg",
+    "category": "Cattle",
+    "confidence": 79.77,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00299.jpg",
+    "category": "Cattle",
+    "confidence": 78.3,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00303.jpg",
+    "category": "Cattle",
+    "confidence": 83.43,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00306.jpg",
+    "category": "Cattle",
+    "confidence": 92.97,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00316.jpg",
+    "category": "Cattle",
+    "confidence": 96.76,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00325.jpg",
+    "category": "Cattle",
+    "confidence": 77.37,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00327.jpg",
+    "category": "Cattle",
+    "confidence": 69.21,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00330.jpg",
+    "category": "Cattle",
+    "confidence": 98.84,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00331.jpg",
+    "category": "Cattle",
+    "confidence": 99.31,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00335.jpg",
+    "category": "Cattle",
+    "confidence": 98.79,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00336.jpg",
+    "category": "Cattle",
+    "confidence": 99.29,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00337.jpg",
+    "category": "Cattle",
+    "confidence": 99.32,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00342.jpg",
+    "category": "Cattle",
+    "confidence": 89.04,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LG-00346.jpg",
+    "category": "Cattle",
+    "confidence": 56.08,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00354.jpg",
+    "category": "Cattle",
+    "confidence": 65.03,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00389.jpg",
+    "category": "Cattle",
+    "confidence": 95.02,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00405.jpg",
+    "category": "Cattle",
+    "confidence": 99.07,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00407.jpg",
+    "category": "Cattle",
+    "confidence": 98.92,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00409.jpg",
+    "category": "Cattle",
+    "confidence": 96.09,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00422.jpg",
+    "category": "Cattle",
+    "confidence": 98.58,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00431.jpg",
+    "category": "Cattle",
+    "confidence": 98.51,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00442.jpg",
+    "category": "Cattle",
+    "confidence": 96.13,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00446.jpg",
+    "category": "Cattle",
+    "confidence": 83.57,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00454.jpg",
+    "category": "Cattle",
+    "confidence": 56.37,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00473.jpg",
+    "category": "Cattle",
+    "confidence": 96.0,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LG-00481.jpg",
+    "category": "Goat",
+    "confidence": 42.24,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00492.jpg",
+    "category": "Cattle",
+    "confidence": 79.32,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00493.jpg",
+    "category": "Goat",
+    "confidence": 30.39,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LG-00495.jpg",
+    "category": "Goat",
+    "confidence": 38.3,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00004.jpg",
+    "category": "Tiger",
+    "confidence": 41.21,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00017.jpg",
+    "category": "Goat",
+    "confidence": 40.53,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00047.jpg",
+    "category": "Tiger",
+    "confidence": 54.84,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00057.jpg",
+    "category": "Cattle",
+    "confidence": 78.4,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00062.jpg",
+    "category": "Cattle",
+    "confidence": 67.85,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00079.jpg",
+    "category": "Tiger",
+    "confidence": 89.62,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LN-00084.jpg",
+    "category": "Goat",
+    "confidence": 32.26,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00096.jpg",
+    "category": "Cattle",
+    "confidence": 38.98,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00120.jpg",
+    "category": "Goat",
+    "confidence": 44.83,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00129.jpg",
+    "category": "Goat",
+    "confidence": 48.37,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00137.jpg",
+    "category": "Goat",
+    "confidence": 32.46,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00147.jpg",
+    "category": "Cattle",
+    "confidence": 87.04,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LN-00165.jpg",
+    "category": "Goat",
+    "confidence": 46.46,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00167.jpg",
+    "category": "Goat",
+    "confidence": 46.89,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00168.jpg",
+    "category": "Goat",
+    "confidence": 50.63,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00181.jpg",
+    "category": "Dog",
+    "confidence": 47.93,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00182.jpg",
+    "category": "Cattle",
+    "confidence": 50.35,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00191.jpg",
+    "category": "Tiger",
+    "confidence": 41.25,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00196.jpg",
+    "category": "Tiger",
+    "confidence": 76.63,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00206.jpg",
+    "category": "Tiger",
+    "confidence": 42.23,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00217.jpg",
+    "category": "Dog",
+    "confidence": 47.5,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00228.jpg",
+    "category": "Goat",
+    "confidence": 50.71,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00232.jpg",
+    "category": "Cattle",
+    "confidence": 46.75,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00254.jpg",
+    "category": "Tiger",
+    "confidence": 45.83,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00258.jpg",
+    "category": "Cattle",
+    "confidence": 69.11,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00276.jpg",
+    "category": "Goat",
+    "confidence": 44.54,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00279.jpg",
+    "category": "Goat",
+    "confidence": 32.42,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00292.jpg",
+    "category": "Cattle",
+    "confidence": 81.61,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00299.jpg",
+    "category": "Cattle",
+    "confidence": 79.93,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00314.jpg",
+    "category": "Tiger",
+    "confidence": 93.02,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-LN-00315.jpg",
+    "category": "Tiger",
+    "confidence": 33.08,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00326.jpg",
+    "category": "Cattle",
+    "confidence": 80.64,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00343.jpg",
+    "category": "Goat",
+    "confidence": 44.93,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00361.jpg",
+    "category": "Cattle",
+    "confidence": 77.32,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00367.jpg",
+    "category": "Cattle",
+    "confidence": 77.86,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00372.jpg",
+    "category": "Cattle",
+    "confidence": 52.48,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00383.jpg",
+    "category": "Goat",
+    "confidence": 36.02,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00387.jpg",
+    "category": "Tiger",
+    "confidence": 41.68,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00414.jpg",
+    "category": "Cattle",
+    "confidence": 98.39,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LN-00415.jpg",
+    "category": "Cattle",
+    "confidence": 98.4,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LN-00419.jpg",
+    "category": "Tiger",
+    "confidence": 90.31,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-LN-00423.jpg",
+    "category": "Tiger",
+    "confidence": 84.2,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00429.jpg",
+    "category": "Tiger",
+    "confidence": 51.01,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00431.jpg",
+    "category": "Tiger",
+    "confidence": 47.41,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00444.jpg",
+    "category": "Dog",
+    "confidence": 44.48,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00445.jpg",
+    "category": "Cattle",
+    "confidence": 52.85,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00456.jpg",
+    "category": "Goat",
+    "confidence": 46.96,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00459.jpg",
+    "category": "Cattle",
+    "confidence": 62.67,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00464.jpg",
+    "category": "Goat",
+    "confidence": 46.03,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00474.jpg",
+    "category": "Goat",
+    "confidence": 41.52,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00489.jpg",
+    "category": "Dog",
+    "confidence": 50.63,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00514.jpg",
+    "category": "Dog",
+    "confidence": 50.23,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00536.jpg",
+    "category": "Cattle",
+    "confidence": 67.66,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00544.webp",
+    "category": "Cattle",
+    "confidence": 64.46,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00546.jpeg",
+    "category": "Cattle",
+    "confidence": 44.62,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00550.jpg",
+    "category": "Cattle",
+    "confidence": 83.93,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00559.jpg",
+    "category": "Tiger",
+    "confidence": 52.71,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00560.jpg",
+    "category": "Dog",
+    "confidence": 48.58,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00581.jpg",
+    "category": "Tiger",
+    "confidence": 92.8,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-LN-00595.jpg",
+    "category": "Goat",
+    "confidence": 44.08,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00608.jpg",
+    "category": "Goat",
+    "confidence": 38.81,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00609.jpg",
+    "category": "Cattle",
+    "confidence": 78.96,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00620.jpg",
+    "category": "Cattle",
+    "confidence": 97.2,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LN-00641.jpg",
+    "category": "Tiger",
+    "confidence": 29.75,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00654.jpg",
+    "category": "Cattle",
+    "confidence": 99.24,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-LN-00662.jpg",
+    "category": "Cattle",
+    "confidence": 83.84,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00677.jpg",
+    "category": "Tiger",
+    "confidence": 50.85,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00682.jpg",
+    "category": "Dog",
+    "confidence": 42.32,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00702.jpg",
+    "category": "Cattle",
+    "confidence": 84.62,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00708.jpg",
+    "category": "Cattle",
+    "confidence": 53.96,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-LN-00712.jpg",
+    "category": "Cattle",
+    "confidence": 80.17,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00005.jpg",
+    "category": "Tiger",
+    "confidence": 45.53,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00008.jpg",
+    "category": "Cattle",
+    "confidence": 45.78,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00012.jpg",
+    "category": "Cattle",
+    "confidence": 81.97,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00026.jpg",
+    "category": "Cattle",
+    "confidence": 87.52,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-NG-00030.jpg",
+    "category": "Cattle",
+    "confidence": 80.95,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00051.jpg",
+    "category": "Cattle",
+    "confidence": 74.6,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00064.jpeg",
+    "category": "Cattle",
+    "confidence": 81.46,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00066.jpg",
+    "category": "Cattle",
+    "confidence": 49.77,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00070.jpg",
+    "category": "Dog",
+    "confidence": 24.88,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-NG-00102.jpg",
+    "category": "Cattle",
+    "confidence": 50.97,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00011.jpg",
+    "category": "Cattle",
+    "confidence": 56.34,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00016.jpg",
+    "category": "Dog",
+    "confidence": 64.62,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00020.jpg",
+    "category": "Dog",
+    "confidence": 46.09,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00023.jpg",
+    "category": "Cattle",
+    "confidence": 79.72,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00038.jpg",
+    "category": "Goat",
+    "confidence": 39.33,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00048.jpg",
+    "category": "Goat",
+    "confidence": 40.08,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00055.jpg",
+    "category": "Cattle",
+    "confidence": 43.25,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00068.jpg",
+    "category": "Cattle",
+    "confidence": 92.1,
+    "tier": "92% - 95%"
+  },
+  {
+    "filename": "WS-WL-RM-00077.jpg",
+    "category": "Cattle",
+    "confidence": 79.33,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00082.jpg",
+    "category": "Cattle",
+    "confidence": 68.5,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00083.jpg",
+    "category": "Goat",
+    "confidence": 36.1,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00085.jpg",
+    "category": "Goat",
+    "confidence": 43.63,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00091.jpg",
+    "category": "Cattle",
+    "confidence": 55.56,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00099.jpg",
+    "category": "Goat",
+    "confidence": 38.55,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00126.jpg",
+    "category": "Cattle",
+    "confidence": 56.1,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00141.jpg",
+    "category": "Cattle",
+    "confidence": 98.02,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-RM-00144.jpg",
+    "category": "Cattle",
+    "confidence": 95.75,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-RM-00163.jpg",
+    "category": "Goat",
+    "confidence": 42.19,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00172.jpg",
+    "category": "Dog",
+    "confidence": 55.18,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00197.jpg",
+    "category": "Cattle",
+    "confidence": 76.09,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00209.jpg",
+    "category": "Cattle",
+    "confidence": 72.16,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00227.jpg",
+    "category": "Cattle",
+    "confidence": 82.48,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00237.jpg",
+    "category": "Cattle",
+    "confidence": 53.64,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00242.jpg",
+    "category": "Cattle",
+    "confidence": 49.6,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00262.jpg",
+    "category": "Dog",
+    "confidence": 48.22,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00272.jpg",
+    "category": "Cattle",
+    "confidence": 77.9,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00273.jpg",
+    "category": "Cattle",
+    "confidence": 96.73,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-RM-00303.jpg",
+    "category": "Goat",
+    "confidence": 36.36,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00313.jpg",
+    "category": "Cattle",
+    "confidence": 72.81,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00322.jpg",
+    "category": "Cattle",
+    "confidence": 56.32,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00329.jpg",
+    "category": "Cattle",
+    "confidence": 49.09,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00371.jpg",
+    "category": "Cattle",
+    "confidence": 46.51,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00390.jpg",
+    "category": "Cattle",
+    "confidence": 90.38,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-RM-00421.jpg",
+    "category": "Cattle",
+    "confidence": 72.24,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00434.jpg",
+    "category": "Goat",
+    "confidence": 47.26,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00436.jpg",
+    "category": "Cattle",
+    "confidence": 85.78,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-RM-00439.jpg",
+    "category": "Cattle",
+    "confidence": 81.46,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-RM-00443.jpg",
+    "category": "Tiger",
+    "confidence": 64.19,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-SD-00006.jpg",
+    "category": "Cattle",
+    "confidence": 87.12,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-SD-00026.jpg",
+    "category": "Cattle",
+    "confidence": 99.17,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-SD-00033.jpg",
+    "category": "Cattle",
+    "confidence": 60.25,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-SD-00036.jpg",
+    "category": "Cattle",
+    "confidence": 73.06,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-SD-00104.jpg",
+    "category": "Cattle",
+    "confidence": 85.06,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-SD-00107.jpg",
+    "category": "Cattle",
+    "confidence": 96.09,
+    "tier": "Above 95%"
+  },
+  {
+    "filename": "WS-WL-SD-00110.jpg",
+    "category": "Cattle",
+    "confidence": 86.55,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-SD-00115.jpg",
+    "category": "Cattle",
+    "confidence": 88.14,
+    "tier": "85% - 90%"
+  },
+  {
+    "filename": "WS-WL-SD-00126.jpeg",
+    "category": "Cattle",
+    "confidence": 81.37,
+    "tier": "Below 85%"
+  },
+  {
+    "filename": "WS-WL-SD-00126.jpg",
+    "category": "Cattle",
+    "confidence": 67.85,
+    "tier": "Below 85%"
+  }
+]

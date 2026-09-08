@@ -32,7 +32,7 @@ Animals Datasets 1/
 Animals Datasets 2/
 yolo11n.pt
 
-# Ignore temporary raw dataset dumps
-WildShield-Dataset/raw/
-WildShield-Dataset/processed/
-WildShield-Dataset/rejected/
+# Ignore large raw dataset directories and caches
+WildShield-Dataset/
+Wildshield AI Workflow/
+*.cache

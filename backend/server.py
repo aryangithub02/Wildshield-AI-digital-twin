@@ -414,7 +414,12 @@ def process_pil_inference(
             "ws-wl-gr": "Gaur",
             "ws-dm-ct": "Cattle",
             "ws-dm-gt": "Goat",
-            "ws-hm-hu": "Human"
+            "ws-sec-hm": "Human",
+            "ws-hm-hu": "Human",
+            "ws-sec-ve": "Vehicle",
+            "ws-wl-tg": "Tiger",
+            "ws-wl-ln": "Asiatic Lion",
+            "ws-dm-dg": "Dog"
         }
         for code_key, sp_name in CODE_TO_SPECIES.items():
             if code_key in sample_str:
@@ -427,6 +432,7 @@ def process_pil_inference(
                 "boar": "Wild Boar",
                 "nilgai": "Nilgai",
                 "deer": "Spotted Deer",
+                "chital": "Spotted Deer",
                 "macaque": "Rhesus Macaque",
                 "langur": "Langur",
                 "gaur": "Gaur",
@@ -435,7 +441,10 @@ def process_pil_inference(
                 "cattle": "Cattle",
                 "goat": "Goat",
                 "human": "Human",
-                "person": "Human"
+                "person": "Human",
+                "tiger": "Tiger",
+                "lion": "Asiatic Lion",
+                "dog": "Dog"
             }
             for kw, sp_name in NAME_KEYWORDS.items():
                 if kw in sample_str:

@@ -12,6 +12,7 @@ DATASET_ROOT = BASE_DIR / "WildShield-Dataset"
 RAW_DIR = DATASET_ROOT / "raw"
 PROCESSED_DIR = DATASET_ROOT / "processed"
 REJECTED_DIR = DATASET_ROOT / "rejected"
+AUG_DIR = DATASET_ROOT / "augmented"
 
 TRAIN_IMG = DATASET_ROOT / "train" / "images"
 TRAIN_LBL = DATASET_ROOT / "train" / "labels"
@@ -20,7 +21,8 @@ VAL_LBL = DATASET_ROOT / "val" / "labels"
 TEST_IMG = DATASET_ROOT / "test" / "images"
 TEST_LBL = DATASET_ROOT / "test" / "labels"
 
-# Source folders
+# Primary & Secondary Source folders
+PRIMARY_DS_PATH = BASE_DIR / "Wildshield AI Workflow" / "wildshield ai Dataset"
 DS1_PATH = BASE_DIR / "Animals Datasets 1" / "animals" / "animals"
 DS2_PATH = BASE_DIR / "Animals Datasets 2" / "data"
 
@@ -34,7 +36,10 @@ TARGET_CLASSES = {
     6: {"name": "Cattle", "type": "DM", "code": "CT"},
     7: {"name": "Goat", "type": "DM", "code": "GT"},
     8: {"name": "Human", "type": "HM", "code": "HM"},
-    9: {"name": "Vehicle", "type": "VH", "code": "VH"}
+    9: {"name": "Vehicle", "type": "VH", "code": "VH"},
+    10: {"name": "Tiger", "type": "WL", "code": "TG"},
+    11: {"name": "Asiatic Lion", "type": "WL", "code": "LN"},
+    12: {"name": "Dog", "type": "DM", "code": "DG"}
 }
 
 def init_folders():
@@ -75,28 +80,58 @@ def import_local_datasets():
     total_imported = 0
     total_rejected = 0
 
-    # Source mapping: (Path, Target Class ID)
+    # Source mapping list of tuples: (source_directory, class_id, max_samples)
     source_mapping = []
-    
-    # Dataset 1
-    if DS1_PATH.exists():
+
+    # 1. PRIMARY USER DATASET (Wildshield AI Workflow / wildshield ai Dataset)
+    if PRIMARY_DS_PATH.exists():
         source_mapping.extend([
-            (DS1_PATH / "boar", 0),
-            (DS1_PATH / "deer", 2),
-            (DS1_PATH / "cow", 6),
-            (DS1_PATH / "ox", 6),
-            (DS1_PATH / "goat", 7),
-        ])
-    
-    # Dataset 2
-    if DS2_PATH.exists():
-        source_mapping.extend([
-            (DS2_PATH / "Wild Boar", 0),
-            (DS2_PATH / "Nilgai", 1),
-            (DS2_PATH / "Chital", 2),
+            (PRIMARY_DS_PATH / "Wild Boar Dataset", 0, 3000), # Sample up to 3000 to keep balance
+            (PRIMARY_DS_PATH / "Indian Macaque", 3, None),
+            (PRIMARY_DS_PATH / "Langur", 4, None),
+            (PRIMARY_DS_PATH / "Indian Bison", 5, None),
+            (PRIMARY_DS_PATH / "Cattle Dataset", 6, 1200),
+            (PRIMARY_DS_PATH / "Indian Cow", 6, None),
+            (PRIMARY_DS_PATH / "Goat Dataset", 7, 1000),
+            (PRIMARY_DS_PATH / "tiger", 10, None),
+            (PRIMARY_DS_PATH / "Asiatic Lion", 11, None),
+            (PRIMARY_DS_PATH / "Indian Dog", 12, None),
         ])
 
-    for source_dir, class_id in source_mapping:
+    # 2. AUGMENTED DATASET (WildShield-Dataset/augmented)
+    if AUG_DIR.exists():
+        source_mapping.extend([
+            (AUG_DIR / "Wild Boar Dataset", 0, 1000),
+            (AUG_DIR / "Indian Macaque", 3, None),
+            (AUG_DIR / "Langur", 4, None),
+            (AUG_DIR / "Indian Bison", 5, None),
+            (AUG_DIR / "Cattle Dataset", 6, 1000),
+            (AUG_DIR / "Indian Cow", 6, None),
+            (AUG_DIR / "Goat Dataset", 7, 1000),
+            (AUG_DIR / "tiger", 10, None),
+            (AUG_DIR / "Asiatic Lion", 11, None),
+            (AUG_DIR / "Indian Dog", 12, None),
+        ])
+
+    # 3. SECONDARY DATASETS (Nilgai, Spotted Deer, supplementary classes)
+    if DS2_PATH.exists():
+        source_mapping.extend([
+            (DS2_PATH / "Nilgai", 1, None),
+            (DS2_PATH / "Chital", 2, None),
+            (DS2_PATH / "Wild Boar", 0, 200),
+            (DS2_PATH / "Asiatic Lion", 11, None),
+            (DS2_PATH / "Indian Leopard", 10, None),
+        ])
+    
+    if DS1_PATH.exists():
+        source_mapping.extend([
+            (DS1_PATH / "deer", 2, None),
+            (DS1_PATH / "dog", 12, None),
+            (DS1_PATH / "tiger", 10, None),
+            (DS1_PATH / "lion", 11, None),
+        ])
+
+    for source_dir, class_id, max_samples in source_mapping:
         if not source_dir.exists():
             continue
             
@@ -105,13 +140,22 @@ def import_local_datasets():
         target_raw_sub = RAW_DIR / class_folder_name
         target_raw_sub.mkdir(parents=True, exist_ok=True)
         
-        for img_file in source_dir.glob("*.*"):
-            if img_file.suffix.lower() not in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]:
-                continue
-                
+        all_imgs = [
+            f for f in source_dir.rglob("*") 
+            if f.is_file() and f.suffix.lower() in [".jpg", ".jpeg", ".png", ".webp", ".bmp"]
+        ]
+        
+        if max_samples and len(all_imgs) > max_samples:
+            import random
+            all_imgs = random.sample(all_imgs, max_samples)
+            
+        for img_file in all_imgs:
             if not is_valid_image(img_file):
-                shutil.copy2(img_file, REJECTED_DIR / f"corrupted_{img_file.name}")
-                total_rejected += 1
+                try:
+                    shutil.copy2(img_file, REJECTED_DIR / f"corrupted_{img_file.name}")
+                    total_rejected += 1
+                except Exception:
+                    pass
                 continue
                 
             img_hash = get_file_hash(img_file)
@@ -128,57 +172,12 @@ def import_local_datasets():
             shutil.copy2(img_file, dest_file)
             total_imported += 1
 
-    print(f"[OK] Imported {total_imported} deduplicated images into {RAW_DIR}")
+    print(f"[OK] Consolidated {total_imported} deduplicated images into {RAW_DIR}")
     if total_rejected > 0:
         print(f"[WARN] Rejected {total_rejected} corrupted images into {REJECTED_DIR}")
 
 # ==========================================
-# 4. HUGGING FACE INGESTION (OPTIONAL)
-# ==========================================
-def import_huggingface_dataset():
-    """
-    Download and extract relevant species from NoeFlandre/IndiaAnimals
-    """
-    try:
-        from datasets import load_dataset
-        print("[INFO] Checking for NoeFlandre/IndiaAnimals on Hugging Face...")
-        ds = load_dataset("NoeFlandre/IndiaAnimals", split="train")
-        
-        hf_mapping = {
-            "Wild Boar": 0,
-            "Nilgai": 1,
-            "Chital": 2,
-            "Rhesus Macaque": 3,
-            "Gray Langur": 4,
-            "Gaur": 5
-        }
-        
-        counters = {cid: 10000 for cid in TARGET_CLASSES}
-        saved_count = 0
-        for item in ds:
-            label = item.get("label") or item.get("species")
-            if label in hf_mapping:
-                class_id = hf_mapping[label]
-                class_meta = TARGET_CLASSES[class_id]
-                target_folder = RAW_DIR / f"{class_id}_{class_meta['name'].replace(' ', '_')}"
-                target_folder.mkdir(parents=True, exist_ok=True)
-                
-                img = item["image"]
-                seq_num = counters[class_id]
-                counters[class_id] += 1
-                ws_id = f"WS-{class_meta['type']}-{class_meta['code']}-{seq_num:05d}"
-                file_path = target_folder / f"{ws_id}.jpg"
-                img.save(file_path, "JPEG")
-                saved_count += 1
-                
-        print(f"[OK] Downloaded {saved_count} images from Hugging Face dataset.")
-    except ImportError:
-        print("[INFO] Hugging Face 'datasets' package not installed. Skipping online HF fetch.")
-    except Exception as e:
-        print(f"[INFO] HF Dataset notice: {e}")
-
-# ==========================================
-# 5. GENERATE data.yaml FOR YOLO
+# 4. GENERATE data.yaml FOR YOLO
 # ==========================================
 def generate_yolo_yaml():
     yaml_content = f"""# WildShield AI - Dataset Configuration
@@ -200,5 +199,4 @@ names:
 if __name__ == "__main__":
     init_folders()
     import_local_datasets()
-    import_huggingface_dataset()
     generate_yolo_yaml()

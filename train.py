@@ -1,16 +1,19 @@
 import os
+import shutil
 from pathlib import Path
 import torch
 
 BASE_DIR = Path(__file__).resolve().parent
 YAML_PATH = BASE_DIR / "WildShield-Dataset" / "data.yaml"
+TARGET_WEIGHTS_DIR = BASE_DIR / "runs" / "detect" / "WildShield-Experiments" / "wildshield_surveillance_v1-2" / "weights"
 
 def train_wildshield_model(
     model_name="yolo11n.pt", 
-    epochs=50, 
-    batch=8, 
-    imgsz=640,
-    device=None
+    epochs=10, 
+    batch=32, 
+    imgsz=320,
+    device="cpu",
+    workers=0
 ):
     try:
         from ultralytics import YOLO
@@ -22,47 +25,66 @@ def train_wildshield_model(
         print(f"[ERROR] data.yaml not found at {YAML_PATH}. Run build_wildshield_dataset.py first.")
         return
 
-    # Auto-detect device
-    if device is None:
-        device = 0 if torch.cuda.is_available() else "cpu"
+    print("=" * 65)
+    print(" WILDSHIELD AI — YOLO SURVEILLANCE MODEL TRAINING")
+    print(f" Device: {device} | Base Model: {model_name} | Epochs: {epochs} | Batch: {batch} | ImgSz: {imgsz}")
+    print("=" * 65)
 
-    print(f"[INFO] Using device: {device} (CUDA available: {torch.cuda.is_available()})")
-    print(f"[INFO] Initializing YOLO training with {model_name}...")
     model = YOLO(model_name)
 
-    # Surveillance & farm augmentation hyperparameters
+    project_dir = BASE_DIR / "runs" / "detect" / "WildShield-Experiments"
+
+    # Train transfer-learning model with surveillance hyperparameters
     results = model.train(
         data=str(YAML_PATH),
         epochs=epochs,
         batch=batch,
         imgsz=imgsz,
         device=device,
+        workers=workers,
         optimizer="AdamW",
-        lr0=0.001,
+        lr0=0.002,
         lrf=0.01,
         
-        # Farm & Night Surveillance Augmentations
-        hsv_h=0.015,       # Color hue variance
-        hsv_s=0.7,         # Desaturation (monochrome/IR simulation)
-        hsv_v=0.5,         # Exposure/brightness variations (low-light, shadows)
-        degrees=10.0,      # Sloped camera angles
-        translate=0.1,     # Perimeter boundaries
-        scale=0.4,         # Distance variation (small/far animals)
-        shear=2.0,         # Perspective distortion
-        fliplr=0.5,        # Horizontal flip
-        flipud=0.0,        # No upside down flip
-        mosaic=1.0,        # Multiple animals & cluttered background
-        mixup=0.15,        # Crop occlusion & partial visibility
-        copy_paste=0.1,    # Animal herds
+        # Surveillance Augmentations
+        hsv_h=0.015,
+        hsv_s=0.5,
+        hsv_v=0.4,
+        degrees=8.0,
+        translate=0.1,
+        scale=0.3,
+        fliplr=0.5,
+        mosaic=0.8,
         
-        # Logging & Model outputs
+        # Logging & Saving
         val=True,
         save=True,
-        project="WildShield-Experiments",
-        name="wildshield_surveillance_v1"
+        project=str(project_dir),
+        name="wildshield_surveillance_v1-2",
+        exist_ok=True
     )
-    print("[OK] Training complete. Model weights saved to WildShield-Experiments/wildshield_surveillance_v1/weights/best.pt")
+    
+    best_pt = project_dir / "wildshield_surveillance_v1-2" / "weights" / "best.pt"
+    if best_pt.exists():
+        print(f"\n[OK] Training completed successfully!")
+        print(f"[OK] Best weights saved to: {best_pt}")
+        
+        # Run test set evaluation
+        print("\n[INFO] Evaluating model on unseen test set (1,071 images)...")
+        try:
+            val_model = YOLO(str(best_pt))
+            metrics = val_model.val(data=str(YAML_PATH), split="test", imgsz=imgsz, device=device, workers=0)
+            print("=" * 65)
+            print(" WILDSHIELD AI — TEST SET BENCHMARK RESULTS")
+            print(f" mAP50    : {metrics.box.map50 * 100:.2f}%")
+            print(f" mAP50-95 : {metrics.box.map * 100:.2f}%")
+            print(f" Precision: {metrics.box.mp * 100:.2f}%")
+            print(f" Recall   : {metrics.box.mr * 100:.2f}%")
+            print("=" * 65)
+        except Exception as e:
+            print(f"[INFO] Validation notice: {e}")
+            
+    return results
 
 if __name__ == "__main__":
     train_wildshield_model()
-
