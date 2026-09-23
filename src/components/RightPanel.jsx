@@ -14,21 +14,11 @@ export default function RightPanel({ simulationState, currentScenario, language 
   // Crop state - Cotton, Rice, Sugarcane, Vegetables
   const [currentCrop, setCurrentCrop] = useState('Cotton');
 
-  const activeScenario = currentScenario || {
-    species: "Elephant",
-    emoji: "🐘",
-    threat: "HIGH",
-    nodeId: 1,
-    nodeName: "FN-1",
-    confidenceBase: 96.2,
-    confidenceMax: 98.4,
-    actuators: { siren: true, floodlight: true, speaker: true, sprinkler: true },
-    logThreat: "HIGH",
-    path: []
-  };
+  const hasActiveTarget = Boolean(currentScenario && currentScenario.species && (simulationState > 0 || currentScenario.isLiveDetection));
+  const activeScenario = hasActiveTarget ? currentScenario : null;
 
   const getSpeciesTranslated = (speciesName) => {
-    if (!speciesName) return "N/A";
+    if (!speciesName) return "None";
     if (speciesName === "Elephant") return t('elephant');
     if (speciesName === "Wild Boar") return t('wildBoar');
     if (speciesName === "Monkey" || speciesName === "Rhesus Macaque" || speciesName === "Langur") return t('monkey');
@@ -45,11 +35,45 @@ export default function RightPanel({ simulationState, currentScenario, language 
   const getThreatTranslated = (threatLevel) => {
     if (threatLevel === "HIGH" || threatLevel === "CRITICAL") return t('high').toUpperCase();
     if (threatLevel === "MEDIUM" || threatLevel === "WARNING") return t('medium').toUpperCase();
+    if (threatLevel === "NONE") return "NONE";
     return t('low').toUpperCase();
   };
 
   // 1. Knowledge Base-Driven Species Configuration
   const getSpeciesConfig = () => {
+    if (!activeScenario) {
+      return {
+        threatScore: 0,
+        threatStatus: "NONE",
+        farmThreat: "🟢 None (Clear)",
+        threatColor: "text-green-400 bg-green-500/10 border-green-500/20",
+        threatBg: "bg-green-600",
+        damageCategory: "No threat detected. Farm perimeter and crops are secure.",
+        activityPeriod: "Standby Monitoring",
+        socialBehavior: "Perimeter Clear",
+        diet: "None",
+        safetyRisk: null,
+        count: 0,
+        speed: "N/A",
+        direction: "Secure",
+        gpsZone: "All Nodes Active",
+        matrixRowIndex: -1,
+        learning: { visits: 0, successful: "All Systems Ready", successRate: 100, exitTime: 0 },
+        reasons: [
+          "All IoT camera and PIR sensors active in standby mode.",
+          `Crop configured as ${currentCrop}.`,
+          "Perimeter geofence intact. No animal or human intrusion detected.",
+          "All deterrents in standby mode."
+        ],
+        tree: [
+          "Sensor Status → All 5 Farmer Nodes Online",
+          "Detection Pipeline → Scanning Perimeter",
+          "Target Identified → None (Perimeter Clear)",
+          "Geofence Status → SECURE",
+          "Response Mode → STANDBY"
+        ]
+      };
+    }
     const meta = getSpeciesMetadataByName(activeScenario.species);
     const sp = activeScenario.species;
 
@@ -476,8 +500,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
 
   // 3. Actuators states mapping based on Species + Crop
   const getActuatorState = (actuator) => {
-    const isLiveDetected = simulationState >= 1 || activeScenario?.confidenceBase;
-    if (!isLiveDetected) return { state: "OFF", color: "bg-slate-800 text-slate-400" };
+    if (!hasActiveTarget || !activeScenario) return { state: "STANDBY", color: "bg-slate-900 border border-slate-800 text-slate-500" };
     
     // Crop-Aware Sprinkler override
     if (actuator === "Sprinkler") {
@@ -487,27 +510,27 @@ export default function RightPanel({ simulationState, currentScenario, language 
       const usesSprinkler = activeScenario.actuators?.sprinkler || activeScenario.species === "Elephant" || activeScenario.species === "Rhesus Macaque" || activeScenario.species === "Langur" || activeScenario.species === "Cattle";
       return usesSprinkler 
         ? { state: "ON", color: "bg-green-500 text-slate-950 font-bold" }
-        : { state: "OFF", color: "bg-slate-800 text-slate-400" };
+        : { state: "STANDBY", color: "bg-slate-900 border border-slate-800 text-slate-500" };
     }
 
     if (actuator === "Floodlights") {
       const usesFlood = activeScenario.actuators?.floodlight || activeScenario.species === "Elephant" || activeScenario.species === "Wild Boar" || activeScenario.species === "Nilgai" || activeScenario.species === "Spotted Deer" || activeScenario.species === "Gaur";
       return usesFlood
         ? { state: "ON", color: "bg-green-500 text-slate-950 font-bold" }
-        : { state: "OFF", color: "bg-slate-800 text-slate-400" };
+        : { state: "STANDBY", color: "bg-slate-900 border border-slate-800 text-slate-500" };
     }
 
     if (actuator === "Speaker") {
       const usesSpeaker = activeScenario.actuators?.speaker || activeScenario.species === "Elephant" || activeScenario.species === "Wild Boar" || activeScenario.species === "Nilgai" || activeScenario.species === "Rhesus Macaque" || activeScenario.species === "Gaur";
       return usesSpeaker
         ? { state: "ON", color: "bg-green-500 text-slate-950 font-bold" }
-        : { state: "OFF", color: "bg-slate-800 text-slate-400" };
+        : { state: "STANDBY", color: "bg-slate-900 border border-slate-800 text-slate-500" };
     }
 
     if (actuator === "ForestAlert") {
       return (activeScenario.species === "Elephant" || activeScenario.species === "Gaur")
         ? { state: "SENT", color: "bg-blue-500 text-white font-bold" }
-        : { state: "OFF", color: "bg-slate-800 text-slate-400" };
+        : { state: "STANDBY", color: "bg-slate-900 border border-slate-800 text-slate-500" };
     }
 
     if (actuator === "FarmerAlert") {
@@ -518,7 +541,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
       return { state: "ACTIVE", color: "bg-blue-500 text-white font-bold" };
     }
 
-    return { state: "OFF", color: "bg-slate-800 text-slate-400" };
+    return { state: "STANDBY", color: "bg-slate-900 border border-slate-800 text-slate-500" };
   };
 
   // Matrix data for Section 5 (from WII Animal Behaviour & Farm Impact Knowledge Base)
@@ -575,7 +598,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
       <div className="bg-[#111827]/40 border border-slate-900/60 rounded-xl p-3 space-y-3">
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5 flex justify-between items-center">
           <span>Current Detection</span>
-          {(simulationState >= 1 || activeScenario?.confidenceBase) && (
+          {hasActiveTarget && (
             (activeScenario.threat === "HIGH" || activeScenario.threat === "CRITICAL" || activeScenario.threat === "MEDIUM" || activeScenario.threat === "WARNING" || activeScenario.threat === "ALERT") ? (
               <span className="flex items-center gap-1 text-[8px] font-mono text-red-500 animate-pulse font-bold">
                 <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
@@ -590,7 +613,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
           )}
         </div>
 
-        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
+        {hasActiveTarget ? (
           <div className="flex gap-3">
             {/* Image / Bounding Box viewport */}
             <div className="relative w-24 h-24 bg-slate-950 rounded-lg border border-slate-900 overflow-hidden flex items-center justify-center shrink-0 crt-overlay">
@@ -674,8 +697,10 @@ export default function RightPanel({ simulationState, currentScenario, language 
             </div>
           </div>
         ) : (
-          <div className="text-center py-6 text-slate-500 font-mono text-[10px] italic">
-            Scanning perimeter... No breach active.
+          <div className="text-center py-6 text-slate-500 font-mono text-[10px] italic space-y-1">
+            <Eye className="h-5 w-5 text-slate-600 mx-auto animate-pulse" />
+            <p className="text-slate-400 font-sans font-bold uppercase">No Active Target</p>
+            <p className="text-slate-600">Perimeter clear • No intrusion detected</p>
           </div>
         )}
       </div>
@@ -686,7 +711,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
           <span>Threat & Impact Analysis</span>
           <span className="text-[8px] font-mono text-slate-400">{specConfig.farmThreat}</span>
         </div>
-        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
+        {hasActiveTarget ? (
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-mono text-slate-400">Threat Index:</span>
@@ -718,8 +743,9 @@ export default function RightPanel({ simulationState, currentScenario, language 
             </div>
           </div>
         ) : (
-          <div className="text-center py-2 text-slate-500 font-mono text-[10px] italic">
-            Monitoring threat parameters...
+          <div className="text-center py-3 text-slate-500 font-mono text-[10px] italic space-y-1">
+            <p className="text-green-400 font-bold">Perimeter Clear • Threat Level: None (0/100)</p>
+            <p className="text-slate-600">All sensor nodes operating in standby</p>
           </div>
         )}
       </div>
@@ -729,7 +755,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
         <div className="text-[10px] font-bold font-sans text-slate-400 uppercase tracking-wider border-b border-slate-900 pb-1.5">
           Context & Animal Behaviour
         </div>
-        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
+        {hasActiveTarget ? (
           <div className="space-y-1.5 text-[9px] font-mono">
             <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-slate-300">
               <div><span className="text-slate-500">Current Crop:</span> <span className="text-slate-200">{currentCrop}</span></div>
@@ -741,8 +767,8 @@ export default function RightPanel({ simulationState, currentScenario, language 
             </div>
           </div>
         ) : (
-          <div className="text-center py-2 text-slate-500 font-mono text-[10px] italic">
-            Awaiting environmental context...
+          <div className="text-center py-3 text-slate-500 font-mono text-[10px] italic">
+            Awaiting active intrusion target...
           </div>
         )}
       </div>
@@ -753,35 +779,29 @@ export default function RightPanel({ simulationState, currentScenario, language 
           <span>Decision Reasoning Tree</span>
           <span className="text-[8px] font-mono text-slate-500">7-Step Cognitive Chain</span>
         </div>
-        {(simulationState >= 1 || activeScenario?.confidenceBase) ? (
-          <div className="space-y-1">
-            {specConfig.tree.map((step, index) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className="flex items-center gap-1.5 text-[9px] font-mono text-slate-400"
-              >
-                {index > 0 && <span className="text-slate-600 pl-2">↳</span>}
-                <span className={`px-1.5 py-0.5 rounded border leading-none ${
-                  index === 0 ? "bg-slate-950 border-slate-900 text-slate-300 font-bold" :
-                  step.includes("Threat") || step.includes("BREACH") || step.includes("CRITICAL") ? "bg-red-500/10 border-red-500/20 text-red-400 font-bold" :
-                  step.includes("Crop") || step.includes("Geofence") ? "bg-blue-500/10 border-blue-500/20 text-blue-400 font-bold" :
-                  step.includes("Disabled") || step.includes("Avoid") || step.includes("INHIBITED") ? "bg-amber-500/10 border border-amber-500/20 text-amber-400 font-extrabold" :
-                  step.includes("Notify") || step.includes("Alert") || step.includes("Selection") ? "bg-green-500/10 border-green-500/20 text-green-400" :
-                  "bg-slate-900/60 border-slate-800 text-slate-300"
-                }`}>
-                  {step}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-2 text-slate-500 font-mono text-[10px] italic">
-            Tree idle.
-          </div>
-        )}
+        <div className="space-y-1">
+          {specConfig.tree.map((step, index) => (
+            <motion.div
+              key={step}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className="flex items-center gap-1.5 text-[9px] font-mono text-slate-400"
+            >
+              {index > 0 && <span className="text-slate-600 pl-2">↳</span>}
+              <span className={`px-1.5 py-0.5 rounded border leading-none ${
+                index === 0 ? "bg-slate-950 border-slate-900 text-slate-300 font-bold" :
+                step.includes("Threat") || step.includes("BREACH") || step.includes("CRITICAL") ? "bg-red-500/10 border-red-500/20 text-red-400 font-bold" :
+                step.includes("Crop") || step.includes("Geofence") ? "bg-blue-500/10 border-blue-500/20 text-blue-400 font-bold" :
+                step.includes("Disabled") || step.includes("Avoid") || step.includes("INHIBITED") ? "bg-amber-500/10 border border-amber-500/20 text-amber-400 font-extrabold" :
+                step.includes("Notify") || step.includes("Alert") || step.includes("Selection") || step.includes("STANDBY") || step.includes("SECURE") ? "bg-green-500/10 border-green-500/20 text-green-400" :
+                "bg-slate-900/60 border-slate-800 text-slate-300"
+              }`}>
+                {step}
+              </span>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       {/* SECTION 5: SPECIES SPECIFIC DECISION MATRIX */}
@@ -803,7 +823,7 @@ export default function RightPanel({ simulationState, currentScenario, language 
             </thead>
             <tbody>
               {matrixData.map((row, index) => {
-                const isHighlighted = (activeScenario.species === row.species || activeScenario.code === row.code) && (simulationState >= 1 || activeScenario?.confidenceBase);
+                const isHighlighted = hasActiveTarget && ((activeScenario?.species === row.species || activeScenario?.code === row.code));
                 return (
                   <tr 
                     key={index} 

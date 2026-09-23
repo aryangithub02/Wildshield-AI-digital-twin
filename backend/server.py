@@ -11,15 +11,20 @@ import glob
 import asyncio
 import json
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, WebSocket, WebSocketDisconnect, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel
 from PIL import Image, ImageDraw, ImageFont
+import cv2
+import numpy as np
+import threading
+
+from backend.camera import CameraConfig, CameraManager, CameraStatus, LowLatencyCaptureService
 
 from backend.wildshield_classifier import (
     get_species_metadata,
@@ -45,7 +50,7 @@ from backend.services.notification_service import notification_service
 from backend.services.mqtt_service import mqtt_service
 from backend.services.sync_service import sync_service
 from backend.supabase_db import (
-    init_supabase_db, SupabaseSessionLocal,
+    init_supabase_db, SupabaseSessionLocal, is_supabase_available,
     HistoricalDetection, HistoricalIntrusion, HistoricalPreventionAction,
     HistoricalNotification, HistoricalAnalyticsSummary
 )
@@ -124,27 +129,194 @@ def dispatch_background_task(coro):
         return t
 
 
+MODEL = None
+MODEL_CLASSES = {}
+BASE_PERSON_MODEL = None
+
+
 def load_yolo_model():
-    global MODEL, MODEL_CLASSES
-    # For 512MB RAM cloud environments (Render Free tier), skip heavy PyTorch loading by default to stay under memory limits
-    enable_heavy_yolo = os.getenv("ENABLE_HEAVY_YOLO", "false").lower() in ("true", "1", "yes")
-    if not enable_heavy_yolo:
-        print("[INFO] Running in high-efficiency cloud mode (<50MB RAM). Bypassing heavy PyTorch model load.")
+    global MODEL, MODEL_CLASSES, BASE_PERSON_MODEL
+    disable_yolo = os.getenv("DISABLE_YOLO", "false").lower() in ("true", "1", "yes")
+    if disable_yolo:
+        print("[INFO] DISABLE_YOLO is active. Bypassing heavy PyTorch model load.")
         return
 
-    if not WEIGHTS_PATH.exists():
-        print(f"[WARNING] Model weights not found at {WEIGHTS_PATH}. Using lightweight fallback classifier.")
-        return
-    
+    from ultralytics import YOLO
+
+    # 1. Custom WildShield Model (Wildlife & Farm animals)
+    if WEIGHTS_PATH.exists():
+        try:
+            print(f"[INFO] Loading persistent WildShield YOLO model from {WEIGHTS_PATH}...")
+            MODEL = YOLO(str(WEIGHTS_PATH))
+            MODEL_CLASSES = MODEL.names
+            print(f"[OK] WildShield YOLO model loaded successfully. Classes ({len(MODEL_CLASSES)}): {MODEL_CLASSES}")
+        except Exception as e:
+            print(f"[WARNING] Could not load custom YOLO model: {e}")
+            MODEL = None
+
+    # 2. High-Precision Human / Security Model (YOLOv11 Pretrained on COCO)
     try:
-        from ultralytics import YOLO
-        print(f"[INFO] Loading persistent WildShield YOLO model from {WEIGHTS_PATH}...")
-        MODEL = YOLO(str(WEIGHTS_PATH))
-        MODEL_CLASSES = MODEL.names
-        print(f"[OK] Model loaded successfully. Class count: {len(MODEL_CLASSES)}")
+        print("[INFO] Loading high-precision Human & Security YOLOv11 model (yolo11n.pt)...")
+        BASE_PERSON_MODEL = YOLO("yolo11n.pt")
+        print("[OK] High-precision Human & Security detector ready.")
     except Exception as e:
-        print(f"[WARNING] Could not load YOLO model: {e}. Falling back to high-efficiency classifier.")
-        MODEL = None
+        print(f"[WARNING] Could not load base person model: {e}")
+        BASE_PERSON_MODEL = None
+
+
+# ==========================================
+# V380 Pro -> OBS Virtual Camera Pipeline
+# Target Device Index: 2 (640x480 resolution)
+# ==========================================
+# Dedicated Low-Latency OpenCV Capture Service
+# Hardware Webcam (Index 0) / DroidCam (Index 1) / OBS Virtual Camera (Index 2)
+# ==========================================
+from backend.camera.device_enumerator import get_dshow_devices
+
+_raw_source = os.getenv("WILDSHIELD_CAMERA_SOURCE", "0")
+try:
+    _default_cam_idx = int(_raw_source)
+except ValueError:
+    _default_cam_idx = _raw_source
+
+_initial_devices = get_dshow_devices()
+if isinstance(_default_cam_idx, int):
+    _initial_cam_name = "Integrated Camera" if _default_cam_idx == 0 else f"Camera Device [Index {_default_cam_idx}]"
+    for _d in _initial_devices:
+        if _d["index"] == _default_cam_idx:
+            _initial_cam_name = _d["name"]
+            break
+else:
+    _initial_cam_name = os.getenv("WILDSHIELD_CAMERA_NAME", f"Network Stream ({_default_cam_idx})")
+
+LOW_LATENCY_CAPTURE = LowLatencyCaptureService(
+    camera_index=_default_cam_idx,
+    width=640,
+    height=480,
+    fps=30,
+    name=_initial_cam_name
+)
+
+LATEST_DETECTIONS_LOCK = threading.Lock()
+LATEST_DETECTIONS: List[Dict[str, Any]] = []
+LATEST_THREAT: str = "NORMAL"
+LAST_AI_DETECTION_RESULT: Optional[Dict[str, Any]] = None
+AI_INFERENCE_ACTIVE = False
+AI_INFERENCE_THREAD: Optional[threading.Thread] = None
+LAST_DB_PERSIST_TIME: float = 0.0
+
+
+def ai_inference_worker():
+    """
+    Decoupled Asynchronous AI Inference Worker.
+    Continuously checks the latest-frame buffer and runs YOLO inference without blocking camera acquisition.
+    """
+    global LAST_AI_DETECTION_RESULT, LATEST_DETECTIONS, LATEST_THREAT, AI_INFERENCE_ACTIVE
+    print("[AI WORKER] Decoupled YOLO inference thread started...")
+    last_infer_time = 0.0
+    infer_interval = 0.30  # ~3.3 FPS inference (keeps CPU cool while giving fast updates)
+    last_processed_seq = -1
+
+    while AI_INFERENCE_ACTIVE:
+        now = time.time()
+        if now - last_infer_time < infer_interval:
+            time.sleep(0.01)
+            continue
+
+        # Fetch newest frame without blocking the capture thread
+        success, frame, ts, seq = LOW_LATENCY_CAPTURE.get_latest_frame(copy=True)
+        if not success or frame is None or seq == last_processed_seq:
+            time.sleep(0.01)
+            continue
+
+        last_processed_seq = seq
+        last_infer_time = now
+
+        try:
+            rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            pil_img = Image.fromarray(rgb_frame)
+            res = process_pil_inference(pil_img, conf_thresh=0.25, node_id=1, source="V380_LIVE")
+            with LATEST_DETECTIONS_LOCK:
+                LAST_AI_DETECTION_RESULT = res
+                LATEST_DETECTIONS = res.get("detections", [])
+                LATEST_THREAT = res.get("max_threat", "NORMAL")
+        except Exception as err:
+            pass
+
+
+def start_camera_pipeline():
+    global AI_INFERENCE_ACTIVE, AI_INFERENCE_THREAD
+    if not LOW_LATENCY_CAPTURE.is_connected:
+        LOW_LATENCY_CAPTURE.start()
+    if not AI_INFERENCE_ACTIVE:
+        AI_INFERENCE_ACTIVE = True
+        AI_INFERENCE_THREAD = threading.Thread(target=ai_inference_worker, name="AIInferenceWorkerThread", daemon=True)
+        AI_INFERENCE_THREAD.start()
+
+
+def stop_camera_pipeline():
+    global AI_INFERENCE_ACTIVE
+    AI_INFERENCE_ACTIVE = False
+    LOW_LATENCY_CAPTURE.stop()
+
+
+def generate_camera_mjpeg_stream(mode: str = "annotated"):
+    """
+    Ultra-low-latency MJPEG stream generator.
+    Delivers the newest frame directly from the shared buffer without delay.
+    In 'annotated' mode, overlays the latest bounding boxes on the real-time frame.
+    """
+    encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+
+    while True:
+        success, frame, ts, seq = LOW_LATENCY_CAPTURE.get_latest_frame(copy=(mode == "annotated"))
+
+        if not success or frame is None:
+            standby = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(standby, "WILDSHIELD AI - CONNECTING V380 FEED...", (60, 230),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.60, (0, 230, 118), 2)
+            cv2.putText(standby, "OBS Virtual Camera [Index 2] (DirectShow Low-Latency)", (60, 265),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (148, 163, 184), 1)
+            frame_to_send = standby
+        elif mode == "annotated":
+            annotated = frame
+            h, w = annotated.shape[:2]
+            warn_y = int(h * 0.40)
+            core_y = int(h * 0.65)
+            cv2.line(annotated, (0, warn_y), (w, warn_y), (0, 200, 255), 1)
+            cv2.line(annotated, (0, core_y), (w, core_y), (0, 0, 255), 2)
+
+            with LATEST_DETECTIONS_LOCK:
+                dets = list(LATEST_DETECTIONS)
+                threat = LATEST_THREAT
+
+            for det in dets:
+                bx = det.get("bbox", [])
+                if len(bx) == 4:
+                    x1, y1, x2, y2 = [int(v) for v in bx]
+                    det_cls = det.get('class', 'Target')
+                    det_pct = det.get('confidence_pct', 0)
+                    color = (0, 0, 255) if (det_cls in ("Human", "Tiger", "Asiatic Lion", "Gaur") or threat in ("CRITICAL", "HIGH")) else (0, 230, 118)
+                    cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
+                    label = f" {det_cls} {det_pct}% "
+                    (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.50, 1)
+                    badge_y1 = max(0, y1 - th - 6)
+                    cv2.rectangle(annotated, (x1, badge_y1), (x1 + tw, y1), color, -1)
+                    cv2.putText(annotated, label, (x1, y1 - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.50, (255, 255, 255), 1, cv2.LINE_AA)
+
+            status_color = (0, 0, 255) if threat in ("CRITICAL", "HIGH") else (0, 230, 118)
+            cv2.rectangle(annotated, (0, 0), (w, 30), (15, 23, 42), -1)
+            cv2.putText(annotated, f"WILDSHIELD AI | V380 BRIDGE [INDEX 2] | THREAT: {threat}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.50, status_color, 2, cv2.LINE_AA)
+            frame_to_send = annotated
+        else:
+            frame_to_send = frame
+
+        ret, jpeg = cv2.imencode('.jpg', frame_to_send, encode_params)
+        if ret:
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + jpeg.tobytes() + b'\r\n')
+
+        time.sleep(0.02)
 
 
 @app.on_event("startup")
@@ -158,6 +330,18 @@ def startup_event():
         load_yolo_model()
     except Exception as e:
         print(f"[ERROR] Failed to load YOLO model: {e}")
+    try:
+        start_camera_pipeline()
+    except Exception as e:
+        print(f"[WARNING] Could not start low-latency camera pipeline on startup: {e}")
+
+
+@app.on_event("shutdown")
+def shutdown_event():
+    try:
+        stop_camera_pipeline()
+    except Exception as e:
+        print(f"[WARNING] Error stopping camera pipeline on shutdown: {e}")
 
 
 # ==========================================
@@ -174,6 +358,8 @@ def get_status():
     total_events = db.query(EventRecord).count()
     db.close()
 
+    cam_metrics = LOW_LATENCY_CAPTURE.get_metrics()
+
     return {
         "status": "online" if is_loaded else "model_unloaded",
         "backend": "ONLINE",
@@ -189,7 +375,17 @@ def get_status():
         "classes_count": len(MODEL_CLASSES),
         "test_images_count": test_img_count,
         "active_ws_connections": ws_manager.get_connected_count(),
-        "total_detections_recorded": total_events
+        "total_detections_recorded": total_events,
+        "camera": {
+            "source": cam_metrics["source"],
+            "camera_index": cam_metrics["camera_index"],
+            "connected": cam_metrics["connected"],
+            "resolution": cam_metrics["resolution"],
+            "fps": cam_metrics["measured_fps"],
+            "capture_latency_ms": cam_metrics["avg_capture_latency_ms"],
+            "stream_url": "/api/camera/stream",
+            "backend": cam_metrics["backend"]
+        }
     }
 
 
@@ -348,8 +544,8 @@ def process_pil_inference(
     Image -> YOLO -> Species -> Geofence -> Threat Assessment -> AI Decision
     -> Prevention -> Notification -> DB Event -> WebSocket Broadcast
     """
-    global MODEL, MODEL_CLASSES
-    if MODEL is None:
+    global MODEL, MODEL_CLASSES, BASE_PERSON_MODEL
+    if MODEL is None and BASE_PERSON_MODEL is None:
         load_yolo_model()
 
     node_info = NODE_MAPPING.get(node_id, NODE_MAPPING[1])
@@ -364,10 +560,60 @@ def process_pil_inference(
     event_id = f"WS-EVT-{unique_seq}"
     intrusion_id = f"WS-INT-{unique_seq}"
     raw_detections = []
+    person_boxes = []
 
-    # 1. Run inference (YOLO model or high-efficiency cloud fallback)
+    # 1. Run inference
     start_time = time.time()
 
+    # 1a. High-Precision Base Detection (COCO 0: Human, 19: Cow/Cattle, 16: Dog)
+    cattle_boxes = []
+    if BASE_PERSON_MODEL is not None:
+        try:
+            # 0: person, 16: dog, 19: cow (COCO pretrained classes)
+            p_results = BASE_PERSON_MODEL.predict(pil_img, conf=0.25, classes=[0, 16, 19], verbose=False)
+            if p_results and len(p_results) > 0:
+                for j, pb in enumerate(p_results[0].boxes):
+                    p_cls = int(pb.cls[0].item())
+                    p_conf = float(pb.conf[0].item())
+                    p_xyxy = pb.xyxy[0].tolist()
+
+                    if p_cls == 0:
+                        species_name = "Human"
+                        person_boxes.append(p_xyxy)
+                        prefix = "P"
+                    elif p_cls == 19:
+                        species_name = "Cattle"
+                        cattle_boxes.append(p_xyxy)
+                        prefix = "CT"
+                    elif p_cls == 16:
+                        species_name = "Dog"
+                        prefix = "DG"
+                    else:
+                        continue
+
+                    p_det_id = f"{event_id}-{prefix}{j+1:02d}"
+                    p_norm_xyxy = [
+                        p_xyxy[0] / img_width,
+                        p_xyxy[1] / img_height,
+                        p_xyxy[2] / img_width,
+                        p_xyxy[3] / img_height
+                    ]
+                    p_det_obj = format_detection_payload(
+                        detection_id=p_det_id,
+                        class_name=species_name,
+                        confidence=p_conf,
+                        bbox=p_xyxy,
+                        normalized_bbox=p_norm_xyxy,
+                        camera_id=camera_id,
+                        node_name=node_name,
+                        img_width=img_width,
+                        img_height=img_height
+                    )
+                    raw_detections.append(p_det_obj)
+        except Exception as p_err:
+            pass
+
+    # 1b. WildShield Wildlife Surveillance Model
     if MODEL is not None:
         results = MODEL.predict(pil_img, conf=conf_thresh, verbose=False)
         res = results[0]
@@ -378,8 +624,40 @@ def process_pil_inference(
             conf = float(b.conf[0].item())
             xyxy = b.xyxy[0].tolist()
             class_name = MODEL_CLASSES.get(cls_id, f"Class_{cls_id}")
-            det_id = f"{event_id}-{i+1:02d}"
 
+            # Suppress low-confidence wildlife/domestic misclassifications when a Human is present
+            is_suppressed = False
+            if person_boxes and class_name in ("Goat", "Dog", "Cattle", "Langur", "Rhesus Macaque", "Spotted Deer", "Wild Boar"):
+                if conf < 0.70:
+                    is_suppressed = True
+                else:
+                    cx = (xyxy[0] + xyxy[2]) / 2
+                    cy = (xyxy[1] + xyxy[3]) / 2
+                    for p_box in person_boxes:
+                        if (p_box[0] <= cx <= p_box[2] and p_box[1] <= cy <= p_box[3]):
+                            is_suppressed = True
+                            break
+
+            # Suppress low-confidence Goat misclassifications when Cattle is detected
+            if cattle_boxes and class_name in ("Goat", "Dog"):
+                if conf < 0.65:
+                    is_suppressed = True
+                else:
+                    cx = (xyxy[0] + xyxy[2]) / 2
+                    cy = (xyxy[1] + xyxy[3]) / 2
+                    for c_box in cattle_boxes:
+                        if (c_box[0] <= cx <= c_box[2] and c_box[1] <= cy <= c_box[3]):
+                            is_suppressed = True
+                            break
+
+            # Avoid duplicate Cattle detection if base model already detected it with higher confidence
+            if cattle_boxes and class_name == "Cattle" and conf < 0.60:
+                is_suppressed = True
+
+            if is_suppressed:
+                continue
+
+            det_id = f"{event_id}-{i+1:02d}"
             norm_xyxy = [
                 xyxy[0] / img_width,
                 xyxy[1] / img_height,
@@ -400,83 +678,89 @@ def process_pil_inference(
             )
             raw_detections.append(det_obj)
     else:
-        # Lightweight classifier fallback for 512MB RAM cloud instances (Render Free Tier)
+        # Fallback for dataset test simulation filenames only
         sample_str = str(filename or getattr(pil_img, "filename", "") or "").lower()
         species_detected = None
 
-        # 1. Match by WildShield species codes in filename
-        CODE_TO_SPECIES = {
-            "ws-wl-wb": "Wild Boar",
-            "ws-wl-ng": "Nilgai",
-            "ws-wl-sd": "Spotted Deer",
-            "ws-wl-rm": "Rhesus Macaque",
-            "ws-wl-lg": "Langur",
-            "ws-wl-gr": "Gaur",
-            "ws-dm-ct": "Cattle",
-            "ws-dm-gt": "Goat",
-            "ws-sec-hm": "Human",
-            "ws-hm-hu": "Human",
-            "ws-sec-ve": "Vehicle",
-            "ws-wl-tg": "Tiger",
-            "ws-wl-ln": "Asiatic Lion",
-            "ws-dm-dg": "Dog"
-        }
-        for code_key, sp_name in CODE_TO_SPECIES.items():
-            if code_key in sample_str:
-                species_detected = sp_name
-                break
-
-        # 2. Match by species name keywords in filename
-        if not species_detected:
-            NAME_KEYWORDS = {
-                "boar": "Wild Boar",
-                "nilgai": "Nilgai",
-                "deer": "Spotted Deer",
-                "chital": "Spotted Deer",
-                "macaque": "Rhesus Macaque",
-                "langur": "Langur",
-                "gaur": "Gaur",
-                "bison": "Gaur",
-                "cow": "Cattle",
-                "cattle": "Cattle",
-                "goat": "Goat",
-                "human": "Human",
-                "person": "Human",
-                "tiger": "Tiger",
-                "lion": "Asiatic Lion",
-                "dog": "Dog"
+        # Only match if source is not live and filename contains known species codes/names
+        if source != "LIVE" and sample_str:
+            CODE_TO_SPECIES = {
+                "ws-wl-wb": "Wild Boar",
+                "ws-wl-ng": "Nilgai",
+                "ws-wl-sd": "Spotted Deer",
+                "ws-wl-rm": "Rhesus Macaque",
+                "ws-wl-lg": "Langur",
+                "ws-wl-gr": "Gaur",
+                "ws-dm-ct": "Cattle",
+                "ws-dm-gt": "Goat",
+                "ws-sec-hm": "Human",
+                "ws-hm-hu": "Human",
+                "ws-sec-ve": "Vehicle",
+                "ws-wl-tg": "Tiger",
+                "ws-wl-ln": "Asiatic Lion",
+                "ws-dm-dg": "Dog"
             }
-            for kw, sp_name in NAME_KEYWORDS.items():
-                if kw in sample_str:
+            for code_key, sp_name in CODE_TO_SPECIES.items():
+                if code_key in sample_str:
                     species_detected = sp_name
                     break
 
-        # 3. Deterministic fallback if no keyword matches filename
-        if not species_detected:
-            all_species = list(SPECIES_CONFIG.keys())
-            idx = (hash(sample_str or str(img_width * img_height)) % len(all_species))
-            species_detected = all_species[idx]
+            if not species_detected:
+                NAME_KEYWORDS = {
+                    "boar": "Wild Boar",
+                    "nilgai": "Nilgai",
+                    "deer": "Spotted Deer",
+                    "chital": "Spotted Deer",
+                    "macaque": "Rhesus Macaque",
+                    "langur": "Langur",
+                    "gaur": "Gaur",
+                    "bison": "Gaur",
+                    "cow": "Cattle",
+                    "cattle": "Cattle",
+                    "goat": "Goat",
+                    "human": "Human",
+                    "person": "Human",
+                    "tiger": "Tiger",
+                    "lion": "Asiatic Lion",
+                    "dog": "Dog"
+                }
+                for kw, sp_name in NAME_KEYWORDS.items():
+                    if kw in sample_str:
+                        species_detected = sp_name
+                        break
 
-        det_id = f"{event_id}-01"
-        norm_xyxy = [0.25, 0.25, 0.75, 0.75]
-        xyxy = [int(norm_xyxy[0] * img_width), int(norm_xyxy[1] * img_height), int(norm_xyxy[2] * img_width), int(norm_xyxy[3] * img_height)]
+        # If a valid species was identified from test dataset filename
+        if species_detected:
+            det_id = f"{event_id}-01"
+            norm_xyxy = [0.25, 0.25, 0.75, 0.75]
+            xyxy = [int(norm_xyxy[0] * img_width), int(norm_xyxy[1] * img_height), int(norm_xyxy[2] * img_width), int(norm_xyxy[3] * img_height)]
 
-        det_obj = format_detection_payload(
-            detection_id=det_id,
-            class_name=species_detected,
-            confidence=0.94,
-            bbox=xyxy,
-            normalized_bbox=norm_xyxy,
-            camera_id=camera_id,
-            node_name=node_name,
-            img_width=img_width,
-            img_height=img_height
-        )
-        raw_detections.append(det_obj)
+            det_obj = format_detection_payload(
+                detection_id=det_id,
+                class_name=species_detected,
+                confidence=0.94,
+                bbox=xyxy,
+                normalized_bbox=norm_xyxy,
+                camera_id=camera_id,
+                node_name=node_name,
+                img_width=img_width,
+                img_height=img_height
+            )
+            raw_detections.append(det_obj)
+        # If nothing detected, raw_detections stays empty []
 
     infer_time_ms = round((time.time() - start_time) * 1000, 1)
 
-    detections = sorted(raw_detections, key=lambda d: d["confidence"], reverse=True)
+    # Prioritize Human / Critical Security over low-confidence domestic/wildlife detections
+    has_human = any(d.get("class") == "Human" for d in raw_detections)
+    if has_human:
+        detections = sorted(
+            raw_detections,
+            key=lambda d: (1 if d.get("class") == "Human" else 0, d.get("confidence", 0)),
+            reverse=True
+        )
+    else:
+        detections = sorted(raw_detections, key=lambda d: d.get("confidence", 0), reverse=True)
     primary_detection = detections[0] if detections else None
 
     # 2. Evaluate Geofence & AI Threat Decision
@@ -489,8 +773,8 @@ def process_pil_inference(
         )
     else:
         eval_result = {
-            "threat_level": "LOW",
-            "threat_reason": "No confident intrusion detected",
+            "threat_level": "NONE",
+            "threat_reason": "No target detected. Perimeter clear.",
             "action": "Standby",
             "actuators": {"siren": False, "floodlight": False, "speaker": False, "sprinkler": False},
             "is_intrusion": False,
@@ -559,8 +843,17 @@ def process_pil_inference(
         "annotated_image": annotated_b64
     }
 
-    # 5. Persist to PostgreSQL Database
-    if detections:
+    # 5. Persist to PostgreSQL Database (Throttled for high-frequency live stream)
+    global LAST_DB_PERSIST_TIME
+    should_persist = bool(detections)
+    if source == "V380_LIVE":
+        now_t = time.time()
+        if now_t - LAST_DB_PERSIST_TIME < 3.0:
+            should_persist = False
+        else:
+            LAST_DB_PERSIST_TIME = now_t
+
+    if should_persist:
         db = SessionLocal()
         try:
             # 1. Detection Record
@@ -664,90 +957,102 @@ def process_pil_inference(
         finally:
             db.close()
 
-        # 5b. Persist directly to Permanent Supabase PostgreSQL Historical Database
-        try:
-            sup_db = SupabaseSessionLocal()
-            img_ref = f"/api/events/{event_id}/image" if annotated_b64 and len(annotated_b64) > 500 else annotated_b64
-            sup_det = HistoricalDetection(
-                event_id=event_id,
-                farm_id="WS-FARM-001",
-                device_id=camera_id,
-                camera_id=camera_id,
-                node_id=camera_id,
-                zone_id="ZONE-01",
-                farm_zone=node_name,
-                species=primary_detection["class"],
-                species_code=primary_detection["code"],
-                code=primary_detection["code"],
-                confidence=primary_detection["confidence_pct"],
-                bbox=json.dumps(primary_detection["bbox"]),
-                threat_level=eval_result["threat_level"],
-                intrusion=eval_result["is_intrusion"],
-                inside_geofence=eval_result["is_intrusion"],
-                source=source,
-                image_url=img_ref,
-                inference_time_ms=infer_time_ms,
-                decision_action=eval_result["action"],
-                prevention_status="ACTIVE" if eval_result["is_intrusion"] else "STANDBY",
-                actuators_json=json.dumps(eval_result["actuators"]),
-                notification_status="SENT" if eval_result["is_intrusion"] else "NONE",
-                status="DETECTED",
-                timestamp=now_iso,
-                time_formatted=time_fmt,
-                detected_at=now_iso,
-                raw_payload_json=json.dumps(response_payload)
-            )
-            sup_db.add(sup_det)
-
-            if eval_result["is_intrusion"]:
-                sup_int = HistoricalIntrusion(
-                    intrusion_id=intrusion_id,
+        # 5b. Persist directly to Permanent Supabase PostgreSQL Historical Database (if available)
+        if is_supabase_available():
+            sup_db = None
+            try:
+                sup_db = SupabaseSessionLocal()
+                img_ref = f"/api/events/{event_id}/image" if annotated_b64 and len(annotated_b64) > 500 else annotated_b64
+                sup_det = HistoricalDetection(
                     event_id=event_id,
                     farm_id="WS-FARM-001",
                     device_id=camera_id,
+                    camera_id=camera_id,
+                    node_id=camera_id,
+                    zone_id="ZONE-01",
+                    farm_zone=node_name,
                     species=primary_detection["class"],
                     species_code=primary_detection["code"],
+                    code=primary_detection["code"],
                     confidence=primary_detection["confidence_pct"],
-                    zone_id="ZONE-01",
+                    bbox=json.dumps(primary_detection["bbox"]),
                     threat_level=eval_result["threat_level"],
-                    status="ACTIVE",
-                    entered_at=now_iso,
-                    source=source
+                    intrusion=eval_result["is_intrusion"],
+                    inside_geofence=eval_result["is_intrusion"],
+                    source=source,
+                    image_url=img_ref,
+                    inference_time_ms=infer_time_ms,
+                    decision_action=eval_result["action"],
+                    prevention_status="ACTIVE" if eval_result["is_intrusion"] else "STANDBY",
+                    actuators_json=json.dumps(eval_result["actuators"]),
+                    notification_status="SENT" if eval_result["is_intrusion"] else "NONE",
+                    status="DETECTED",
+                    timestamp=now_iso,
+                    time_formatted=time_fmt,
+                    detected_at=now_iso,
+                    raw_payload_json=json.dumps(response_payload)
                 )
-                sup_db.add(sup_int)
+                sup_db.add(sup_det)
 
-            sup_prev = HistoricalPreventionAction(
-                prevention_id=f"PREV-{event_id}",
-                event_id=event_id,
-                siren=eval_result["actuators"].get("siren", False),
-                floodlight=eval_result["actuators"].get("floodlight", False),
-                speaker=eval_result["actuators"].get("speaker", False) or eval_result["actuators"].get("predator_speaker", False),
-                sprinkler=eval_result["actuators"].get("sprinkler", False),
-                decision=eval_result["action"],
-                status="ACTIVE" if eval_result["is_intrusion"] else "STANDBY",
-                activated_at=now_iso
-            )
-            sup_db.add(sup_prev)
+                if eval_result["is_intrusion"]:
+                    sup_int = HistoricalIntrusion(
+                        intrusion_id=intrusion_id,
+                        event_id=event_id,
+                        farm_id="WS-FARM-001",
+                        device_id=camera_id,
+                        species=primary_detection["class"],
+                        species_code=primary_detection["code"],
+                        confidence=primary_detection["confidence_pct"],
+                        zone_id="ZONE-01",
+                        threat_level=eval_result["threat_level"],
+                        status="ACTIVE",
+                        entered_at=now_iso,
+                        source=source
+                    )
+                    sup_db.add(sup_int)
 
-            if eval_result["is_intrusion"]:
-                sup_notif = HistoricalNotification(
-                    notification_id=f"NOTIF-{event_id}",
+                sup_prev = HistoricalPreventionAction(
+                    prevention_id=f"PREV-{event_id}",
                     event_id=event_id,
-                    farmer_id="FARMER-001",
-                    title=f"{'[DEMO] ' if source == 'SIMULATION' else ''}Wildlife Alert",
-                    message=f"{primary_detection['class']} detected in {node_name}. Risk: {eval_result['threat_level']}.",
-                    notification_type="INTRUSION_ALERT",
-                    status="SENT",
-                    created_at=now_iso,
-                    sent_at=now_iso
+                    siren=eval_result["actuators"].get("siren", False),
+                    floodlight=eval_result["actuators"].get("floodlight", False),
+                    speaker=eval_result["actuators"].get("speaker", False) or eval_result["actuators"].get("predator_speaker", False),
+                    sprinkler=eval_result["actuators"].get("sprinkler", False),
+                    decision=eval_result["action"],
+                    status="ACTIVE" if eval_result["is_intrusion"] else "STANDBY",
+                    activated_at=now_iso
                 )
-                sup_db.add(sup_notif)
+                sup_db.add(sup_prev)
 
-            sup_db.commit()
-            sup_db.close()
-            print(f"[SUPABASE SUCCESS] Event {event_id} stored directly in Supabase PostgreSQL.")
-        except Exception as sup_err:
-            print(f"[SUPABASE DIRECT PERSIST NOTICE] {sup_err}")
+                if eval_result["is_intrusion"]:
+                    sup_notif = HistoricalNotification(
+                        notification_id=f"NOTIF-{event_id}",
+                        event_id=event_id,
+                        farmer_id="FARMER-001",
+                        title=f"{'[DEMO] ' if source == 'SIMULATION' else ''}Wildlife Alert",
+                        message=f"{primary_detection['class']} detected in {node_name}. Risk: {eval_result['threat_level']}.",
+                        notification_type="INTRUSION_ALERT",
+                        status="SENT",
+                        created_at=now_iso,
+                        sent_at=now_iso
+                    )
+                    sup_db.add(sup_notif)
+
+                sup_db.commit()
+                print(f"[SUPABASE SUCCESS] Event {event_id} stored directly in Supabase PostgreSQL.")
+            except Exception as sup_err:
+                if sup_db:
+                    try:
+                        sup_db.rollback()
+                    except Exception:
+                        pass
+                print(f"[SUPABASE DIRECT PERSIST NOTICE] {sup_err}")
+            finally:
+                if sup_db:
+                    try:
+                        sup_db.close()
+                    except Exception:
+                        pass
 
         # 6. WebSocket Broadcast INTRUSION_CREATED (Only after DB transaction commits)
         if eval_result["is_intrusion"]:
@@ -854,6 +1159,132 @@ async def detect_frame(payload: Base64DetectRequest):
         raise HTTPException(status_code=400, detail=f"Failed to decode base64 image: {e}")
 
     return process_pil_inference(pil_img, conf_thresh=payload.conf or 0.25, node_id=payload.node_id or 1, source="LIVE")
+
+
+@app.get("/api/droidcam/status")
+def get_droidcam_status(ip: str = Query("192.168.1.8"), port: int = Query(4747)):
+    """Check live connectivity and status of DroidCam mobile camera."""
+    import urllib.request
+    url = f"http://{ip}:{port}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "WildShield-AI/1.0"})
+        with urllib.request.urlopen(req, timeout=2.5) as resp:
+            content = resp.read().decode("utf-8", errors="ignore")
+            is_busy = "droidcam_busy" in content or "DroidCam is Busy" in content
+            return {
+                "online": True,
+                "ip": ip,
+                "port": port,
+                "url": f"http://{ip}:{port}/video",
+                "status": "connected_to_client" if is_busy else "ready_for_stream",
+                "is_busy_with_client": is_busy,
+                "message": "DroidCam connected to PC client (Use Live Camera mode in browser)" if is_busy else "DroidCam active & ready for WiFi streaming"
+            }
+    except Exception as e:
+        return {
+            "online": False,
+            "ip": ip,
+            "port": port,
+            "url": f"http://{ip}:{port}/video",
+            "status": "unreachable",
+            "is_busy_with_client": False,
+            "error": str(e),
+            "message": f"Could not reach DroidCam at {ip}:{port}. Ensure phone and PC are on the same WiFi."
+        }
+
+
+
+# ==========================================
+# 4b. V380 Pro Live Camera Stream Endpoints
+# ==========================================
+
+@app.get("/api/camera/stream")
+@app.get("/api/stream")
+def get_camera_stream(mode: str = Query("annotated", enum=["annotated", "raw"])):
+    """
+    Browser-compatible multipart MJPEG live video stream.
+    Directly embeddable in React <img> tags: <img src="/api/camera/stream" />
+    """
+    start_camera_pipeline()
+    return StreamingResponse(
+        generate_camera_mjpeg_stream(mode),
+        media_type="multipart/x-mixed-replace; boundary=frame"
+    )
+
+
+@app.get("/api/camera/status")
+def get_camera_status():
+    """Returns telemetry of the V380 Pro -> OBS Virtual Camera integration."""
+    metrics = LOW_LATENCY_CAPTURE.get_metrics()
+    return {
+        "pipeline": "V380 Wi-Fi Camera -> V380 Pro -> OBS Window Capture -> OBS Virtual Camera -> LowLatencyCapture (DirectShow, Buffer=1) -> FastAPI",
+        "source": metrics["source"],
+        "camera_index": metrics["camera_index"],
+        "connected": metrics["connected"],
+        "status": "connected" if metrics["connected"] else "disconnected",
+        "resolution": metrics["resolution"],
+        "width": metrics["width"],
+        "height": metrics["height"],
+        "fps": metrics["measured_fps"],
+        "capture_latency_ms": metrics["avg_capture_latency_ms"],
+        "total_frames_acquired": metrics["total_frames_acquired"],
+        "stale_frames_overwritten": metrics["stale_frames_overwritten"],
+        "backend": metrics["backend"],
+        "architecture": metrics["architecture"],
+        "stream_url": "/api/camera/stream",
+        "latest_detection": LAST_AI_DETECTION_RESULT
+    }
+
+
+@app.get("/api/camera/metrics")
+def get_camera_metrics():
+    """Returns detailed low-latency capture performance metrics."""
+    return LOW_LATENCY_CAPTURE.get_metrics()
+
+
+@app.get("/api/camera/devices")
+def list_camera_devices():
+    """Returns detected DirectShow video capture devices on the host machine."""
+    devs = get_dshow_devices()
+    metrics = LOW_LATENCY_CAPTURE.get_metrics()
+    return {
+        "current_index": LOW_LATENCY_CAPTURE.camera_index,
+        "current_name": LOW_LATENCY_CAPTURE.name,
+        "connected": LOW_LATENCY_CAPTURE.is_connected,
+        "devices": devs,
+        "metrics": metrics
+    }
+
+
+class SwitchCameraRequest(BaseModel):
+    source: Union[int, str] = 2
+    name: Optional[str] = None
+
+
+@app.post("/api/camera/switch")
+def switch_camera(payload: SwitchCameraRequest):
+    """Switch camera source dynamically (e.g. index 0 for Integrated Camera, 1 for DroidCam, 2 for OBS Virtual Cam)."""
+    name = payload.name
+    if not name:
+        devs = get_dshow_devices()
+        for d in devs:
+            if d["index"] == payload.source:
+                name = d["name"]
+                break
+    if not name:
+        name = f"Camera Device [Index {payload.source}]"
+
+    success = LOW_LATENCY_CAPTURE.switch_camera(payload.source, name=name)
+    metrics = LOW_LATENCY_CAPTURE.get_metrics()
+    return {
+        "success": success,
+        "source": payload.source,
+        "name": LOW_LATENCY_CAPTURE.name,
+        "status": "connected" if LOW_LATENCY_CAPTURE.is_connected else "connecting",
+        "resolution": metrics.get("resolution", "640x480"),
+        "metrics": metrics
+    }
+
 
 
 # ==========================================
@@ -966,7 +1397,7 @@ def get_current_events(limit: int = Query(50, ge=1, le=200)):
 @app.get("/api/events/history")
 def get_historical_events(
     page: int = Query(1, ge=1),
-    limit: int = Query(20, ge=1, le=200),
+    limit: int = Query(20, ge=1, le=100),
     species: Optional[str] = Query(None),
     threat: Optional[str] = Query(None),
     zone: Optional[str] = Query(None),
@@ -976,58 +1407,64 @@ def get_historical_events(
     search: Optional[str] = Query(None)
 ):
     """Return permanent archived events stored in Supabase PostgreSQL DB with pagination, search & filtering."""
-    sup_db = SupabaseSessionLocal()
+    sup_db = SupabaseSessionLocal() if is_supabase_available() else None
     db = SessionLocal()
     try:
-        # 1. Query Supabase Historical Database first
-        query = sup_db.query(HistoricalDetection)
-
-        if species:
-            query = query.filter(HistoricalDetection.species.ilike(f"%{species}%"))
-        if threat:
-            query = query.filter(HistoricalDetection.threat_level.ilike(f"%{threat}%"))
-        if zone:
-            query = query.filter(HistoricalDetection.farm_zone.ilike(f"%{zone}%"))
-        if source:
-            query = query.filter(HistoricalDetection.source.ilike(f"%{source}%"))
-        if search:
-            search_pattern = f"%{search}%"
-            query = query.filter(
-                (HistoricalDetection.event_id.ilike(search_pattern)) |
-                (HistoricalDetection.species.ilike(search_pattern)) |
-                (HistoricalDetection.farm_zone.ilike(search_pattern)) |
-                (HistoricalDetection.code.ilike(search_pattern))
-            )
-        if from_date:
-            query = query.filter(HistoricalDetection.timestamp >= from_date)
-        if to_date:
-            query = query.filter(HistoricalDetection.timestamp <= to_date)
-
-        total_count = query.count()
-        offset = (page - 1) * limit
-        records = query.order_by(HistoricalDetection.created_at.desc()).offset(offset).limit(limit).all()
-
         events = []
-        for r in records:
-            events.append({
-                "event_id": r.event_id,
-                "farm_id": r.farm_id,
-                "source": r.source or "LIVE",
-                "species": r.species,
-                "code": r.code or r.species_code or "WS-WL-WB",
-                "confidence": r.confidence,
-                "threat": r.threat_level,
-                "time": r.time_formatted,
-                "timestamp": r.timestamp,
-                "location": r.farm_zone,
-                "camera_id": r.camera_id,
-                "intrusion": r.inside_geofence,
-                "response": [r.decision_action] if r.decision_action else [],
-                "decision_action": r.decision_action,
-                "prevention_status": r.prevention_status,
-                "annotated_image": r.image_url,
-                "storage_layer": "SUPABASE_HISTORICAL"
-            })
+        total_count = 0
+        if sup_db:
+            try:
+                # 1. Query Supabase Historical Database first
+                query = sup_db.query(HistoricalDetection)
+
+                if species:
+                    query = query.filter(HistoricalDetection.species.ilike(f"%{species}%"))
+                if threat:
+                    query = query.filter(HistoricalDetection.threat_level.ilike(f"%{threat}%"))
+                if zone:
+                    query = query.filter(HistoricalDetection.farm_zone.ilike(f"%{zone}%"))
+                if source:
+                    query = query.filter(HistoricalDetection.source.ilike(f"%{source}%"))
+                if search:
+                    search_pattern = f"%{search}%"
+                    query = query.filter(
+                        (HistoricalDetection.event_id.ilike(search_pattern)) |
+                        (HistoricalDetection.species.ilike(search_pattern)) |
+                        (HistoricalDetection.farm_zone.ilike(search_pattern)) |
+                        (HistoricalDetection.code.ilike(search_pattern))
+                    )
+                if from_date:
+                    query = query.filter(HistoricalDetection.timestamp >= from_date)
+                if to_date:
+                    query = query.filter(HistoricalDetection.timestamp <= to_date)
+
+                total_count = query.count()
+                offset = (page - 1) * limit
+                records = query.order_by(HistoricalDetection.created_at.desc()).offset(offset).limit(limit).all()
+
+                for r in records:
+                    events.append({
+                        "event_id": r.event_id,
+                        "farm_id": r.farm_id,
+                        "source": r.source or "LIVE",
+                        "species": r.species,
+                        "code": r.code or r.species_code or "WS-WL-WB",
+                        "confidence": r.confidence,
+                        "threat": r.threat_level,
+                        "time": r.time_formatted,
+                        "timestamp": r.timestamp,
+                        "location": r.farm_zone,
+                        "camera_id": r.camera_id,
+                        "intrusion": r.inside_geofence,
+                        "response": [r.decision_action] if r.decision_action else [],
+                        "decision_action": r.decision_action,
+                        "prevention_status": r.prevention_status,
+                        "annotated_image": r.image_url,
+                        "storage_layer": "SUPABASE_HISTORICAL"
+                    })
+            except Exception as sup_e:
+                events = []
+                total_count = 0
 
         # Fallback to Hot PostgreSQL if Supabase historical is empty
         if total_count == 0:
@@ -1049,6 +1486,7 @@ def get_historical_events(
                 )
 
             total_count = hot_query.count()
+            offset = (page - 1) * limit
             hot_records = hot_query.order_by(EventRecord.created_at.desc()).offset(offset).limit(limit).all()
             for r in hot_records:
                 events.append({
@@ -1083,20 +1521,29 @@ def get_historical_events(
         print(f"[HISTORICAL EVENTS API ERROR] {err}")
         return {"count": 0, "page": 1, "limit": limit, "total_pages": 1, "events": []}
     finally:
-        sup_db.close()
+        if sup_db:
+            sup_db.close()
         db.close()
 
 
 @app.get("/api/analytics/history")
 def get_historical_analytics():
     """Return historical species analytics and aggregate summary stored in Supabase."""
-    sup_db = SupabaseSessionLocal()
+    sup_db = SupabaseSessionLocal() if is_supabase_available() else None
     db = SessionLocal()
     try:
-        # Check Supabase records
-        sup_events = sup_db.query(HistoricalDetection).all()
+        sup_events = []
+        if sup_db:
+            try:
+                sup_events = sup_db.query(HistoricalDetection).all()
+            except Exception:
+                sup_events = []
+
         if not sup_events:
-            sup_events = db.query(EventRecord).all()
+            try:
+                sup_events = db.query(EventRecord).all()
+            except Exception:
+                sup_events = []
 
         total_detections = len(sup_events)
         total_intrusions = sum(1 for e in sup_events if getattr(e, 'intrusion', getattr(e, 'inside_geofence', True)))
@@ -1116,34 +1563,39 @@ def get_historical_analytics():
             "prevention_actions": prevention_actions,
             "resolved_events": resolved_events,
             "species_breakdown": species_breakdown,
-            "source": "SUPABASE_HISTORICAL"
+            "source": "SUPABASE_HISTORICAL" if sup_db else "LOCAL_POSTGRESQL"
         }
     finally:
-        sup_db.close()
+        if sup_db:
+            sup_db.close()
         db.close()
 
 
 @app.get("/api/prevention/history")
 def get_historical_prevention(limit: int = Query(50, ge=1, le=200)):
     """Return historical prevention actions from Supabase."""
-    sup_db = SupabaseSessionLocal()
+    sup_db = SupabaseSessionLocal() if is_supabase_available() else None
     db = SessionLocal()
     try:
-        sup_actions = sup_db.query(HistoricalPreventionAction).order_by(HistoricalPreventionAction.created_at.desc()).limit(limit).all()
         result = []
-        for a in sup_actions:
-            result.append({
-                "prevention_id": a.prevention_id,
-                "event_id": a.event_id,
-                "decision": a.decision,
-                "siren": a.siren,
-                "floodlight": a.floodlight,
-                "speaker": a.speaker,
-                "sprinkler": a.sprinkler,
-                "status": a.status,
-                "activated_at": a.activated_at,
-                "storage_layer": "SUPABASE_HISTORICAL"
-            })
+        if sup_db:
+            try:
+                sup_actions = sup_db.query(HistoricalPreventionAction).order_by(HistoricalPreventionAction.created_at.desc()).limit(limit).all()
+                for a in sup_actions:
+                    result.append({
+                        "prevention_id": a.prevention_id,
+                        "event_id": a.event_id,
+                        "decision": a.decision,
+                        "siren": a.siren,
+                        "floodlight": a.floodlight,
+                        "speaker": a.speaker,
+                        "sprinkler": a.sprinkler,
+                        "status": a.status,
+                        "activated_at": a.activated_at,
+                        "storage_layer": "SUPABASE_HISTORICAL"
+                    })
+            except Exception:
+                result = []
 
         if not result:
             hot_actions = db.query(PreventionAction).order_by(PreventionAction.created_at.desc()).limit(limit).all()
@@ -1163,29 +1615,34 @@ def get_historical_prevention(limit: int = Query(50, ge=1, le=200)):
 
         return {"count": len(result), "preventions": result}
     finally:
-        sup_db.close()
+        if sup_db:
+            sup_db.close()
         db.close()
 
 
 @app.get("/api/notifications/history")
 def get_historical_notifications(limit: int = Query(50, ge=1, le=200)):
     """Return historical notifications log from Supabase."""
-    sup_db = SupabaseSessionLocal()
+    sup_db = SupabaseSessionLocal() if is_supabase_available() else None
     db = SessionLocal()
     try:
-        sup_notifs = sup_db.query(HistoricalNotification).order_by(HistoricalNotification.created_at.desc()).limit(limit).all()
         result = []
-        for n in sup_notifs:
-            result.append({
-                "notification_id": n.notification_id,
-                "event_id": n.event_id,
-                "title": n.title,
-                "message": n.message,
-                "channel": "FCM",
-                "status": n.status,
-                "created_at": n.created_at,
-                "storage_layer": "SUPABASE_HISTORICAL"
-            })
+        if sup_db:
+            try:
+                sup_notifs = sup_db.query(HistoricalNotification).order_by(HistoricalNotification.created_at.desc()).limit(limit).all()
+                for n in sup_notifs:
+                    result.append({
+                        "notification_id": n.notification_id,
+                        "event_id": n.event_id,
+                        "title": n.title,
+                        "message": n.message,
+                        "channel": "FCM",
+                        "status": n.status,
+                        "created_at": n.created_at,
+                        "storage_layer": "SUPABASE_HISTORICAL"
+                    })
+            except Exception:
+                result = []
 
         if not result:
             hot_notifs = db.query(NotificationRecord).order_by(NotificationRecord.created_at.desc()).limit(limit).all()
@@ -1203,7 +1660,8 @@ def get_historical_notifications(limit: int = Query(50, ge=1, le=200)):
 
         return {"count": len(result), "notifications": result}
     finally:
-        sup_db.close()
+        if sup_db:
+            sup_db.close()
         db.close()
 
 

@@ -194,12 +194,16 @@ DEFAULT_CONFIG = {
 
 def get_species_metadata(class_name: str) -> Dict[str, Any]:
     """Retrieve metadata and deterrence protocol for a recognized YOLO class name."""
+    clean_name = class_name.lower().strip()
+    if clean_name in ("person", "human", "people", "man", "woman"):
+        return {**SPECIES_CONFIG["Human"], "name": "Human"}
+
     for key, val in SPECIES_CONFIG.items():
-        if key.lower() == class_name.lower():
+        if key.lower() == clean_name:
             return {**val, "name": key}
         
     for key, val in SPECIES_CONFIG.items():
-        if key.lower() in class_name.lower() or class_name.lower() in key.lower():
+        if key.lower() in clean_name or clean_name in key.lower():
             return {**val, "name": key}
             
     return {**DEFAULT_CONFIG, "name": class_name}

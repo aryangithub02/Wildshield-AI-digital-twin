@@ -32,11 +32,32 @@ supabase_engine = create_engine(
     max_overflow=10,
     pool_recycle=300,
     pool_pre_ping=True,
-    connect_args={"connect_timeout": 5}
+    connect_args={"connect_timeout": 3}
 )
 
-SupabaseSessionLocal = scoped_session(sessionmaker(autocommit=False, autoflush=False, bind=supabase_engine))
+SupabaseSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=supabase_engine)
 SupabaseBase = declarative_base()
+
+_supabase_status = {"available": None, "last_check": 0}
+
+
+def is_supabase_available() -> bool:
+    """Check if Supabase database is reachable with cached result to avoid blocking."""
+    import time
+    now = time.time()
+    if _supabase_status["available"] is not None and (now - _supabase_status["last_check"] < 60):
+        return _supabase_status["available"]
+    
+    _supabase_status["last_check"] = now
+    try:
+        with supabase_engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        _supabase_status["available"] = True
+        return True
+    except Exception:
+        _supabase_status["available"] = False
+        return False
+
 
 
 # ==========================================
@@ -252,6 +273,9 @@ class HistoricalAnalyticsSummary(SupabaseBase):
 
 def init_supabase_db():
     """Create all historical tables in Supabase PostgreSQL if they do not exist."""
+    if not is_supabase_available():
+        print("[SUPABASE DB NOTICE] Supabase PostgreSQL host is unreachable (paused or offline). Operational local DB active.")
+        return False
     try:
         SupabaseBase.metadata.create_all(bind=supabase_engine, checkfirst=True)
         print("[SUPABASE DB] Connected & historical tables verified in Supabase PostgreSQL.")

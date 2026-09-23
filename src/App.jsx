@@ -17,6 +17,7 @@ import AlertsTab from './components/AlertsTab';
 import AnalyticsTab from './components/AnalyticsTab';
 import TimelineTab from './components/TimelineTab';
 import SettingsTab from './components/SettingsTab';
+import HardwareSimulationTab from './components/HardwareSimulationTab';
 import { getTranslation } from './utils/translations';
 import { SPECIES_TAXONOMY, getSpeciesMetadataByName } from './utils/speciesMapping';
 
@@ -189,7 +190,7 @@ export default function App() {
   });
 
   const timerRef = useRef(null);
-  const currentScenario = liveModelScenario || DEFAULT_SCENARIOS[0];
+  const currentScenario = liveModelScenario || (simulationState > 0 ? DEFAULT_SCENARIOS[0] : null);
 
   function getFormattedTime(date = new Date()) {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -453,7 +454,7 @@ export default function App() {
   const handleLiveModelDetection = (payload) => {
     if (!payload) return;
     const primary = payload.primary_detection;
-    if (primary) {
+    if (primary && payload.detection_count > 0) {
       const isHigh = primary.threat === "HIGH" || primary.threat === "CRITICAL";
       const isMed = primary.threat === "MEDIUM" || primary.threat === "WARNING";
       const assignedNodeId = payload.camera_id === "FN-1" ? 1 : 
@@ -482,7 +483,8 @@ export default function App() {
         confidenceMax: primary.confidence_pct,
         actuators: primary.actuators || { siren: false, floodlight: false, speaker: false, sprinkler: false },
         logThreat: primary.threat,
-        path: pathCoords
+        path: pathCoords,
+        isLiveDetection: true
       };
       
       setLiveModelScenario(scenarioObj);
@@ -495,10 +497,14 @@ export default function App() {
       }));
 
       addLog(
-        `[${primary.code}] ${primary.class} identified at ${payload.camera_id} (${primary.confidence_pct}% Conf) • ${primary.responses.join(' + ')}`,
+        `[${primary.code}] ${primary.class} identified at ${payload.camera_id} (${primary.confidence_pct}% Conf) • ${primary.responses ? primary.responses.join(' + ') : 'Standby'}`,
         primary.intrusion ? 'danger' : 'detection',
         { species: primary.class, threat: primary.threat }
       );
+    } else {
+      // Zero targets detected — reset live scenario so no fake targets linger
+      setLiveModelScenario(null);
+      setSimulationState(STATE_IDLE);
     }
   };
 
@@ -602,14 +608,16 @@ export default function App() {
       <TopNavbar language={language} setLanguage={setLanguage} />
 
       {/* 3. Right Sidebar Panel */}
-      <RightPanel 
-        simulationState={simulationState} 
-        currentScenario={currentScenario} 
-        language={language}
-      />
+      {activeTab === 'overview' && (
+        <RightPanel 
+          simulationState={simulationState} 
+          currentScenario={currentScenario} 
+          language={language}
+        />
+      )}
 
       {/* 4. Center Main Panel Viewport */}
-      <div className="ml-64 pr-[400px] pt-16 min-h-screen flex flex-col p-6 space-y-6">
+      <div className={`ml-64 ${activeTab === 'overview' ? 'pr-[400px]' : ''} pt-16 min-h-screen flex flex-col p-6 space-y-6`}>
         
         {activeTab === 'overview' ? (
           <>
@@ -646,6 +654,10 @@ export default function App() {
               <DeviceStatus simulationState={simulationState} currentScenario={currentScenario} language={language} />
             </div>
           </>
+        ) : (activeTab === 'hardware' || activeTab === 'twin') ? (
+          <HardwareSimulationTab 
+            language={language}
+          />
         ) : activeTab === 'map' ? (
           <FarmMapTab 
             simulationState={simulationState} 

@@ -30,12 +30,25 @@ if "channel_binding=" in DATABASE_URL:
     if DATABASE_URL.endswith("?"):
         DATABASE_URL = DATABASE_URL[:-1]
 
+from sqlalchemy import event
+
 def create_db_engine(url: str):
     if "sqlite" in url:
-        return create_engine(
+        eng = create_engine(
             url,
-            connect_args={"check_same_thread": False}
+            connect_args={"check_same_thread": False, "timeout": 30.0}
         )
+        @event.listens_for(eng, "connect")
+        def set_sqlite_pragma(dbapi_connection, connection_record):
+            try:
+                cursor = dbapi_connection.cursor()
+                cursor.execute("PRAGMA journal_mode=WAL")
+                cursor.execute("PRAGMA synchronous=NORMAL")
+                cursor.execute("PRAGMA busy_timeout=30000")
+                cursor.close()
+            except Exception:
+                pass
+        return eng
     return create_engine(
         url,
         pool_size=5,

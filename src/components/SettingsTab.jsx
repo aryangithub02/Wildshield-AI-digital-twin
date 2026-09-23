@@ -30,6 +30,10 @@ export default function SettingsTab({
   const [detectionMode, setDetectionMode] = useState('CONTINUOUS');
   const [nightVisionMode, setNightVisionMode] = useState(true);
   const [autoDeterrent, setAutoDeterrent] = useState(true);
+  const [primaryCameraType, setPrimaryCameraType] = useState('DROIDCAM');
+  const [droidCamIp, setDroidCamIp] = useState(
+    () => localStorage.getItem('wildshield_droidcam_ip') || '192.168.1.8'
+  );
 
   // 3. Species Response Matrix Settings State
   const [speciesResponses, setSpeciesResponses] = useState({
@@ -65,7 +69,8 @@ export default function SettingsTab({
   };
 
   const handleSave = () => {
-    showToast("✅ Configuration saved successfully and synced with Central AI Hub.");
+    localStorage.setItem('wildshield_droidcam_ip', droidCamIp);
+    showToast("✅ Configuration saved: DroidCam Mobile (" + droidCamIp + ") synced.");
   };
 
   const handleResetDefaults = () => {
@@ -298,6 +303,33 @@ export default function SettingsTab({
               >
                 {nightVisionMode ? 'ON' : 'OFF'}
               </button>
+            </div>
+          </div>
+
+          {/* Camera Source & DroidCam IP Configuration */}
+          <div className="grid grid-cols-2 gap-3 text-[10px] font-mono pt-1 border-t border-slate-900">
+            <div className="bg-slate-950/60 border border-slate-900 rounded-lg p-2.5 space-y-1">
+              <span className="text-slate-400 block font-bold">Primary Camera Source:</span>
+              <select
+                value={primaryCameraType}
+                onChange={(e) => setPrimaryCameraType(e.target.value)}
+                className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-slate-200 text-xs font-sans"
+              >
+                <option value="DROIDCAM">📱 Android Mobile (DroidCam)</option>
+                <option value="INTEGRATED">💻 Integrated Laptop Webcam</option>
+                <option value="EXTERNAL">📷 USB External Camera</option>
+              </select>
+            </div>
+
+            <div className="bg-slate-950/60 border border-slate-900 rounded-lg p-2.5 space-y-1">
+              <span className="text-slate-400 block font-bold">DroidCam WiFi IP:</span>
+              <input
+                type="text"
+                value={droidCamIp}
+                onChange={(e) => setDroidCamIp(e.target.value)}
+                placeholder="192.168.1.8"
+                className="w-full bg-slate-900 border border-slate-800 rounded px-2 py-1 text-blue-400 font-bold text-xs font-mono focus:outline-none focus:border-blue-500"
+              />
             </div>
           </div>
         </div>

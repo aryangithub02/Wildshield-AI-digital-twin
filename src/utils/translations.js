@@ -12,6 +12,10 @@ export const TRANSLATIONS = {
     settings: "Settings",
     decisionMatrix: "Decision Matrix",
     systemWorkflow: "System Workflow",
+    hardwareTwin: "Hardware Digital Twin",
+    hardwareSimulation: "Hardware Simulation & Digital Twin",
+    virtualHardwareSimulation: "VIRTUAL HARDWARE SIMULATION",
+    simulatedEvent: "SIMULATED EVENT",
 
     // System status
     systemStatus: "System Status",
@@ -129,6 +133,10 @@ export const TRANSLATIONS = {
     settings: "सेटिंग्स",
     decisionMatrix: "निर्णय मैट्रिक्स",
     systemWorkflow: "सिस्टम कार्यप्रवाह",
+    hardwareTwin: "हार्डवेयर डिजिटल ट्विन",
+    hardwareSimulation: "हार्डवेयर सिमुलेशन और डिजिटल ट्विन",
+    virtualHardwareSimulation: "वर्चुअल हार्डवेयर सिमुलेशन",
+    simulatedEvent: "सिम्युलेटेड इवेंट",
 
     // System status
     systemStatus: "सिस्टम की स्थिति",
@@ -246,6 +254,10 @@ export const TRANSLATIONS = {
     settings: "सेटिंग्ज",
     decisionMatrix: "निर्णय मॅट्रिक्स",
     systemWorkflow: "सिस्टम कार्यप्रवाह",
+    hardwareTwin: "हार्डवेअर डिजिटल ट्विन",
+    hardwareSimulation: "हार्डवेअर सिम्युलेशन आणि डिजिटल ट्विन",
+    virtualHardwareSimulation: "व्हर्च्युअल हार्डवेअर सिम्युलेशन",
+    simulatedEvent: "सिम्युलेटेड इव्हेंट",
 
     // System status
     systemStatus: "सिस्टम स्थिती",

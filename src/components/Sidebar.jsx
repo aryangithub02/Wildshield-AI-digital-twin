@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   LayoutDashboard, Map, Cpu, Bell, BarChart3, 
-  Clock, FileText, Settings, HelpCircle, GitFork, Workflow
+  Clock, FileText, Settings, HelpCircle, GitFork, Workflow, CircuitBoard
 } from 'lucide-react';
 import { getTranslation } from '../utils/translations';
 
@@ -10,6 +10,7 @@ export default function Sidebar({ activeTab = 'overview', setActiveTab, language
 
   const menuItems = [
     { id: 'overview', label: t('overview'), icon: LayoutDashboard },
+    { id: 'hardware', label: t('hardwareTwin'), icon: CircuitBoard, badge: "NEW" },
     { id: 'map', label: t('farmMap'), icon: Map },
     { id: 'detection', label: t('aiDetection'), icon: Cpu },
     { id: 'decision', label: t('decisionMatrix'), icon: GitFork },
@@ -59,7 +60,12 @@ export default function Sidebar({ activeTab = 'overview', setActiveTab, language
                 }`}
               >
                 <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
+                <span className="flex-1 text-left">{item.label}</span>
+                {item.badge && (
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-mono font-bold tracking-wider">
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}
