@@ -18,8 +18,10 @@ import AnalyticsTab from './components/AnalyticsTab';
 import TimelineTab from './components/TimelineTab';
 import SettingsTab from './components/SettingsTab';
 import HardwareSimulationTab from './components/HardwareSimulationTab';
+import DeterrentAudioSection from './components/DeterrentAudioSection';
 import { getTranslation } from './utils/translations';
 import { SPECIES_TAXONOMY, getSpeciesMetadataByName } from './utils/speciesMapping';
+import { dispatchAnimalDetectionUrl, isHumanSpecies, playHumanDetectionSound } from './utils/animalUrlDispatcher';
 
 // Simulation state constants
 const STATE_IDLE = 0;
@@ -501,6 +503,19 @@ export default function App() {
         primary.intrusion ? 'danger' : 'detection',
         { species: primary.class, threat: primary.threat }
       );
+
+      // Sound triggers strictly on Human detection
+      if (isHumanSpecies(primary.class)) {
+        playHumanDetectionSound('0001');
+      }
+
+      // Auto-hit configured URL for this detected species
+      dispatchAnimalDetectionUrl(primary.class, {
+        threat: primary.threat,
+        confidence: primary.confidence_pct,
+        camera_id: payload.camera_id,
+        nodeName: payload.camera_id
+      });
     } else {
       // Zero targets detected — reset live scenario so no fake targets linger
       setLiveModelScenario(null);
@@ -521,11 +536,14 @@ export default function App() {
         break;
       
       case STATE_APPROACHING:
-        addLog("motionDetectedLog", "warning", { nodeName: active.nodeName });
+        addLog("motionDetectedLog", "warning", { nodeName: active?.nodeName });
         break;
       
       case STATE_DETECTED:
-        addLog("cameraActivatedLog", "detection", { nodeName: active.nodeName });
+        addLog("cameraActivatedLog", "detection", { nodeName: active?.nodeName });
+        if (active?.species) {
+          dispatchAnimalDetectionUrl(active.species, active);
+        }
         break;
       
       case STATE_ESCALATED:
@@ -539,6 +557,9 @@ export default function App() {
         break;
       
       case STATE_DETERRENT_ACTIVE:
+        if (active?.species) {
+          dispatchAnimalDetectionUrl(active.species, active);
+        }
         const stage2Actuators = [];
         if (active.actuators?.siren) stage2Actuators.push("Ultrasonic Siren");
         if (active.actuators?.floodlight) stage2Actuators.push("Floodlight 01");
@@ -654,6 +675,11 @@ export default function App() {
               <DeviceStatus simulationState={simulationState} currentScenario={currentScenario} language={language} />
             </div>
           </>
+        ) : activeTab === 'deterrents' ? (
+          <DeterrentAudioSection 
+            language={language}
+            onLiveDetection={handleLiveModelDetection}
+          />
         ) : (activeTab === 'hardware' || activeTab === 'twin') ? (
           <HardwareSimulationTab 
             language={language}

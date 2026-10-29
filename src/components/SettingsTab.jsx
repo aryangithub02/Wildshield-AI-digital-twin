@@ -7,6 +7,9 @@ import {
 } from 'lucide-react';
 import { getTranslation } from '../utils/translations';
 import { SPECIES_TAXONOMY } from '../utils/speciesMapping';
+import TargetTriggerController from './TargetTriggerController';
+import V380CameraMovementController from './V380CameraMovementController';
+import SpeciesUrlManager from './SpeciesUrlManager';
 
 export default function SettingsTab({ 
   simulationState, 
@@ -512,6 +515,34 @@ export default function SettingsTab({
               </span>
             </div>
           </div>
+        </div>
+
+        {/* 6. Hardware Signal Target IP, Trigger & V380 Camera System */}
+        <div className="bg-[#0b0f19] border border-slate-900 rounded-xl p-5 shadow-lg space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-900 pb-2">
+            <div>
+              <span className="text-xs font-bold text-slate-100 font-sans uppercase tracking-wider block">
+                6. Hardware Signal Target IP, Trigger & V380 Camera System
+              </span>
+              <p className="text-[10px] text-slate-500 font-mono">
+                Dynamically enter IP for deterrent triggers on Wi‑Fi / Hotspot / LAN & control V380 movement and light (info.md)
+              </p>
+            </div>
+            <Zap className="h-4 w-4 text-emerald-400" />
+          </div>
+
+          <div className="space-y-4">
+            {/* Target IP Trigger Controller */}
+            <TargetTriggerController />
+
+            {/* V380 Camera Movement (PTZ) & Light Controls */}
+            <V380CameraMovementController />
+          </div>
+        </div>
+
+        {/* 7. Per-Species Trigger URLs (10 Animals + Human) */}
+        <div className="space-y-4">
+          <SpeciesUrlManager />
         </div>
 
       </div>

@@ -71,6 +71,19 @@ class PreventionService:
             priority="HIGH"
         )
 
+        # Trigger physical ESP32 hardware (LED + Speaker) if siren/speaker/floodlight active
+        if any(actuators.get(k) for k in ("siren", "speaker", "floodlight")):
+            try:
+                from backend.services.esp32_service import esp32_service
+                esp32_service.activate(
+                    reason=f"Prevention protocol engaged for {species}",
+                    duration=float(duration_seconds),
+                    force=True
+                )
+            except Exception as esp_err:
+                print(f"[PREVENTION ESP32 ERROR] {esp_err}")
+
+
         # Launch background task for simulated deterrent completion
         asyncio.create_task(self._auto_deactivate_task(event_id, int_id, node_code, species, duration_seconds))
 
@@ -96,6 +109,13 @@ class PreventionService:
                 db.close()
             except Exception as e:
                 print(f"[DB ERROR] Failed to update intrusion clearance: {e}")
+
+            # Deactivate physical ESP32 hardware (LED OFF + Speaker OFF)
+            try:
+                from backend.services.esp32_service import esp32_service
+                esp32_service.deactivate(reason=f"Deterrent cycle completed for {species}")
+            except Exception:
+                pass
 
             # Reset node state
             self.node_prevention_states[node_code] = {
@@ -170,6 +190,16 @@ class PreventionService:
             "triggered_by": operator_id,
             "updated_at": datetime.utcnow().isoformat()
         }
+
+        # Sync physical ESP32 hardware with manual override
+        try:
+            from backend.services.esp32_service import esp32_service
+            if is_active:
+                esp32_service.activate(reason=f"Manual override by {operator_id}", force=True)
+            else:
+                esp32_service.deactivate(reason=f"Manual override stop by {operator_id}", force=True)
+        except Exception:
+            pass
 
         event_type = "DETERRENT_ACTIVATED" if is_active else "DETERRENT_DEACTIVATED"
         await ws_manager.broadcast_event(

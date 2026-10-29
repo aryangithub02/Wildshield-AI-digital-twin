@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   LayoutDashboard, Map, Cpu, Bell, BarChart3, 
-  Clock, FileText, Settings, HelpCircle, GitFork, Workflow, CircuitBoard
+  Clock, FileText, Settings, HelpCircle, GitFork, Workflow, CircuitBoard, Volume2
 } from 'lucide-react';
 import { getTranslation } from '../utils/translations';
 
@@ -10,6 +10,7 @@ export default function Sidebar({ activeTab = 'overview', setActiveTab, language
 
   const menuItems = [
     { id: 'overview', label: t('overview'), icon: LayoutDashboard },
+    { id: 'deterrents', label: t('deterrentSounds'), icon: Volume2, badge: "5 SOUNDS" },
     { id: 'hardware', label: t('hardwareTwin'), icon: CircuitBoard, badge: "NEW" },
     { id: 'map', label: t('farmMap'), icon: Map },
     { id: 'detection', label: t('aiDetection'), icon: Cpu },

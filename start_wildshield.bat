@@ -29,10 +29,17 @@ echo.
 echo [INFO] Checking port 8000 availability...
 powershell -NoProfile -Command "$conns = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($conns) { foreach ($c in $conns) { if ($c.OwningProcess -gt 0) { Write-Host '[INFO] Releasing port 8000 from PID:' $c.OwningProcess; Stop-Process -Id $c.OwningProcess -Force -ErrorAction SilentlyContinue } } }"
 
+:: Detect Python executable (.venv preferred)
+if exist "%BACKEND_DIR%\.venv\Scripts\python.exe" (
+    set "PYTHON_CMD="%BACKEND_DIR%\.venv\Scripts\python.exe""
+) else (
+    set "PYTHON_CMD=python"
+)
+
 :: 1. Launch FastAPI Backend Server
 echo.
 echo [1/3] Starting FastAPI Backend Server on port 8000...
-start "WildShield AI - Backend (Port 8000)" /D "%BACKEND_DIR%" cmd /k python -m uvicorn backend.server:app --host 0.0.0.0 --port 8000 --reload
+start "WildShield AI - Backend (Port 8000)" /D "%BACKEND_DIR%" cmd /k %PYTHON_CMD% -m uvicorn backend.server:app --host 0.0.0.0 --port 8000 --reload
 
 :: 2. Launch Vite Web Dashboard directly via Node (Bypasses 7s npm wrapper overhead)
 echo [2/3] Starting Web Dashboard Frontend (Vite Instant Engine)...

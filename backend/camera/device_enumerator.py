@@ -89,6 +89,12 @@ def get_dshow_devices(force_refresh: bool = False) -> List[Dict[str, Any]]:
 
 
 if __name__ == '__main__':
+    import sys
+    if hasattr(sys.stdout, 'reconfigure'):
+        try:
+            sys.stdout.reconfigure(encoding='utf-8')
+        except Exception:
+            pass
     devs = get_dshow_devices()
     for d in devs:
         print(d)

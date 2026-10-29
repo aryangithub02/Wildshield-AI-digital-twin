@@ -16,6 +16,8 @@ export const TRANSLATIONS = {
     hardwareSimulation: "Hardware Simulation & Digital Twin",
     virtualHardwareSimulation: "VIRTUAL HARDWARE SIMULATION",
     simulatedEvent: "SIMULATED EVENT",
+    deterrentSounds: "Deterrent Sounds",
+    acousticLibrary: "Acoustic Deterrents",
 
     // System status
     systemStatus: "System Status",
@@ -137,6 +139,8 @@ export const TRANSLATIONS = {
     hardwareSimulation: "हार्डवेयर सिमुलेशन और डिजिटल ट्विन",
     virtualHardwareSimulation: "वर्चुअल हार्डवेयर सिमुलेशन",
     simulatedEvent: "सिम्युलेटेड इवेंट",
+    deterrentSounds: "निवारक ध्वनियां (ऑडियो)",
+    acousticLibrary: "ध्वनिक निवारक",
 
     // System status
     systemStatus: "सिस्टम की स्थिति",
@@ -258,6 +262,8 @@ export const TRANSLATIONS = {
     hardwareSimulation: "हार्डवेअर सिम्युलेशन आणि डिजिटल ट्विन",
     virtualHardwareSimulation: "व्हर्च्युअल हार्डवेअर सिम्युलेशन",
     simulatedEvent: "सिम्युलेटेड इव्हेंट",
+    deterrentSounds: "प्रतिबंधक आवाज (ऑडिओ)",
+    acousticLibrary: "ध्वनिक प्रतिबंधक",
 
     // System status
     systemStatus: "सिस्टम स्थिती",

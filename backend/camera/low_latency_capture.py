@@ -140,10 +140,39 @@ class LowLatencyCaptureService:
                     except (ValueError, TypeError):
                         dev_idx = 0
                     backend = cv2.CAP_DSHOW if platform.system() == "Windows" else cv2.CAP_ANY
-                    cap = cv2.VideoCapture(dev_idx, backend)
+                    try:
+                        cap = cv2.VideoCapture(dev_idx, backend)
+                    except Exception as be_err:
+                        logger.warning(f"Error initializing camera {dev_idx} with backend {backend}: {be_err}")
+                        cap = None
+
                     if not cap or not cap.isOpened():
-                        logger.warning(f"Could not open device index {dev_idx} with CAP_DSHOW, retrying with CAP_ANY...")
-                        cap = cv2.VideoCapture(dev_idx, cv2.CAP_ANY)
+                        # Try to resolve device index by name if camera index shifted
+                        try:
+                            from backend.camera.device_enumerator import get_dshow_devices
+                            devices = get_dshow_devices(force_refresh=True)
+                            for d in devices:
+                                if self.name and (self.name.lower() in d["name"].lower() or d["name"].lower() in self.name.lower()):
+                                    if d["index"] != dev_idx:
+                                        logger.info(f"Auto-resolving '{self.name}' from index {dev_idx} to active index {d['index']}...")
+                                        dev_idx = d["index"]
+                                        self.source = dev_idx
+                                        self.camera_index = dev_idx
+                                        try:
+                                            cap = cv2.VideoCapture(dev_idx, backend)
+                                        except Exception:
+                                            cap = None
+                                        break
+                        except Exception:
+                            pass
+
+                    if not cap or not cap.isOpened():
+                        logger.warning(f"Could not open device index {dev_idx} with preferred backend, retrying with CAP_ANY...")
+                        try:
+                            cap = cv2.VideoCapture(dev_idx, cv2.CAP_ANY)
+                        except Exception as any_err:
+                            logger.error(f"Failed to open device {dev_idx} with CAP_ANY: {any_err}")
+                            cap = None
 
                 if not cap or not cap.isOpened():
                     logger.error(f"Failed to open camera source {self.source}.")
@@ -274,14 +303,21 @@ class LowLatencyCaptureService:
         Drains hardware frames at native rate without waiting for downstream processing.
         """
         logger.info("Capture loop active. Streaming latest frames into shared buffer...")
-        
+        last_reconnect_log = 0.0
+        reconnect_delay = 1.0
+
         while self._running:
             if self._cap is None or not self._cap.isOpened():
                 self._is_connected = False
-                logger.info(f"Reconnecting to camera source {self.source}...")
+                now = time.time()
+                if now - last_reconnect_log >= 10.0:
+                    logger.info(f"Reconnecting to camera source {self.source} ({self.name})...")
+                    last_reconnect_log = now
                 if not self._open_camera():
-                    time.sleep(1.0)
+                    time.sleep(min(reconnect_delay, 5.0))
+                    reconnect_delay = min(reconnect_delay * 1.5, 5.0)
                     continue
+                reconnect_delay = 1.0
 
             try:
                 t0 = time.perf_counter()

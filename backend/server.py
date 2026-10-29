@@ -13,6 +13,11 @@ import json
 from pathlib import Path
 from typing import Optional, List, Dict, Any, Union
 from datetime import datetime
+import logging
+import urllib.request
+import urllib.error
+
+logger = logging.getLogger("WildShield.Server")
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, WebSocket, WebSocketDisconnect, Query, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,6 +28,11 @@ from PIL import Image, ImageDraw, ImageFont
 import cv2
 import numpy as np
 import threading
+import sys
+from pathlib import Path
+_project_root = str(Path(__file__).resolve().parent.parent)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 from backend.camera import CameraConfig, CameraManager, CameraStatus, LowLatencyCaptureService
 
@@ -49,6 +59,8 @@ from backend.services.prevention_service import prevention_service
 from backend.services.notification_service import notification_service
 from backend.services.mqtt_service import mqtt_service
 from backend.services.sync_service import sync_service
+from backend.services.esp32_service import esp32_service
+from backend.services.animal_url_service import animal_url_service
 from backend.supabase_db import (
     init_supabase_db, SupabaseSessionLocal, is_supabase_available,
     HistoricalDetection, HistoricalIntrusion, HistoricalPreventionAction,
@@ -97,6 +109,13 @@ app.add_middleware(
 # Mount static folder for test images
 if TEST_IMAGES_DIR.exists():
     app.mount("/static-test-images", StaticFiles(directory=str(TEST_IMAGES_DIR)), name="test_images")
+
+# Mount static folder for deterrent audio library
+AUDIOS_DIR = BASE_DIR / "audios"
+if not AUDIOS_DIR.exists():
+    AUDIOS_DIR = BASE_DIR / "public" / "audios"
+if AUDIOS_DIR.exists():
+    app.mount("/audios", StaticFiles(directory=str(AUDIOS_DIR)), name="audios")
 
 # Global model state
 MODEL = None
@@ -173,26 +192,66 @@ def load_yolo_model():
 # ==========================================
 from backend.camera.device_enumerator import get_dshow_devices
 
-_raw_source = os.getenv("WILDSHIELD_CAMERA_SOURCE", "0")
+_raw_source = os.getenv("WILDSHIELD_CAMERA_SOURCE")
+_target_cam_name = os.getenv("WILDSHIELD_CAMERA_NAME", "").strip().strip('"').strip("'")
+
+# Automatically prioritize active V380 Streamer on port 8080 if running
+if not _raw_source:
+    try:
+        import urllib.request
+        with urllib.request.urlopen("http://localhost:8080/api/status", timeout=0.8) as _v380_chk:
+            if _v380_chk.status == 200:
+                _raw_source = "http://localhost:8080/mjpeg"
+                _target_cam_name = "V380 Camera Streamer (Port 8080)"
+                print(f"[OK] Auto-detected active V380 Streamer on {_raw_source} — prioritizing as primary camera source.")
+    except Exception:
+        pass
+
+if not _raw_source:
+    _raw_source = "1"
+
 try:
     _default_cam_idx = int(_raw_source)
 except ValueError:
     _default_cam_idx = _raw_source
 
-_initial_devices = get_dshow_devices()
-if isinstance(_default_cam_idx, int):
-    _initial_cam_name = "Integrated Camera" if _default_cam_idx == 0 else f"Camera Device [Index {_default_cam_idx}]"
+_initial_devices = get_dshow_devices() if not (isinstance(_raw_source, str) and _raw_source.startswith(("http://", "https://", "rtsp://"))) else []
+_matched_device = None
+
+# If a preferred camera name is configured (e.g. "OBS Virtual Camera"), resolve it dynamically from active DirectShow devices
+if _target_cam_name and _initial_devices:
     for _d in _initial_devices:
-        if _d["index"] == _default_cam_idx:
-            _initial_cam_name = _d["name"]
+        if _target_cam_name.lower() in _d["name"].lower() or _d["name"].lower() in _target_cam_name.lower():
+            _matched_device = _d
             break
+
+if isinstance(_raw_source, str) and _raw_source.startswith(("http://", "https://", "rtsp://")):
+    _default_cam_idx = _raw_source
+    _initial_cam_name = _target_cam_name or f"Network Stream ({_raw_source})"
+    print(f"[OK] Camera configured to live Network Stream: {_default_cam_idx} ({_initial_cam_name})")
+elif _matched_device is not None:
+    _default_cam_idx = _matched_device["index"]
+    _initial_cam_name = _matched_device["name"]
+    print(f"[OK] Dynamically resolved preferred camera '{_target_cam_name}' to Device Index {_default_cam_idx} ({_initial_cam_name})")
+elif isinstance(_default_cam_idx, int):
+    dev_by_idx = next((_d for _d in _initial_devices if _d["index"] == _default_cam_idx), None)
+    if dev_by_idx:
+        _initial_cam_name = dev_by_idx["name"]
+    elif _initial_devices:
+        # Requested index out of range: auto-fallback to first available hardware/virtual device
+        _fallback = _initial_devices[0]
+        print(f"[WARNING] Requested camera source index {_default_cam_idx} not found in available devices {[d['name'] for d in _initial_devices]}. Auto-falling back to Index {_fallback['index']} ({_fallback['name']}).")
+        _default_cam_idx = _fallback["index"]
+        _initial_cam_name = _fallback["name"]
+    else:
+        _initial_cam_name = _target_cam_name or f"Camera Device [Index {_default_cam_idx}]"
 else:
-    _initial_cam_name = os.getenv("WILDSHIELD_CAMERA_NAME", f"Network Stream ({_default_cam_idx})")
+    _initial_cam_name = _target_cam_name or f"Network Stream ({_default_cam_idx})"
 
 LOW_LATENCY_CAPTURE = LowLatencyCaptureService(
     camera_index=_default_cam_idx,
-    width=640,
-    height=480,
+    width=1920 if isinstance(_default_cam_idx, str) and "8080" in _default_cam_idx else 640,
+    height=3240 if isinstance(_default_cam_idx, str) and "8080" in _default_cam_idx else 480,
     fps=30,
     name=_initial_cam_name
 )
@@ -205,20 +264,67 @@ AI_INFERENCE_ACTIVE = False
 AI_INFERENCE_THREAD: Optional[threading.Thread] = None
 LAST_DB_PERSIST_TIME: float = 0.0
 
+# Temporal stability: number of consecutive empty frames before clearing displayed detections.
+# With 0.30s interval this means ~1.5s of no detection before the overlay clears.
+_MISS_TOLERANCE = 5
+_consecutive_misses: int = 0
+_last_heartbeat_broadcast: float = 0.0
+
+# Temporal Confirmation Tracker (2-3 seconds consistency requirement)
+TEMPORAL_TARGET_CLASS: Optional[str] = None
+TEMPORAL_FIRST_SEEN: Optional[float] = None
+TEMPORAL_LAST_SEEN: Optional[float] = None
+TEMPORAL_CONFIRMED: bool = False
+TEMPORAL_WINDOW_SEC: float = float(os.getenv("WILDSHIELD_TEMPORAL_WINDOW_SEC", "0.5"))
+TEMPORAL_GRACE_GAP_SEC: float = 1.5
+CONFIDENCE_THRESHOLD: float = float(os.getenv("WILDSHIELD_CONFIDENCE_THRESHOLD", "0.45"))
+
 
 def ai_inference_worker():
     """
     Decoupled Asynchronous AI Inference Worker.
-    Continuously checks the latest-frame buffer and runs YOLO inference without blocking camera acquisition.
+    Reads live frames from the LowLatencyCaptureService buffer and runs YOLO inference
+    without blocking camera acquisition.
+
+    Temporal stability & Confirmation:
+      1. 75% Confidence Gate: Any detection < 0.75 is classified as UNKNOWN/UNCERTAIN.
+      2. 2-3 Second Temporal Confirmation: Requires the same class to remain detected
+         consistently for >= 2.5 seconds before confirming the threat and activating deterrents.
     """
     global LAST_AI_DETECTION_RESULT, LATEST_DETECTIONS, LATEST_THREAT, AI_INFERENCE_ACTIVE
-    print("[AI WORKER] Decoupled YOLO inference thread started...")
+    global _consecutive_misses, _last_heartbeat_broadcast
+    global TEMPORAL_TARGET_CLASS, TEMPORAL_FIRST_SEEN, TEMPORAL_LAST_SEEN, TEMPORAL_CONFIRMED
+    print(f"[AI WORKER] Decoupled YOLO inference started (Conf floor: 75%, Temporal window: {TEMPORAL_WINDOW_SEC}s)...")
     last_infer_time = 0.0
-    infer_interval = 0.30  # ~3.3 FPS inference (keeps CPU cool while giving fast updates)
+    infer_interval = 0.30  # ~3.3 FPS inference
     last_processed_seq = -1
 
     while AI_INFERENCE_ACTIVE:
         now = time.time()
+
+        # --- Heartbeat broadcast every 1s regardless of detection ---
+        if now - _last_heartbeat_broadcast >= 1.0:
+            _last_heartbeat_broadcast = now
+            with LATEST_DETECTIONS_LOCK:
+                _dets_snap = list(LATEST_DETECTIONS)
+                _threat_snap = LATEST_THREAT
+            cam_metrics = LOW_LATENCY_CAPTURE.get_metrics()
+            dispatch_background_task(
+                ws_manager.broadcast_event(
+                    event_type="CAMERA_LIVE",
+                    data={
+                        "connected": LOW_LATENCY_CAPTURE.is_connected,
+                        "source": cam_metrics.get("source", 2),
+                        "fps": round(cam_metrics.get("measured_fps", 0.0), 1),
+                        "resolution": cam_metrics.get("resolution", "640x480"),
+                        "detection_count": len(_dets_snap),
+                        "threat": _threat_snap,
+                        "detections": _dets_snap
+                    },
+                    priority="NORMAL"
+                )
+            )
+
         if now - last_infer_time < infer_interval:
             time.sleep(0.01)
             continue
@@ -235,13 +341,122 @@ def ai_inference_worker():
         try:
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             pil_img = Image.fromarray(rgb_frame)
-            res = process_pil_inference(pil_img, conf_thresh=0.25, node_id=1, source="V380_LIVE")
-            with LATEST_DETECTIONS_LOCK:
-                LAST_AI_DETECTION_RESULT = res
-                LATEST_DETECTIONS = res.get("detections", [])
-                LATEST_THREAT = res.get("max_threat", "NORMAL")
+            res = process_pil_inference(pil_img, conf_thresh=0.75, node_id=1, source="V380_LIVE")
+            new_dets = res.get("detections", [])
+            accepted_dets = [d for d in new_dets if d.get("is_accepted", False)]
+
+            now = time.time()
+            if accepted_dets:
+                _consecutive_misses = 0
+                target_cls = accepted_dets[0].get("raw_class") or accepted_dets[0].get("class")
+
+                # Check temporal continuity
+                if (TEMPORAL_TARGET_CLASS == target_cls and 
+                    TEMPORAL_LAST_SEEN is not None and 
+                    (now - TEMPORAL_LAST_SEEN) <= TEMPORAL_GRACE_GAP_SEC):
+                    TEMPORAL_LAST_SEEN = now
+                    elapsed = now - TEMPORAL_FIRST_SEEN
+                else:
+                    TEMPORAL_TARGET_CLASS = target_cls
+                    TEMPORAL_FIRST_SEEN = now
+                    TEMPORAL_LAST_SEEN = now
+                    elapsed = 0.0
+
+                # Responsive confirmation (>= 0.5s or elevated threat)
+                is_confirmed = (elapsed >= TEMPORAL_WINDOW_SEC) or (res.get("max_threat") in ("HIGH", "CRITICAL", "MEDIUM"))
+                TEMPORAL_CONFIRMED = is_confirmed
+                current_status = "CONFIRMED" if is_confirmed else f"DETECTED ({elapsed:.1f}s)"
+
+                for d in new_dets:
+                    d["temporal_confirmed"] = is_confirmed
+                    d["temporal_elapsed_sec"] = round(elapsed, 1)
+                    d["detection_status"] = current_status
+
+                # AUTOMATIC DETERRENT TRIGGERING (Hardware Target + V380 Floodlight)
+                should_deter = esp32_service.evaluate_deterrent_trigger(
+                    detections=accepted_dets,
+                    threat_level=res.get("max_threat", "NORMAL"),
+                    is_intrusion=res.get("intrusion", False)
+                )
+                if should_deter:
+                    primary_cls = accepted_dets[0].get("raw_class") or accepted_dets[0].get("class", "Target")
+                    det_pct = accepted_dets[0].get("confidence_pct", 75)
+                    esp32_service.activate(reason=f"Auto-Deterrent: Live AI detected {primary_cls} ({det_pct}%)")
+                    animal_url_service.dispatch(primary_cls, accepted_dets[0])
+
+                    # Also trigger V380 camera floodlight on port 8080 if available
+                    try:
+                        req_light = urllib.request.Request("http://localhost:8080/api/light/on", method="POST")
+                        urllib.request.urlopen(req_light, timeout=0.4)
+                    except Exception:
+                        pass
+
+                res["detection_status"] = current_status
+                res["temporal_confirmed"] = TEMPORAL_CONFIRMED
+                res["temporal_target_class"] = TEMPORAL_TARGET_CLASS
+
+                with LATEST_DETECTIONS_LOCK:
+                    LAST_AI_DETECTION_RESULT = res
+                    LATEST_DETECTIONS = new_dets
+                    LATEST_THREAT = res.get("max_threat", "NORMAL")
+
+            elif new_dets:
+                # Detections exist, but ALL are below 75% confidence (< 0.75)
+                _consecutive_misses += 1
+                if TEMPORAL_LAST_SEEN and (now - TEMPORAL_LAST_SEEN) > TEMPORAL_GRACE_GAP_SEC:
+                    TEMPORAL_TARGET_CLASS = None
+                    TEMPORAL_FIRST_SEEN = None
+                    TEMPORAL_LAST_SEEN = None
+                    TEMPORAL_CONFIRMED = False
+
+                for d in new_dets:
+                    d["temporal_confirmed"] = False
+                    d["detection_status"] = "LOW CONFIDENCE"
+                    d["temporal_elapsed_sec"] = 0.0
+
+                res["detection_status"] = "LOW CONFIDENCE"
+                res["temporal_confirmed"] = False
+                res["temporal_target_class"] = None
+
+                with LATEST_DETECTIONS_LOCK:
+                    LAST_AI_DETECTION_RESULT = res
+                    LATEST_DETECTIONS = new_dets
+                    LATEST_THREAT = "NORMAL"
+
+                # Low confidence detections NEVER trigger deterrent
+                if _consecutive_misses >= 2:
+                    esp32_service.deactivate(reason="Low confidence detection (< 75%): Deterrent suppressed")
+
+            else:
+                # No detections at all (Perimeter clear)
+                _consecutive_misses += 1
+                if TEMPORAL_LAST_SEEN and (now - TEMPORAL_LAST_SEEN) > TEMPORAL_GRACE_GAP_SEC:
+                    TEMPORAL_TARGET_CLASS = None
+                    TEMPORAL_FIRST_SEEN = None
+                    TEMPORAL_LAST_SEEN = None
+                    TEMPORAL_CONFIRMED = False
+
+                res["detection_status"] = "NO DETECTION"
+                res["temporal_confirmed"] = False
+                res["temporal_target_class"] = None
+
+                with LATEST_DETECTIONS_LOCK:
+                    LAST_AI_DETECTION_RESULT = {
+                        **res,
+                        "primary_detection": None,
+                        "detections": [],
+                        "detection_count": 0,
+                        "status": "NO CONFIDENT DETECTION",
+                        "detection_status": "NO DETECTION",
+                        "max_threat": "NORMAL"
+                    }
+                    LATEST_DETECTIONS = []
+                    LATEST_THREAT = "NORMAL"
+
+                if _consecutive_misses >= 2:
+                    esp32_service.deactivate(reason="Perimeter clear: No detection")
         except Exception as err:
-            pass
+            print(f"[AI WORKER ERROR] Inference failed on frame seq={seq}: {err}")
 
 
 def start_camera_pipeline():
@@ -258,56 +473,157 @@ def stop_camera_pipeline():
     global AI_INFERENCE_ACTIVE
     AI_INFERENCE_ACTIVE = False
     LOW_LATENCY_CAPTURE.stop()
+    esp32_service.deactivate(reason="Camera pipeline stopped")
 
 
 def generate_camera_mjpeg_stream(mode: str = "annotated"):
     """
     Ultra-low-latency MJPEG stream generator.
     Delivers the newest frame directly from the shared buffer without delay.
-    In 'annotated' mode, overlays the latest bounding boxes on the real-time frame.
+    In 'annotated' mode draws YOLO bounding boxes, class labels, and confidence
+    scores directly onto each frame using the temporally-stable LATEST_DETECTIONS.
     """
-    encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), 80]
+    encode_params = [int(cv2.IMWRITE_JPEG_QUALITY), 82]
+
+    # Threat colour map
+    THREAT_COLORS = {
+        "CRITICAL": (0, 0, 220),
+        "HIGH":     (0, 80, 255),
+        "MEDIUM":   (0, 165, 255),
+        "LOW":      (0, 230, 118),
+        "NORMAL":   (0, 200, 100),
+        "NONE":     (100, 100, 100),
+    }
+    HIGH_RISK_SPECIES = {"Human", "Tiger", "Asiatic Lion", "Gaur", "Wild Boar", "Nilgai"}
 
     while True:
         success, frame, ts, seq = LOW_LATENCY_CAPTURE.get_latest_frame(copy=(mode == "annotated"))
 
+        # ── Standby frame when camera is not yet connected ──────────────────────
         if not success or frame is None:
             standby = np.zeros((480, 640, 3), dtype=np.uint8)
-            cv2.putText(standby, "WILDSHIELD AI - CONNECTING V380 FEED...", (60, 230),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.60, (0, 230, 118), 2)
-            cv2.putText(standby, "OBS Virtual Camera [Index 2] (DirectShow Low-Latency)", (60, 265),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.45, (148, 163, 184), 1)
+            cv2.rectangle(standby, (0, 0), (640, 40), (15, 23, 42), -1)
+            cv2.putText(standby, "WILDSHIELD AI", (12, 26),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.70, (0, 230, 118), 2, cv2.LINE_AA)
+            cv2.putText(standby, f"Connecting to {LOW_LATENCY_CAPTURE.name}...", (80, 230),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.55, (200, 200, 200), 1, cv2.LINE_AA)
+            cv2.putText(standby, f"Source  \u2192  {LOW_LATENCY_CAPTURE.name} [Idx {LOW_LATENCY_CAPTURE.camera_index}]  \u2192  OpenCV", (80, 260),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.42, (100, 140, 180), 1, cv2.LINE_AA)
             frame_to_send = standby
+
+        # ── Annotated live feed ──────────────────────────────────────────────────
         elif mode == "annotated":
             annotated = frame
             h, w = annotated.shape[:2]
-            warn_y = int(h * 0.40)
-            core_y = int(h * 0.65)
-            cv2.line(annotated, (0, warn_y), (w, warn_y), (0, 200, 255), 1)
-            cv2.line(annotated, (0, core_y), (w, core_y), (0, 0, 255), 2)
 
             with LATEST_DETECTIONS_LOCK:
                 dets = list(LATEST_DETECTIONS)
                 threat = LATEST_THREAT
 
+            # Draw each detection bounding box
             for det in dets:
                 bx = det.get("bbox", [])
-                if len(bx) == 4:
-                    x1, y1, x2, y2 = [int(v) for v in bx]
-                    det_cls = det.get('class', 'Target')
-                    det_pct = det.get('confidence_pct', 0)
-                    color = (0, 0, 255) if (det_cls in ("Human", "Tiger", "Asiatic Lion", "Gaur") or threat in ("CRITICAL", "HIGH")) else (0, 230, 118)
-                    cv2.rectangle(annotated, (x1, y1), (x2, y2), color, 2)
-                    label = f" {det_cls} {det_pct}% "
-                    (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.50, 1)
-                    badge_y1 = max(0, y1 - th - 6)
-                    cv2.rectangle(annotated, (x1, badge_y1), (x1 + tw, y1), color, -1)
-                    cv2.putText(annotated, label, (x1, y1 - 4), cv2.FONT_HERSHEY_SIMPLEX, 0.50, (255, 255, 255), 1, cv2.LINE_AA)
+                if len(bx) != 4:
+                    continue
+                x1, y1, x2, y2 = [int(v) for v in bx]
+                # Clamp to frame bounds
+                x1, y1 = max(0, x1), max(0, y1)
+                x2, y2 = min(w - 1, x2), min(h - 1, y2)
 
-            status_color = (0, 0, 255) if threat in ("CRITICAL", "HIGH") else (0, 230, 118)
-            cv2.rectangle(annotated, (0, 0), (w, 30), (15, 23, 42), -1)
-            cv2.putText(annotated, f"WILDSHIELD AI | V380 BRIDGE [INDEX 2] | THREAT: {threat}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.50, status_color, 2, cv2.LINE_AA)
+                det_conf = float(det.get("confidence", 0.0))
+                det_pct  = det.get("confidence_pct", round(det_conf * 100, 1))
+                raw_cls  = det.get("raw_class") or det.get("class", "Target")
+                is_confirmed = det.get("temporal_confirmed", False)
+                det_status = det.get("detection_status", "UNKNOWN")
+
+                # USER REQUIREMENT: Only show detections with confidence over 75%
+                if det_conf < 0.75:
+                    continue
+
+                if is_confirmed:
+                    # Confirmed: sustained for >= 2.5s
+                    is_high_risk = (raw_cls in HIGH_RISK_SPECIES or threat in ("CRITICAL", "HIGH"))
+                    bbox_color = (0, 0, 220) if is_high_risk else (0, 230, 118)
+                    label_bg = bbox_color
+                    label = f" {raw_cls}  {det_pct}%  [CONFIRMED] "
+                    thickness = 3 if is_high_risk else 2
+                else:
+                    # High confidence (>= 75%) but currently confirming (elapsed < 2.5s)
+                    elapsed = det.get("temporal_elapsed_sec", 0.0)
+                    bbox_color = (255, 200, 0)  # Cyan in BGR
+                    label_bg = (200, 160, 0)
+                    label = f" {raw_cls}  {det_pct}%  [CONFIRMING {elapsed:.1f}s/2.5s] "
+                    thickness = 2
+
+                cv2.rectangle(annotated, (x1, y1), (x2, y2), bbox_color, thickness)
+
+                # Label badge above the box
+                font_scale = 0.44
+                font_thickness = 1
+                (tw, th), baseline = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, font_scale, font_thickness)
+                badge_y1 = max(0, y1 - th - baseline - 6)
+                badge_y2 = y1
+                # Filled badge rectangle
+                cv2.rectangle(annotated, (x1, badge_y1), (x1 + tw + 2, badge_y2), label_bg, -1)
+                cv2.putText(annotated, label,
+                            (x1 + 1, badge_y2 - baseline - 1),
+                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255),
+                            font_thickness, cv2.LINE_AA)
+
+                # Small confidence bar below label (visual confidence indicator)
+                bar_w = int(tw * min(1.0, det_conf))
+                cv2.rectangle(annotated, (x1, y2 + 2), (x1 + tw, y2 + 5), (60, 60, 60), -1)
+                cv2.rectangle(annotated, (x1, y2 + 2), (x1 + bar_w, y2 + 5), bbox_color, -1)
+
+            # ── Top HUD bar ──────────────────────────────────────────────────────
+            hud_h = 32
+            overlay = annotated.copy()
+            cv2.rectangle(overlay, (0, 0), (w, hud_h), (10, 15, 30), -1)
+            cv2.addWeighted(overlay, 0.80, annotated, 0.20, 0, annotated)
+
+            hud_color = THREAT_COLORS.get(threat, (0, 230, 118))
+            cam_metrics = LOW_LATENCY_CAPTURE.get_metrics()
+            fps_val = cam_metrics.get("measured_fps", 0.0)
+            cv2.putText(annotated, "WILDSHIELD AI",
+                        (10, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.58, (0, 230, 118), 2, cv2.LINE_AA)
+            cv2.putText(annotated, f"{LOW_LATENCY_CAPTURE.name} [Idx {LOW_LATENCY_CAPTURE.camera_index}]  {fps_val:.1f} FPS",
+                        (170, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.42, (160, 180, 200), 1, cv2.LINE_AA)
+            threat_tag = f"THREAT: {threat}"
+            (ttw, _), _ = cv2.getTextSize(threat_tag, cv2.FONT_HERSHEY_SIMPLEX, 0.48, 1)
+            cv2.putText(annotated, threat_tag,
+                        (w - ttw - 10, 21), cv2.FONT_HERSHEY_SIMPLEX, 0.48, hud_color, 1, cv2.LINE_AA)
+
+            # ── Bottom status bar ────────────────────────────────────────────────
+            bar_h = 26
+            bot_y = h - bar_h
+            bot_overlay = annotated.copy()
+            cv2.rectangle(bot_overlay, (0, bot_y), (w, h), (10, 15, 30), -1)
+            cv2.addWeighted(bot_overlay, 0.80, annotated, 0.20, 0, annotated)
+
+            confident_dets = [d for d in dets if float(d.get("confidence", 0.0)) >= 0.75]
+            if confident_dets:
+                primary = confident_dets[0]
+                p_conf = float(primary.get("confidence", 0.0))
+                p_pct = primary.get("confidence_pct", round(p_conf * 100, 1))
+                p_cls = primary.get("raw_class") or primary.get("class", "?")
+                p_confirmed = primary.get("temporal_confirmed", False)
+                if p_confirmed:
+                    status_txt = f"STATUS: CONFIRMED (>= 75% \u2022 Sustained) | {p_cls} {p_pct}% | THREAT: {threat}"
+                    status_color = hud_color
+                else:
+                    elapsed = primary.get("temporal_elapsed_sec", 0.0)
+                    status_txt = f"STATUS: CONFIRMING ({elapsed:.1f}s / 2.5s) | {p_cls} {p_pct}% | DURATION PENDING"
+                    status_color = (255, 200, 0)
+            else:
+                status_txt = "SCANNING...  Perimeter Clear (Confidence Floor: 75%)"
+                status_color = (120, 140, 160)
+
+            cv2.putText(annotated, status_txt,
+                        (10, bot_y + 18), cv2.FONT_HERSHEY_SIMPLEX, 0.44, status_color, 1, cv2.LINE_AA)
+
             frame_to_send = annotated
+
+        # ── Raw pass-through ─────────────────────────────────────────────────────
         else:
             frame_to_send = frame
 
@@ -569,8 +885,8 @@ def process_pil_inference(
     cattle_boxes = []
     if BASE_PERSON_MODEL is not None:
         try:
-            # 0: person, 16: dog, 19: cow (COCO pretrained classes)
-            p_results = BASE_PERSON_MODEL.predict(pil_img, conf=0.25, classes=[0, 16, 19], verbose=False)
+            # 0: person, 16: dog, 19: cow (COCO pretrained classes, confidence floor 75%)
+            p_results = BASE_PERSON_MODEL.predict(pil_img, conf=0.75, classes=[0, 16, 19], verbose=False)
             if p_results and len(p_results) > 0:
                 for j, pb in enumerate(p_results[0].boxes):
                     p_cls = int(pb.cls[0].item())
@@ -625,36 +941,12 @@ def process_pil_inference(
             xyxy = b.xyxy[0].tolist()
             class_name = MODEL_CLASSES.get(cls_id, f"Class_{cls_id}")
 
-            # Suppress low-confidence wildlife/domestic misclassifications when a Human is present
-            is_suppressed = False
-            if person_boxes and class_name in ("Goat", "Dog", "Cattle", "Langur", "Rhesus Macaque", "Spotted Deer", "Wild Boar"):
-                if conf < 0.70:
-                    is_suppressed = True
-                else:
-                    cx = (xyxy[0] + xyxy[2]) / 2
-                    cy = (xyxy[1] + xyxy[3]) / 2
-                    for p_box in person_boxes:
-                        if (p_box[0] <= cx <= p_box[2] and p_box[1] <= cy <= p_box[3]):
-                            is_suppressed = True
-                            break
+            # --- Diagnostic log: always print raw YOLO output for debugging ---
+            print(f"[YOLO RAW] cls_id={cls_id} class={class_name} conf={conf:.3f} bbox={[round(v,1) for v in xyxy]}")
 
-            # Suppress low-confidence Goat misclassifications when Cattle is detected
-            if cattle_boxes and class_name in ("Goat", "Dog"):
-                if conf < 0.65:
-                    is_suppressed = True
-                else:
-                    cx = (xyxy[0] + xyxy[2]) / 2
-                    cy = (xyxy[1] + xyxy[3]) / 2
-                    for c_box in cattle_boxes:
-                        if (c_box[0] <= cx <= c_box[2] and c_box[1] <= cy <= c_box[3]):
-                            is_suppressed = True
-                            break
-
-            # Avoid duplicate Cattle detection if base model already detected it with higher confidence
-            if cattle_boxes and class_name == "Cattle" and conf < 0.60:
-                is_suppressed = True
-
-            if is_suppressed:
+            # --- Hard per-class minimum confidence gates ---
+            # Accept all confident detections from YOLO model (threshold controlled by conf_thresh)
+            if conf < conf_thresh:
                 continue
 
             det_id = f"{event_id}-{i+1:02d}"
@@ -751,27 +1043,65 @@ def process_pil_inference(
 
     infer_time_ms = round((time.time() - start_time) * 1000, 1)
 
-    # Prioritize Human / Critical Security over low-confidence domestic/wildlife detections
-    has_human = any(d.get("class") == "Human" for d in raw_detections)
-    if has_human:
-        detections = sorted(
-            raw_detections,
-            key=lambda d: (1 if d.get("class") == "Human" else 0, d.get("confidence", 0)),
-            reverse=True
-        )
-    else:
-        detections = sorted(raw_detections, key=lambda d: d.get("confidence", 0), reverse=True)
-    primary_detection = detections[0] if detections else None
+    # 2. Strict 75% Confidence Filter
+    # Only detections over 75% are accepted and displayed
+    CONF_FLOOR = 0.75
 
-    # 2. Evaluate Geofence & AI Threat Decision
-    if primary_detection:
+    processed_detections = []
+    for d in raw_detections:
+        conf = float(d.get("confidence", 0.0))
+        conf_pct = round(conf * 100, 1)
+        raw_cls = d.get("class", "Target")
+        d["raw_class"] = raw_cls
+        d["confidence_pct"] = conf_pct
+        d["confidence_threshold"] = CONF_FLOOR
+
+        # USER REQUIREMENT: Show confidence over 75% (filter out < 75%)
+        if conf < 0.75:
+            continue
+
+        d["is_accepted"] = True
+        d["status"] = "HIGH CONFIDENCE"
+        d["detection_status"] = "CONFIRMED"
+        d["classification_label"] = raw_cls
+        d["class"] = raw_cls
+
+        processed_detections.append(d)
+
+    # Sort: Accepted detections (>= 75%) first, then by confidence
+    detections = sorted(
+        processed_detections,
+        key=lambda d: (1 if d.get("is_accepted") else 0, d.get("confidence", 0)),
+        reverse=True
+    )
+
+    accepted_detections = [d for d in detections if d.get("is_accepted")]
+    unaccepted_detections = [d for d in detections if not d.get("is_accepted")]
+
+    if accepted_detections:
+        primary_detection = accepted_detections[0]
+        # Evaluate Geofence & AI Threat Decision using existing taxonomy & logic
         eval_result = evaluate_decision(
-            species=primary_detection["class"],
+            species=primary_detection["raw_class"],
             confidence=primary_detection["confidence"],
             inside_geofence=True,
             zone=node_name
         )
+        detection_status = "CONFIRMED" if source != "V380_LIVE" else "HIGH CONFIDENCE"
+    elif unaccepted_detections:
+        primary_detection = unaccepted_detections[0]
+        # Below 75%: DO NOT TRIGGER ANY THREAT DECISION OR DETERRENT
+        eval_result = {
+            "threat_level": "NORMAL",
+            "threat_reason": f"Target detected with {primary_detection['confidence_pct']}% confidence (< 75% threshold). Classified as UNKNOWN/UNCERTAIN. Threat response suppressed.",
+            "action": "Monitoring (Low Confidence / Uncertain)",
+            "actuators": {"siren": False, "floodlight": False, "speaker": False, "sprinkler": False},
+            "is_intrusion": False,
+            "behaviour": {"activity": "Unconfirmed Target (< 75% Confidence)", "possible_damage": "None", "risk_score": 0}
+        }
+        detection_status = "LOW CONFIDENCE"
     else:
+        primary_detection = None
         eval_result = {
             "threat_level": "NONE",
             "threat_reason": "No target detected. Perimeter clear.",
@@ -780,15 +1110,27 @@ def process_pil_inference(
             "is_intrusion": False,
             "behaviour": {"activity": "Perimeter clear", "possible_damage": "None", "risk_score": 0}
         }
+        detection_status = "NO DETECTION"
 
     # 3. Render Annotated Image
     draw_img = pil_img.copy()
     draw = ImageDraw.Draw(draw_img)
     for det_obj in detections:
         xyxy = det_obj["bbox"]
-        color = "#ef4444" if eval_result["is_intrusion"] else "#22c55e"
+        conf = det_obj.get("confidence", 0.0)
+        conf_pct = det_obj.get("confidence_pct", round(conf * 100, 1))
+        raw_cls = det_obj.get("raw_class", det_obj.get("class", "Target"))
+
+        if conf < CONF_FLOOR:
+            # Below 75%: Amber box and explicit UNKNOWN/UNCERTAIN label
+            color = "#f59e0b"
+            label_text = f"UNKNOWN/UNCERTAIN ({raw_cls}) {conf_pct}% [LOW CONFIDENCE < 75%]"
+        else:
+            # 75% or higher: Red if intrusion/threat, Green if safe
+            color = "#ef4444" if eval_result.get("is_intrusion") else "#22c55e"
+            label_text = f"{raw_cls} {conf_pct}% [CONFIRMED]"
+
         draw.rectangle(xyxy, outline=color, width=3)
-        label_text = f"{det_obj['class']} ({det_obj['code']}) {det_obj['confidence_pct']}%"
         draw.rectangle([xyxy[0], max(0, xyxy[1]-20), xyxy[0] + len(label_text)*8, xyxy[1]], fill=color)
         draw.text((xyxy[0]+3, max(0, xyxy[1]-18)), label_text, fill="#ffffff")
 
@@ -812,7 +1154,9 @@ def process_pil_inference(
         "node_name": node_name,
         "inference_time_ms": infer_time_ms,
         "detection_count": len(detections),
-        "status": "DETECTED" if detections else "NO CONFIDENT DETECTION",
+        "status": detection_status,
+        "detection_status": detection_status,
+        "confidence_threshold": CONF_FLOOR,
         "intrusion": eval_result["is_intrusion"],
         "max_threat": eval_result["threat_level"],
         "primary_detection": primary_detection,
@@ -1054,6 +1398,21 @@ def process_pil_inference(
                     except Exception:
                         pass
 
+        # 5c. Physical Hardware Deterrent Trigger (ESP32 Actuator)
+        should_esp32_deter = esp32_service.evaluate_deterrent_trigger(
+            detections=detections,
+            threat_level=eval_result["threat_level"],
+            is_intrusion=eval_result["is_intrusion"]
+        )
+        # Note: Live stream (V380_LIVE) is directly managed by ai_inference_worker for zero-hold control.
+        if source != "V380_LIVE" and should_esp32_deter:
+            primary_cls = primary_detection["class"] if primary_detection else "Intrusion"
+            esp32_service.activate(reason=f"AI confirmed {primary_cls} ({eval_result['threat_level']})")
+
+        # Automatic custom URL hit for detected animal or human
+        if primary_detection:
+            animal_url_service.dispatch(primary_detection["class"], primary_detection)
+
         # 6. WebSocket Broadcast INTRUSION_CREATED (Only after DB transaction commits)
         if eval_result["is_intrusion"]:
             dispatch_background_task(
@@ -1075,12 +1434,12 @@ def process_pil_inference(
             )
 
         # 7. Execute Prevention & MQTT Actuators
-        if eval_result["is_intrusion"]:
+        if eval_result["is_intrusion"] or should_esp32_deter:
             dispatch_background_task(
                 prevention_service.activate_deterrent(
                     event_id=event_id,
                     node_code=camera_id,
-                    species=primary_detection["class"],
+                    species=primary_detection["class"] if primary_detection else "Target",
                     actuators=eval_result["actuators"],
                     duration_seconds=15,
                     triggered_by="AI_ENGINE",
@@ -1098,8 +1457,8 @@ def process_pil_inference(
             dispatch_background_task(
                 notification_service.send_event_notification(
                     event_id=event_id,
-                    species=primary_detection["class"],
-                    confidence=primary_detection["confidence"],
+                    species=primary_detection["class"] if primary_detection else "Target",
+                    confidence=primary_detection["confidence"] if primary_detection else 0.85,
                     farm_zone=node_name,
                     threat_level=eval_result["threat_level"],
                     action_taken=eval_result["action"]
@@ -1116,6 +1475,7 @@ def process_pil_inference(
         )
 
     return response_payload
+
 
 
 class TestDetectRequest(BaseModel):
@@ -1214,10 +1574,54 @@ def get_camera_stream(mode: str = Query("annotated", enum=["annotated", "raw"]))
 
 @app.get("/api/camera/status")
 def get_camera_status():
-    """Returns telemetry of the V380 Pro -> OBS Virtual Camera integration."""
+    """Returns telemetry of the V380 Pro -> OBS Virtual Camera integration.
+    
+    IMPORTANT: latest_detection is built from the live LATEST_DETECTIONS snapshot
+    (always current) rather than the stale LAST_AI_DETECTION_RESULT, which may
+    hold an old detection during the temporal-stability miss-tolerance window.
+    This prevents false 'Goat' / 'Cattle' labels when the frame is empty.
+    """
     metrics = LOW_LATENCY_CAPTURE.get_metrics()
+
+    # Build a live-accurate detection snapshot from LATEST_DETECTIONS
+    with LATEST_DETECTIONS_LOCK:
+        live_dets = list(LATEST_DETECTIONS)
+        live_threat = LATEST_THREAT
+
+    if live_dets:
+        primary = live_dets[0]
+        status_val = (LAST_AI_DETECTION_RESULT or {}).get("detection_status") or primary.get("detection_status", "UNKNOWN")
+        temporal_conf = (LAST_AI_DETECTION_RESULT or {}).get("temporal_confirmed") or primary.get("temporal_confirmed", False)
+        live_detection_payload = {
+            **(LAST_AI_DETECTION_RESULT or {}),
+            "detection_count": len(live_dets),
+            "status": status_val,
+            "detection_status": status_val,
+            "temporal_confirmed": temporal_conf,
+            "confidence_threshold": CONFIDENCE_THRESHOLD,
+            "primary_detection": primary,
+            "detections": live_dets,
+            "max_threat": live_threat,
+        }
+    else:
+        # No live detections — return a clear payload so the UI shows "No Animal Detected"
+        live_detection_payload = {
+            "detection_count": 0,
+            "status": "NO CONFIDENT DETECTION",
+            "primary_detection": None,
+            "detections": [],
+            "max_threat": "NORMAL",
+        }
+
+    is_net = isinstance(metrics["source"], str) and metrics["source"].startswith(("http://", "https://"))
+    pipe_str = (
+        f"V380 Wi-Fi Camera -> V380 Streamer ({metrics['source']}) -> LowLatencyCapture (FFMPEG, Buffer=1) -> FastAPI"
+        if is_net
+        else f"V380 Pro -> OBS Window Capture -> OBS Virtual Camera -> LowLatencyCapture (DirectShow, Buffer=1) -> FastAPI"
+    )
+
     return {
-        "pipeline": "V380 Wi-Fi Camera -> V380 Pro -> OBS Window Capture -> OBS Virtual Camera -> LowLatencyCapture (DirectShow, Buffer=1) -> FastAPI",
+        "pipeline": pipe_str,
         "source": metrics["source"],
         "camera_index": metrics["camera_index"],
         "connected": metrics["connected"],
@@ -1232,7 +1636,8 @@ def get_camera_status():
         "backend": metrics["backend"],
         "architecture": metrics["architecture"],
         "stream_url": "/api/camera/stream",
-        "latest_detection": LAST_AI_DETECTION_RESULT
+        "direct_mjpeg_url": "http://localhost:8080/mjpeg",
+        "latest_detection": live_detection_payload
     }
 
 
@@ -1909,6 +2314,509 @@ def trigger_response(payload: TriggerResponseRequest):
         "message": f"Deterrent protocol engaged: {', '.join(active_devices) if active_devices else 'Standby'}",
         "timestamp": datetime.utcnow().isoformat()
     }
+
+
+# ==========================================
+# 7b. ESP32 Smart Deterrent Hardware Control
+# ==========================================
+
+class ESP32ConfigRequest(BaseModel):
+    ip: Optional[str] = None
+    port: Optional[int] = None
+    enabled: Optional[bool] = None
+    auto_trigger: Optional[bool] = None
+    deter_endpoint: Optional[str] = None
+    stop_endpoint: Optional[str] = None
+    status_endpoint: Optional[str] = None
+    http_method: Optional[str] = None
+    min_conf: Optional[float] = None
+    human_min_conf: Optional[float] = None
+    mode: Optional[str] = None
+    auto_off_sec: Optional[float] = None
+
+
+@app.get("/api/esp32/status")
+def get_esp32_status():
+    """Return real-time status, diagnostics and ping of the ESP32 hardware deterrent."""
+    st = esp32_service.get_status()
+    st["ping"] = esp32_service.ping()
+    return st
+
+
+@app.get("/api/esp32/ping")
+def ping_esp32_hardware():
+    """Instant TCP ping and HTTP status query to ESP32 hardware device (192.168.137.211:80)."""
+    return esp32_service.ping()
+
+
+class ESP32DeterRequest(BaseModel):
+    duration: Optional[float] = None  # None = indefinite zero-hold until deactivation
+    reason: Optional[str] = "Manual Dashboard Trigger"
+    track: Optional[int] = None  # Suggested DFPlayer track (1 = 0001.mp3, ..., 5 = 0005.mp3)
+    actuator: Optional[str] = "all"  # "1", "2", or "all"
+
+
+@app.get("/api/deterrent-sounds")
+def get_deterrent_sounds():
+    """Returns the catalog of 5 deterrent sounds and the 10-class YOLO wildlife mapping."""
+    return {
+        "status": "success",
+        "sounds": [
+            {
+                "id": "0001",
+                "file": "0001.mp3",
+                "url": "/audios/0001.mp3",
+                "title": "Bear & Apex Predator Ultrasonic Repellent",
+                "suggested_classes": [6],
+                "threat": "CRITICAL",
+                "frequency": "16 kHz – 24 kHz",
+                "decibels": "118 dB @ 1m"
+            },
+            {
+                "id": "0002",
+                "file": "0002.mp3",
+                "url": "/audios/0002.mp3",
+                "title": "Extended Herbivore Resonance Deterrent",
+                "suggested_classes": [2],
+                "threat": "MEDIUM",
+                "frequency": "12 kHz – 19 kHz",
+                "decibels": "104 dB @ 1m"
+            },
+            {
+                "id": "0003",
+                "file": "0003.mp3",
+                "url": "/audios/0003.mp3",
+                "title": "Multi-Frequency Bio-Acoustic Disruptor",
+                "suggested_classes": [1, 3, 4, 9],
+                "threat": "HIGH",
+                "frequency": "14 kHz – 22 kHz",
+                "decibels": "115 dB @ 1m"
+            },
+            {
+                "id": "0004",
+                "file": "0004.mp3",
+                "url": "/audios/0004.mp3",
+                "title": "High-Impact Acoustic & Bio-Acoustic Wave",
+                "suggested_classes": [0, 5, 7, 8],
+                "threat": "CRITICAL",
+                "frequency": "8 kHz – 26 kHz",
+                "decibels": "122 dB @ 1m"
+            },
+            {
+                "id": "0005",
+                "file": "0005.mp3",
+                "url": "/audios/0005.mp3",
+                "title": "Emergency Perimeter Sweep & Auxiliary Blast",
+                "suggested_classes": [],
+                "threat": "MAXIMUM",
+                "frequency": "10 kHz – 30 kHz",
+                "decibels": "125 dB @ 1m"
+            }
+        ],
+        "class_mappings": [
+            {"class_id": 0, "animal": "Elephant", "suggested_sound_id": "0004", "audio_file": "0004.mp3"},
+            {"class_id": 1, "animal": "Wild Boar", "suggested_sound_id": "0003", "audio_file": "0003.mp3"},
+            {"class_id": 2, "animal": "Deer", "suggested_sound_id": "0002", "audio_file": "0002.mp3"},
+            {"class_id": 3, "animal": "Nilgai", "suggested_sound_id": "0003", "audio_file": "0003.mp3"},
+            {"class_id": 4, "animal": "Monkey", "suggested_sound_id": "0003", "audio_file": "0003.mp3"},
+            {"class_id": 5, "animal": "Leopard", "suggested_sound_id": "0004", "audio_file": "0004.mp3"},
+            {"class_id": 6, "animal": "Bear", "suggested_sound_id": "0001", "audio_file": "0001.mp3"},
+            {"class_id": 7, "animal": "Cattle", "suggested_sound_id": "0004", "audio_file": "0004.mp3"},
+            {"class_id": 8, "animal": "Goat", "suggested_sound_id": "0004", "audio_file": "0004.mp3"},
+            {"class_id": 9, "animal": "Wild Dogs", "suggested_sound_id": "0003", "audio_file": "0003.mp3"},
+            {"class_id": 10, "animal": "Human", "suggested_sound_id": "0001", "audio_file": "0001.mp3"}
+        ]
+    }
+
+
+class AnimalUrlsUpdateRequest(BaseModel):
+    urls: Optional[Dict[str, str]] = None
+    methods: Optional[Dict[str, str]] = None
+
+
+class HitAnimalUrlRequest(BaseModel):
+    url: str
+    method: Optional[str] = "POST"
+    species: Optional[str] = "Target"
+    payload: Optional[Dict[str, Any]] = None
+
+
+@app.get("/api/animal-urls")
+def get_animal_urls():
+    """Returns the custom trigger URLs and HTTP methods for all 10 animals + Human."""
+    return animal_url_service.get_urls()
+
+
+@app.post("/api/animal-urls")
+def update_animal_urls(req: AnimalUrlsUpdateRequest):
+    """Updates and persists custom trigger URLs for any/all animals and human."""
+    success = animal_url_service.save_config(urls=req.urls, methods=req.methods)
+    return {"success": success, "data": animal_url_service.get_urls()}
+
+
+@app.post("/api/hit-animal-url")
+def hit_animal_url(req: HitAnimalUrlRequest):
+    """Direct proxy to hit a custom animal trigger URL from Python, bypassing browser CORS restrictions."""
+    status = animal_url_service._send_request(
+        url=req.url,
+        method=req.method or "POST",
+        species=req.species or "Target",
+        metadata=req.payload or {}
+    )
+    return {"success": status is not None, "status_code": status, "url": req.url}
+
+
+@app.post("/api/esp32/deter")
+def trigger_esp32_deter(payload: Optional[ESP32DeterRequest] = None):
+    """Manually test activating the ESP32 deterrent on Actuator 1, Actuator 2, or both."""
+    duration = payload.duration if payload and payload.duration else None
+    reason = payload.reason if payload and payload.reason else "Manual API trigger (/api/esp32/deter)"
+    actuator = payload.actuator if payload and payload.actuator else "all"
+    activated = esp32_service.activate(reason=reason, duration=duration, force=True, actuator=actuator)
+    return {
+        "success": True,
+        "state_changed": activated,
+        "actuator": actuator,
+        "message": f"Deterrent command dispatched to Actuator(s): {actuator}",
+        "duration_sec": duration,
+        "status": esp32_service.get_status()
+    }
+
+
+@app.post("/api/esp32/stop")
+def trigger_esp32_stop(actuator: Optional[str] = Query("all")):
+    """Manually test deactivating the ESP32 deterrent on Actuator 1, Actuator 2, or both."""
+    deactivated = esp32_service.deactivate(reason="Manual API trigger (/api/esp32/stop)", force=True, actuator=actuator or "all")
+    return {
+        "success": True,
+        "state_changed": deactivated,
+        "actuator": actuator,
+        "message": f"Stop command dispatched to Actuator(s): {actuator}",
+        "status": esp32_service.get_status()
+    }
+
+
+@app.post("/api/esp32/config")
+def update_esp32_config(payload: ESP32ConfigRequest):
+    """Dynamically reconfigure ESP32 IP, port, API endpoints, auto_trigger, auto_off duration, or toggle modes."""
+    esp32_service.update_config(
+        ip=payload.ip,
+        port=payload.port,
+        enabled=payload.enabled,
+        auto_trigger=payload.auto_trigger,
+        deter_endpoint=payload.deter_endpoint,
+        stop_endpoint=payload.stop_endpoint,
+        status_endpoint=payload.status_endpoint,
+        http_method=payload.http_method,
+        min_conf=payload.min_conf,
+        human_min_conf=payload.human_min_conf,
+        mode=payload.mode,
+        auto_off_sec=payload.auto_off_sec
+    )
+    status = esp32_service.get_status()
+    status["ping"] = esp32_service.ping()
+    return {
+        "success": True,
+        "message": f"Target hardware configuration updated: http://{esp32_service.ip}:{esp32_service.port}",
+        "config": status
+    }
+
+
+# ========================================================
+# 7c. Dynamic Signal & Hardware Target Trigger Controller API (Dual Actuators)
+# ========================================================
+
+class TargetTriggerConfigRequest(BaseModel):
+    # Actuator 1
+    ip: Optional[str] = None
+    port: Optional[int] = 80
+    trigger_endpoint: Optional[str] = None
+    cancel_endpoint: Optional[str] = None
+    deter_endpoint: Optional[str] = None
+    stop_endpoint: Optional[str] = None
+    enabled: Optional[bool] = None
+
+    # Actuator 2
+    ip_2: Optional[str] = None
+    port_2: Optional[int] = 80
+    trigger_endpoint_2: Optional[str] = None
+    cancel_endpoint_2: Optional[str] = None
+    deter_endpoint_2: Optional[str] = None
+    stop_endpoint_2: Optional[str] = None
+    enabled_2: Optional[bool] = None
+
+    auto_trigger: Optional[bool] = None
+    http_method: Optional[str] = "GET"
+
+
+@app.get("/api/trigger/target")
+def get_trigger_target():
+    """Returns currently configured trigger IPs, ports, and live Trigger/Cancel URLs for both actuators."""
+    st = esp32_service.get_status()
+    st["ping"] = esp32_service.ping()
+    return {
+        "success": True,
+        "actuator_1": st["actuator_1"],
+        "actuator_2": st["actuator_2"],
+        "ip": esp32_service.ip,
+        "port": esp32_service.port,
+        "trigger_url": st["trigger_url"],
+        "cancel_url": st["cancel_url"],
+        "ip_2": esp32_service.ip_2,
+        "port_2": esp32_service.port_2,
+        "trigger_url_2": st["trigger_url_2"],
+        "cancel_url_2": st["cancel_url_2"],
+        "status_url": st.get("status_endpoint", "/status"),
+        "trigger_endpoint": esp32_service.deter_endpoint,
+        "cancel_endpoint": esp32_service.stop_endpoint,
+        "enabled": esp32_service.enabled,
+        "enabled_2": esp32_service.enabled_2,
+        "auto_trigger": esp32_service.auto_trigger,
+        "state": esp32_service.state,
+        "state_1": esp32_service.state_1,
+        "state_2": esp32_service.state_2,
+        "is_active": esp32_service.is_active,
+        "ping": st["ping"]
+    }
+
+
+@app.post("/api/trigger/target")
+def configure_trigger_target(payload: TargetTriggerConfigRequest):
+    """Updates target device IP address, port, auto_trigger, and Trigger/Cancel endpoints for Dual Actuators."""
+    deter_ep = payload.trigger_endpoint or payload.deter_endpoint
+    stop_ep = payload.cancel_endpoint or payload.stop_endpoint
+    deter_ep_2 = payload.trigger_endpoint_2 or payload.deter_endpoint_2
+    stop_ep_2 = payload.cancel_endpoint_2 or payload.stop_endpoint_2
+
+    esp32_service.update_config(
+        ip=payload.ip,
+        port=payload.port,
+        deter_endpoint=deter_ep,
+        stop_endpoint=stop_ep,
+        enabled=payload.enabled,
+        ip_2=payload.ip_2,
+        port_2=payload.port_2,
+        deter_endpoint_2=deter_ep_2,
+        stop_endpoint_2=stop_ep_2,
+        enabled_2=payload.enabled_2,
+        auto_trigger=payload.auto_trigger,
+        http_method=payload.http_method
+    )
+    st = esp32_service.get_status()
+    st["ping"] = esp32_service.ping()
+    return {
+        "success": True,
+        "message": f"Dual Signal trigger targets updated: Actuator 1 ({esp32_service.ip}:{esp32_service.port}), Actuator 2 ({esp32_service.ip_2}:{esp32_service.port_2})",
+        "actuator_1": st["actuator_1"],
+        "actuator_2": st["actuator_2"],
+        "trigger_url": st["trigger_url"],
+        "cancel_url": st["cancel_url"],
+        "trigger_url_2": st["trigger_url_2"],
+        "cancel_url_2": st["cancel_url_2"],
+        "ping": st["ping"]
+    }
+
+
+@app.get("/api/trigger/ping")
+def ping_target_hardware(
+    ip: Optional[str] = Query(None), 
+    port: Optional[int] = Query(None),
+    actuator: Optional[str] = Query(None)
+):
+    """Test ping a specific IP:port or the currently configured hardware target(s)."""
+    if ip:
+        target_ip = ip.strip()
+        target_port = port or 80
+        if "://" in target_ip:
+            target_ip = target_ip.split("://", 1)[1]
+        if "/" in target_ip:
+            target_ip = target_ip.split("/", 1)[0]
+        if ":" in target_ip:
+            parts = target_ip.split(":", 1)
+            target_ip = parts[0]
+            try:
+                target_port = int(parts[1])
+            except Exception:
+                pass
+        return esp32_service.ping(target_ip, int(target_port))
+
+    if actuator in ("2", "actuator2"):
+        return esp32_service.ping(esp32_service.ip_2, esp32_service.port_2)
+    elif actuator in ("1", "actuator1"):
+        return esp32_service.ping(esp32_service.ip, esp32_service.port)
+
+    return esp32_service.ping()
+
+
+@app.post("/api/trigger/activate")
+def activate_trigger(payload: Optional[ESP32DeterRequest] = None):
+    """Dispatches deterrent trigger signal to target Actuator(s): 1, 2, or all."""
+    return trigger_esp32_deter(payload)
+
+
+@app.post("/api/trigger/cancel")
+def cancel_trigger(actuator: Optional[str] = Query("all")):
+    """Dispatches cancel/stop deterrent signal to target Actuator(s): 1, 2, or all."""
+    return trigger_esp32_stop(actuator=actuator or "all")
+
+
+# ========================================================
+# 7d. V380 Camera Movement (PTZ) & Light Controller API
+# (Based on info.md: /api/ptz/*, /api/light/*, /api/image/*)
+# ========================================================
+
+class CameraPTZRequest(BaseModel):
+    direction: Optional[str] = "stop"  # "up", "down", "left", "right", "stop"
+    command: Optional[str] = None      # fallback alias
+    camera: Optional[str] = "cam1"
+    camera_url: Optional[str] = None
+
+
+class CameraLightRequest(BaseModel):
+    state: Optional[str] = "auto"      # "on", "off", "auto"
+    camera_url: Optional[str] = None
+
+
+class CameraImageRequest(BaseModel):
+    mode: Optional[str] = "auto"       # "color", "bw", "auto", "flip"
+    camera_url: Optional[str] = None
+
+
+def _clean_camera_url(url: Optional[str]) -> str:
+    raw = (url or os.getenv("WILDSHIELD_V380_URL", "http://192.168.1.7:8080")).strip()
+    if not raw.startswith("http://") and not raw.startswith("https://"):
+        raw = f"http://{raw}"
+    return raw.rstrip("/")
+
+
+@app.post("/api/camera/ptz")
+def control_camera_ptz(payload: CameraPTZRequest):
+    """
+    Dispatches PTZ movement commands to the V380 Camera server:
+    /api/ptz/up, /api/ptz/down, /api/ptz/left, /api/ptz/right, /api/ptz/stop
+    """
+    base = _clean_camera_url(payload.camera_url)
+    dir_raw = (payload.direction or payload.command or "stop").strip().lower()
+    
+    # Normalize direction to info.md standard
+    if dir_raw in ("center", "home"):
+        dir_clean = "stop"
+    elif dir_raw in ("up", "down", "left", "right", "stop"):
+        dir_clean = dir_raw
+    else:
+        dir_clean = "stop"
+
+    endpoint = f"{base}/api/ptz/{dir_clean}"
+    try:
+        req = urllib.request.Request(endpoint, data=b"", method="POST")
+        with urllib.request.urlopen(req, timeout=2.0) as resp:
+            body = resp.read().decode("utf-8", errors="ignore").strip()
+            return {
+                "success": True,
+                "direction": dir_clean,
+                "url": endpoint,
+                "response": body
+            }
+    except Exception as e:
+        logger.warning(f"[V380 PTZ] Could not dispatch {dir_clean} to {endpoint}: {e}")
+        return {
+            "success": False,
+            "direction": dir_clean,
+            "url": endpoint,
+            "error": str(e)
+        }
+
+
+@app.post("/api/camera/light")
+def control_camera_light(payload: CameraLightRequest):
+    """
+    Controls V380 Camera LED / Infrared Light:
+    /api/light/on, /api/light/off, /api/light/auto
+    """
+    base = _clean_camera_url(payload.camera_url)
+    state_clean = (payload.state or "auto").strip().lower()
+    if state_clean not in ("on", "off", "auto"):
+        state_clean = "auto"
+
+    endpoint = f"{base}/api/light/{state_clean}"
+    try:
+        req = urllib.request.Request(endpoint, data=b"", method="POST")
+        with urllib.request.urlopen(req, timeout=2.0) as resp:
+            body = resp.read().decode("utf-8", errors="ignore").strip()
+            return {
+                "success": True,
+                "state": state_clean,
+                "url": endpoint,
+                "response": body
+            }
+    except Exception as e:
+        logger.warning(f"[V380 LIGHT] Could not dispatch {state_clean} to {endpoint}: {e}")
+        return {
+            "success": False,
+            "state": state_clean,
+            "url": endpoint,
+            "error": str(e)
+        }
+
+
+@app.post("/api/camera/image")
+def control_camera_image_mode(payload: CameraImageRequest):
+    """
+    Controls V380 Camera Image Mode & Flip:
+    /api/image/color, /api/image/bw, /api/image/auto, /api/image/flip
+    """
+    base = _clean_camera_url(payload.camera_url)
+    mode_raw = (payload.mode or "auto").strip().lower()
+    if mode_raw in ("night", "ir"):
+        mode_clean = "bw"
+    elif mode_raw in ("day",):
+        mode_clean = "color"
+    elif mode_raw in ("color", "bw", "auto", "flip"):
+        mode_clean = mode_raw
+    else:
+        mode_clean = "auto"
+
+    endpoint = f"{base}/api/image/{mode_clean}"
+    try:
+        req = urllib.request.Request(endpoint, data=b"", method="POST")
+        with urllib.request.urlopen(req, timeout=2.0) as resp:
+            body = resp.read().decode("utf-8", errors="ignore").strip()
+            return {
+                "success": True,
+                "mode": mode_clean,
+                "url": endpoint,
+                "response": body
+            }
+    except Exception as e:
+        logger.warning(f"[V380 IMAGE] Could not dispatch {mode_clean} to {endpoint}: {e}")
+        return {
+            "success": False,
+            "mode": mode_clean,
+            "url": endpoint,
+            "error": str(e)
+        }
+
+
+@app.get("/api/camera/v380/status")
+def get_v380_camera_status(camera_url: Optional[str] = Query(None)):
+    """Queries /api/status from the V380 streamer."""
+    base = _clean_camera_url(camera_url)
+    endpoint = f"{base}/api/status"
+    try:
+        req = urllib.request.Request(endpoint, method="GET")
+        with urllib.request.urlopen(req, timeout=1.5) as resp:
+            body = resp.read().decode("utf-8", errors="ignore").strip()
+            return {
+                "online": True,
+                "url": endpoint,
+                "status": body
+            }
+    except Exception as e:
+        return {
+            "online": False,
+            "url": endpoint,
+            "error": str(e)
+        }
 
 
 # ==========================================

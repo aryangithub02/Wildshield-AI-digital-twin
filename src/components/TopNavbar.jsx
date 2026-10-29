@@ -5,11 +5,31 @@ import { getTranslation } from '../utils/translations';
 export default function TopNavbar({ language, setLanguage }) {
   const [time, setTime] = useState(new Date());
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
+  const [targetIp, setTargetIp] = useState(() => {
+    const saved = localStorage.getItem('wildshield_target_ip');
+    if (!saved || saved === '192.168.137.37' || saved === '192.168.43.88') return '192.168.137.211';
+    return saved;
+  });
+  const [v380Host, setV380Host] = useState(() => localStorage.getItem('wildshield_v380_host') || '192.168.1.7:8080');
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
+    const syncTimer = setInterval(() => {
+      let savedIp = localStorage.getItem('wildshield_target_ip');
+      if (savedIp === '192.168.137.37' || savedIp === '192.168.43.88') {
+        savedIp = '192.168.137.211';
+        localStorage.setItem('wildshield_target_ip', savedIp);
+      }
+      if (savedIp && savedIp !== targetIp) setTargetIp(savedIp);
+      const savedCam = localStorage.getItem('wildshield_v380_host');
+      if (savedCam && savedCam !== v380Host) setV380Host(savedCam);
+    }, 2000);
+
+    return () => {
+      clearInterval(timer);
+      clearInterval(syncTimer);
+    };
+  }, [targetIp, v380Host]);
 
   const formatClock = (date) => {
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
@@ -31,19 +51,33 @@ export default function TopNavbar({ language, setLanguage }) {
 
   return (
     <header id="tour-navbar" className="h-16 fixed top-0 left-64 right-0 bg-[#090d16] border-b border-slate-900 flex items-center justify-between px-6 z-35 select-none">
-      
+
       {/* Left side: Navigation toggle & Breadcrumbs */}
       <div className="flex items-center gap-4">
         <button className="p-1 rounded bg-slate-950/40 border border-slate-900 text-slate-400 hover:text-slate-200">
           <Menu className="h-4.5 w-4.5" />
         </button>
-        
+
         {/* Dropdown title */}
         <div className="flex items-center gap-2 cursor-pointer group">
           <span className="text-sm font-semibold text-slate-100 font-sans tracking-tight">
             {t('digitalTwinTitle')}
           </span>
           <span className="text-slate-500 text-[8px] group-hover:text-slate-300">▼</span>
+        </div>
+
+        {/* Dynamic Hardware Signal & Camera Target Badge */}
+        <div className="hidden lg:flex items-center gap-2.5 px-3 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-[9px] font-mono shadow-sm">
+          <span className="flex items-center gap-1.5 text-slate-400">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="text-slate-500">Trigger Target:</span>
+            <span className="text-emerald-400 font-bold">{targetIp}</span>
+          </span>
+          <span className="text-slate-700">•</span>
+          <span className="flex items-center gap-1.5 text-slate-400">
+            <span className="text-slate-500">V380:</span>
+            <span className="text-cyan-400 font-bold">{v380Host}</span>
+          </span>
         </div>
       </div>
 
@@ -52,7 +86,7 @@ export default function TopNavbar({ language, setLanguage }) {
 
         {/* 1. Language selector dropdown */}
         <div className="relative border-r border-slate-900 pr-5">
-          <button 
+          <button
             onClick={() => setLangDropdownOpen(!langDropdownOpen)}
             className="flex items-center gap-1.5 px-2.5 py-1 bg-slate-950/40 border border-slate-900 rounded-lg text-[9px] font-bold text-slate-300 hover:text-slate-100 hover:border-slate-800 transition-all"
           >
@@ -60,7 +94,7 @@ export default function TopNavbar({ language, setLanguage }) {
             <span>{currentLang.name}</span>
             <span className="text-[6px] text-slate-500">▼</span>
           </button>
-          
+
           {langDropdownOpen && (
             <div className="absolute right-5 mt-1.5 w-28 bg-[#090d16] border border-slate-900 rounded-lg shadow-xl py-1 z-50">
               {languagesList.map((lang) => (
@@ -70,9 +104,8 @@ export default function TopNavbar({ language, setLanguage }) {
                     setLanguage(lang.code);
                     setLangDropdownOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-1.5 text-[9px] font-sans font-semibold hover:bg-slate-950 transition-colors ${
-                    language === lang.code ? 'text-green-500 font-extrabold' : 'text-slate-400'
-                  }`}
+                  className={`w-full text-left px-3 py-1.5 text-[9px] font-sans font-semibold hover:bg-slate-950 transition-colors ${language === lang.code ? 'text-green-500 font-extrabold' : 'text-slate-400'
+                    }`}
                 >
                   {lang.name}
                 </button>
@@ -80,7 +113,7 @@ export default function TopNavbar({ language, setLanguage }) {
             </div>
           )}
         </div>
-        
+
         {/* Weather widget */}
         <div className="flex items-center gap-2 border-r border-slate-900 pr-5">
           <CloudSun className="h-5 w-5 text-amber-400/85" />

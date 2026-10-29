@@ -11,7 +11,10 @@ from dataclasses import dataclass
 from typing import Union
 
 # Default Configuration Constants (Targeting Primary Hardware Webcam or OBS/DroidCam Bridge)
-DEFAULT_CAMERA_ID: int = int(os.getenv("WILDSHIELD_CAMERA_SOURCE", "0"))
+try:
+    DEFAULT_CAMERA_ID: int = int(os.getenv("WILDSHIELD_CAMERA_SOURCE", "1"))
+except ValueError:
+    DEFAULT_CAMERA_ID: int = 1
 DEFAULT_FRAME_WIDTH: int = 640
 DEFAULT_FRAME_HEIGHT: int = 480
 DEFAULT_FPS: int = 30

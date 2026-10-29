@@ -1,0 +1,19 @@
+{
+  "ip": "192.168.137.211",
+  "port": 80,
+  "enabled": true,
+  "deter_endpoint": "/siren",
+  "stop_endpoint": "/stop",
+  "ip_2": "192.168.137.64",
+  "port_2": 80,
+  "enabled_2": true,
+  "deter_endpoint_2": "/siren2",
+  "stop_endpoint_2": "/stop",
+  "status_endpoint": "/status",
+  "http_method": "GET",
+  "min_conf": 0.75,
+  "human_min_conf": 0.75,
+  "mode": "ALL",
+  "auto_off_sec": 0.0,
+  "updated_at": 1791959225.611131
+}
